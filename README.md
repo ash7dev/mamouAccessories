@@ -1,36 +1,122 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Site E-commerce de Bijoux
 
-## Getting Started
+Site e-commerce pour une bijouterie avec espace admin et boutique publique.
 
-First, run the development server:
+## 🚀 Stack Technique
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- **Framework**: Next.js 15 (App Router, TypeScript)
+- **Styling**: Tailwind CSS + shadcn/ui
+- **Base de données**: Supabase (PostgreSQL)
+- **Médias**: Cloudinary
+- **Hébergement**: Vercel
+
+## 📋 Prérequis
+
+- Node.js 20+
+- Un compte Supabase (plan Free)
+- Un compte Cloudinary (plan Free)
+
+## 🛠️ Installation
+
+1. **Cloner le projet** (déjà fait)
+
+2. **Installer les dépendances**
+   ```bash
+   npm install
+   ```
+
+3. **Configurer les variables d'environnement**
+
+   Copiez le fichier `.env.example` vers `.env.local` et remplissez les valeurs :
+
+   ```bash
+   cp .env.example .env.local
+   ```
+
+4. **Configurer Supabase**
+
+   - Créez un nouveau projet sur [Supabase](https://supabase.com)
+   - Récupérez votre URL et vos clés API dans Project Settings > API
+   - Exécutez le script SQL de migration (fourni séparément) pour créer les tables
+
+5. **Configurer Cloudinary**
+
+   - Créez un compte sur [Cloudinary](https://cloudinary.com)
+   - Récupérez vos identifiants dans Dashboard > Account Details
+
+6. **Démarrer le serveur de développement**
+   ```bash
+   npm run dev
+   ```
+
+   Le site sera accessible sur [http://localhost:3000](http://localhost:3000)
+
+## 📁 Structure du Projet
+
+```
+├── app/
+│   ├── (boutique)/          # Pages publiques
+│   │   ├── page.tsx         # Accueil
+│   │   ├── boutique/        # Liste produits
+│   │   ├── produit/[slug]/  # Détail produit
+│   │   ├── panier/          # Panier
+│   │   ├── commande/        # Checkout
+│   │   └── suivi/           # Suivi commande
+│   ├── admin/               # Espace admin protégé
+│   │   ├── products/        # Gestion produits
+│   │   ├── categories/      # Gestion catégories
+│   │   ├── orders/          # Gestion commandes
+│   │   ├── reviews/         # Modération avis
+│   │   ├── customers/       # Liste clientes
+│   │   └── settings/        # Paramètres
+│   └── api/
+├── components/
+│   ├── ui/                  # Composants shadcn/ui
+│   ├── boutique/            # Composants publics
+│   └── admin/               # Composants admin
+├── lib/
+│   ├── supabase/            # Clients Supabase
+│   ├── cloudinary.ts        # Configuration Cloudinary
+│   └── validation.ts        # Schémas Zod
+└── middleware.ts            # Protection routes admin
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🔑 Étapes Suivantes
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. **Vous allez me fournir les identifiants Supabase**
+   - URL du projet
+   - Clé anon (publique)
+   - Clé service_role (privée)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+2. **Vous allez me fournir les identifiants Cloudinary**
+   - Cloud Name
+   - API Key
+   - API Secret
 
-## Learn More
+3. **Je créerai ensuite la structure de la base de données** via un script SQL
 
-To learn more about Next.js, take a look at the following resources:
+4. **Puis nous développerons l'application étape par étape** :
+   - Phase 1 : Auth admin + Dashboard
+   - Phase 2 : Gestion produits et catégories
+   - Phase 3 : Gestion commandes
+   - Phase 4 : Front boutique
+   - Phase 5 : Checkout et paiement
+   - Phase 6 : Finitions (avis, relances, SEO)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 📝 Notes
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- Le panier est stocké en localStorage (pas de compte client requis)
+- Les paiements Wave sont vérifiés manuellement par l'admin
+- Les images sont optimisées automatiquement par Cloudinary
+- Le plan gratuit Supabase se met en pause après 7 jours d'inactivité (solution : cron keep-alive)
 
-## Deploy on Vercel
+## 🔐 Sécurité
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Row Level Security (RLS) activé sur toutes les tables Supabase
+- Middleware pour protéger les routes admin
+- Clés sensibles côté serveur uniquement
+- Upload Cloudinary sécurisé avec signatures
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+**Prêt pour la configuration !** Fournissez-moi vos identifiants Supabase et Cloudinary pour continuer.

@@ -1,26 +1,243 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  /* Couleurs système */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Couleurs de marque Ivoire & Or — utilisables en bg-gold, text-espresso, etc. */
+  --color-ivory: var(--ivory);
+  --color-gold: var(--gold);
+  --color-gold-dark: var(--gold-dark);
+  --color-espresso: var(--espresso);
+
+  /* Charts */
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  /* Sidebar */
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Fonts */
+  --font-sans: var(--font-inter);
   --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-playfair);
+  --font-logo: var(--font-cinzel);
+
+  /* Radius
+     ⚠ On ne redéfinit QUE --radius-sm/md/lg (utilisés par shadcn).
+     Les overrides de --radius-xl/2xl/3xl ont été SUPPRIMÉS : ils
+     écrasaient les classes rounded-2xl/3xl de Tailwind et rendaient
+     toutes les cartes moins arrondies que prévu (1.1rem au lieu de
+     1.5rem pour rounded-3xl). On garde les valeurs Tailwind standard. */
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+:root {
+  /* ===================================
+     PALETTE IVOIRE & OR — BIJOUTERIE
+     Source de vérité UNIQUE : les hex ci-dessous.
+     Tout le reste est défini PAR RÉFÉRENCE (var(...)),
+     donc zéro risque de dérive entre deux définitions.
+     =================================== */
+
+  --ivory: #FAF6F0;      /* Fond de page */
+  --white: #FFFFFF;      /* Cartes */
+  --text-dark: #2B2118;  /* Texte principal */
+  --gold: #B98A44;       /* Accent or */
+  --gold-dark: #8C6239;  /* Or foncé (survol, petits textes or) */
+  --espresso: #241B14;   /* Brun profond : bandeaux, sidebar, footer */
+
+  /* ----- Système de design : par référence ----- */
+  --background: var(--ivory);
+  --foreground: var(--text-dark);
+
+  --card: var(--white);
+  --card-foreground: var(--text-dark);
+
+  --popover: var(--white);
+  --popover-foreground: var(--text-dark);
+
+  /* ⚠ CORRECTION CONTRASTE : texte FONCÉ sur les boutons or.
+     Blanc sur or = contraste ~2.2:1, illisible. Tous les
+     composants du projet utilisent brun-sur-or. */
+  --primary: var(--gold);
+  --primary-foreground: var(--espresso);
+
+  --secondary: color-mix(in srgb, var(--ivory) 92%, var(--gold) 8%);
+  --secondary-foreground: var(--text-dark);
+
+  --muted: color-mix(in srgb, var(--ivory) 96%, var(--text-dark) 4%);
+  --muted-foreground: color-mix(in srgb, var(--text-dark) 55%, var(--ivory) 45%);
+
+  --accent: var(--gold);
+  --accent-foreground: var(--espresso);
+
+  --destructive: oklch(0.577 0.245 27.325);
+
+  --border: color-mix(in srgb, var(--gold) 18%, var(--ivory) 82%);
+  --input: var(--border);
+  --ring: var(--gold);
+
+  /* Graphiques */
+  --chart-1: var(--gold);
+  --chart-2: var(--gold-dark);
+  --chart-3: color-mix(in srgb, var(--gold-dark) 70%, var(--espresso) 30%);
+  --chart-4: color-mix(in srgb, var(--text-dark) 60%, var(--ivory) 40%);
+  --chart-5: var(--text-dark);
+
+  --radius: 0.75rem;
+
+  /* Sidebar admin — sombre, alignée sur les bandeaux */
+  --sidebar: var(--espresso);
+  --sidebar-foreground: #F4EFE6;
+  --sidebar-primary: var(--gold);
+  --sidebar-primary-foreground: var(--espresso);
+  --sidebar-accent: color-mix(in srgb, var(--espresso) 90%, white 10%);
+  --sidebar-accent-foreground: #F4EFE6;
+  --sidebar-border: color-mix(in srgb, white 10%, var(--espresso) 90%);
+  --sidebar-ring: var(--gold);
+}
+
+/* Mode sombre : NON SUPPORTÉ en v1.
+   L'ancien bloc .dark était le gris shadcn générique (sidebar bleue !),
+   complètement hors marque. Plutôt qu'un dark cassé, on n'en offre pas :
+   la classe .dark ne doit jamais être posée sur <html>.
+   Si un jour tu veux un vrai dark mode, on le fera avec la palette
+   "Noir & champagne" (fond #101010, cartes #1C1C1C, accent #D4B572). */
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer utilities {
+  /* Masque la barre de défilement des carrousels horizontaux
+     (catégories, produits, pilules de filtres) */
+  .scrollbar-none {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Masque complètement la scrollbar (pour drawer, modals, etc.) */
+  .scrollbar-hide {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Cache la scrollbar pour les éléments avec overflow-y-auto */
+  *::-webkit-scrollbar {
+    width: 0px;
+    background: transparent;
+  }
+}
+
+/* ===================================
+   STYLES PREMIUM POUR DATETIME-LOCAL
+   =================================== */
+
+/* Style du calendrier datetime-local natif */
+input[type="datetime-local"] {
+  position: relative;
+  color: var(--text-dark);
+  font-weight: 500;
+}
+
+/* Icône du calendrier - style premium */
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="%23B98A44" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>') center/contain no-repeat;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+  margin-left: 8px;
+}
+
+input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+/* État focus - border gold premium */
+input[type="datetime-local"]:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(185, 138, 68, 0.15);
+}
+
+/* Texte placeholder pour datetime-local vide */
+input[type="datetime-local"]::-webkit-datetime-edit-text,
+input[type="datetime-local"]::-webkit-datetime-edit-month-field,
+input[type="datetime-local"]::-webkit-datetime-edit-day-field,
+input[type="datetime-local"]::-webkit-datetime-edit-year-field,
+input[type="datetime-local"]::-webkit-datetime-edit-hour-field,
+input[type="datetime-local"]::-webkit-datetime-edit-minute-field,
+input[type="datetime-local"]::-webkit-datetime-edit-ampm-field {
+  color: var(--text-dark);
+  padding: 2px;
+}
+
+/* État invalide ou vide - style subtil */
+input[type="datetime-local"]:invalid {
+  color: rgba(43, 33, 24, 0.4);
+}
+
+/* Respect des préférences d'accessibilité : coupe les animations
+   pour les personnes sensibles au mouvement */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
