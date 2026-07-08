@@ -2,6 +2,9 @@ import { CommandeHeader } from "@/components/admin/orders/orders-header";
 import { CommandesList } from "@/components/admin/orders/orders-list";
 import type { OrderListItem } from "@/components/admin/orders/orders-list";
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 async function getOrders(): Promise<OrderListItem[]> {
   const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/orders`, {
     cache: 'no-store',

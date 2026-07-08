@@ -2,6 +2,9 @@ import { PromotionHeader } from "@/components/admin/promotions/promotion-header"
 import { PromotionList } from "@/components/admin/promotions/promotion-list";
 import type { PromotionListItem } from "@/components/admin/promotions/promotion-list";
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 async function getPromotions(): Promise<PromotionListItem[]> {
   const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/admin/promotions`, {
     cache: 'no-store',

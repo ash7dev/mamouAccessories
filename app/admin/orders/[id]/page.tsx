@@ -3,6 +3,9 @@ import { CommandeDetail } from '@/components/admin/orders/orders-details';
 import { adaptOrderForDisplay } from '@/lib/adapters/order-adapter';
 import { createServiceRoleClient } from '@/lib/supabase/service-role';
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 interface PageProps {
   params: Promise<{
     id: string;

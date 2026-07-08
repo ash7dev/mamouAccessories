@@ -1,6 +1,9 @@
 import { PromotionDetail } from "@/components/admin/promotions/promotion-detail";
 import type { PromotionDetailData } from "@/components/admin/promotions/promotion-detail";
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 async function getPromotionById(id: string): Promise<PromotionDetailData> {
   const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/admin/promotions/${id}`, {
     cache: 'no-store',

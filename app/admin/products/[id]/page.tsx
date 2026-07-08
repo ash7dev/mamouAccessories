@@ -2,6 +2,9 @@ import { ProductDetail } from "@/components/admin/products/product-detail";
 import { getProductById } from "@/lib/api/products";
 import type { ProductDetailData } from "@/components/admin/products/product-detail";
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 function buildCloudinaryImageUrl(publicId: string) {
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
 

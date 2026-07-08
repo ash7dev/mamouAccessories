@@ -2,6 +2,9 @@ import { ProductsHeader } from "@/components/admin/products/products-header";
 import { ProductsList } from "@/components/admin/products/products-list";
 import { getProducts } from "@/lib/api/products";
 
+// Force dynamic rendering - ne pas pré-rendre au build
+export const dynamic = 'force-dynamic';
+
 function buildCloudinaryImageUrl(publicId: string) {
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
 
