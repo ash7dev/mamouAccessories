@@ -5,17 +5,22 @@ import { createServiceRoleClient } from '@/lib/supabase/service-role';
 export async function GET() {
   try {
     const supabase = createServiceRoleClient();
-    
+
     const { data: settings, error } = await supabase
       .from('settings')
-      .select('*')
-      .single();
-    
-    if (error && error.code !== 'PGRST116') {
+      .select('key, value');
+
+    if (error) {
       return NextResponse.json({ error: 'Failed to fetch settings' }, { status: 500 });
     }
-    
-    return NextResponse.json({ settings: settings || {} });
+
+    // Convertir le format clé-valeur en objet
+    const settingsObj: Record<string, string> = {};
+    settings?.forEach(({ key, value }) => {
+      settingsObj[key] = value;
+    });
+
+    return NextResponse.json({ settings: settingsObj });
   } catch (error) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
@@ -26,56 +31,35 @@ export async function PUT(request: NextRequest) {
   try {
     const supabase = createServiceRoleClient();
     const body = await request.json();
-    
-    const { data: existingSettings } = await supabase
+
+    // Mettre à jour chaque clé individuellement avec upsert
+    const updates = Object.entries(body).map(([key, value]) => ({
+      key,
+      value: String(value),
+    }));
+
+    const { error } = await supabase
       .from('settings')
-      .select('id')
-      .single();
-    
-    let result;
-    
-    if (existingSettings) {
-      // Update existing
-      result = await supabase
-        .from('settings')
-        .update({
-          wave_link: body.wave_link,
-          delivery_fee: body.delivery_fee,
-          delivery_days: body.delivery_days,
-          whatsapp_number: body.whatsapp_number,
-          store_name: body.store_name,
-          store_description: body.store_description,
-          notifications_orders: body.notifications_orders,
-          notifications_low_stock: body.notifications_low_stock,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', existingSettings.id)
-        .select()
-        .single();
-    } else {
-      // Create new
-      result = await supabase
-        .from('settings')
-        .insert({
-          wave_link: body.wave_link,
-          delivery_fee: body.delivery_fee,
-          delivery_days: body.delivery_days,
-          whatsapp_number: body.whatsapp_number,
-          store_name: body.store_name,
-          store_description: body.store_description,
-          notifications_orders: body.notifications_orders,
-          notifications_low_stock: body.notifications_low_stock,
-        })
-        .select()
-        .single();
+      .upsert(updates, { onConflict: 'key' });
+
+    if (error) {
+      console.error('Error updating settings:', error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
     }
-    
-    if (result.error) {
-      return NextResponse.json({ error: result.error.message }, { status: 500 });
-    }
-    
-    return NextResponse.json({ settings: result.data });
+
+    // Retourner les settings mis à jour
+    const { data: updatedSettings } = await supabase
+      .from('settings')
+      .select('key, value');
+
+    const settingsObj: Record<string, string> = {};
+    updatedSettings?.forEach(({ key, value }) => {
+      settingsObj[key] = value;
+    });
+
+    return NextResponse.json({ settings: settingsObj });
   } catch (error) {
+    console.error('Unexpected error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

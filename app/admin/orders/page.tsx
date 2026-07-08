@@ -13,7 +13,21 @@ async function getOrders(): Promise<OrderListItem[]> {
     throw new Error('Failed to fetch orders');
   }
   const data = await response.json();
-  return data.orders || [];
+  const rawOrders = data.orders || [];
+
+  // Transform snake_case API response to camelCase for component
+  return rawOrders.map((order: any) => ({
+    id: order.id,
+    orderNumber: order.order_number,
+    customerName: order.customer_name,
+    customerPhone: order.customer_phone,
+    itemsCount: order.items?.length || 0,
+    total: order.total,
+    status: order.status,
+    paymentMethod: order.payment_method,
+    paymentStatus: order.payment_status,
+    createdAt: order.created_at,
+  }));
 }
 
 export default async function OrdersPage() {

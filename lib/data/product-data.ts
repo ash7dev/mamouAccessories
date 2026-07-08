@@ -38,18 +38,13 @@ export async function getProductBySlug(slug: string): Promise<PublicProduct | nu
     .eq('product_id', product.id)
     .order('position', { ascending: true });
 
-  // Transformer les images avec Cloudinary URLs
-  const productImages = (images || [])
-    .map((img) => ({
-      id: img.id,
-      url: buildImageUrl(img.cloudinary_public_id, {
-        width: 1200,
-        height: 1600,
-        crop: 'fill',
-        quality: 'auto',
-      }),
-    }))
-    .filter((img): img is { id: string; url: string } => img.url !== null);
+  // Transformer les images avec Cloudinary URLs (sans transformations pour éviter 404)
+  const productImages: Array<{ id: string; url: string }> = (images || [])
+    .map((img) => {
+      const url = buildImageUrl(img.cloudinary_public_id, {});
+      return url ? { id: img.id, url } : null;
+    })
+    .filter((img): img is { id: string; url: string } => img !== null);
 
   return {
     id: product.id,
@@ -61,6 +56,6 @@ export async function getProductBySlug(slug: string): Promise<PublicProduct | nu
     compareAtPrice: product.compare_at_price,
     stock: product.stock,
     imageOrientation: product.image_orientation || 'portrait',
-    images: productImages.length > 0 ? productImages : [],
+    images: productImages,
   };
 }

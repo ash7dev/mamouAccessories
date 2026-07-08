@@ -26,11 +26,13 @@ export function adaptOrderForDisplay(apiOrder: OrderWithDetails): OrderDetailDat
     total: apiOrder.total,
     adminNote: apiOrder.admin_note,
     cancelReason: apiOrder.cancel_reason,
-    items: apiOrder.items.map(item => ({
+    items: apiOrder.items.map((item: any) => ({
       id: item.id,
       productId: item.product_id,
       productName: item.product_name,
-      imageUrl: null, // TODO: Ajouter image_url dans la table order_items ou faire une jointure
+      imageUrl: item.product_image
+        ? buildImageUrl(item.product_image, {})
+        : null,
       quantity: item.quantity,
       unitPrice: item.unit_price,
     })),

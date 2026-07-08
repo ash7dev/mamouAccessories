@@ -15,6 +15,7 @@ function buildCloudinaryImageUrl(publicId: string) {
 export default function CommandePage() {
   const { items } = useCart();
   const [cartProducts, setCartProducts] = useState<any[]>([]);
+  const [deliveryFees, setDeliveryFees] = useState({ dakar: 1500, regions: 3000 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -27,12 +28,21 @@ export default function CommandePage() {
       try {
         const productIds = items.map(item => item.productId);
 
-        // Fetch tous les produits du panier
-        const promises = productIds.map(id =>
-          fetch(`/api/products/${id}`).then(r => r.json())
-        );
+        // Fetch tous les produits du panier ET les frais de livraison en parallèle
+        const [feesResponse, ...productResponses] = await Promise.all([
+          fetch('/api/settings/delivery-fees').then(r => r.json()),
+          ...productIds.map(id => fetch(`/api/products/${id}`).then(r => r.json()))
+        ]);
 
-        const results = await Promise.all(promises);
+        // Mettre à jour les frais de livraison
+        if (feesResponse.delivery_fee_dakar && feesResponse.delivery_fee_regions) {
+          setDeliveryFees({
+            dakar: feesResponse.delivery_fee_dakar,
+            regions: feesResponse.delivery_fee_regions,
+          });
+        }
+
+        const results = productResponses;
 
         const products = results
           .filter(r => r.product)
@@ -83,7 +93,11 @@ export default function CommandePage() {
       <Navbar />
 
       <main className="flex-1">
-        <Checkout cartProducts={cartProducts} />
+        <Checkout
+          cartProducts={cartProducts}
+          deliveryFeeDakar={deliveryFees.dakar}
+          deliveryFeeRegions={deliveryFees.regions}
+        />
       </main>
 
       <Footer />

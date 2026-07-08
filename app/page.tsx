@@ -41,7 +41,7 @@ export default async function HomePage() {
 
       <SearchBar />
 
-      <Hero />
+      <Hero heroImage="/hero.jpg" />
 
       <CategoryRail categories={categories} />
 

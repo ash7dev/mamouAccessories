@@ -28,7 +28,7 @@ export function AdminHeader({
   }, []);
 
   return (
-    <div className="hidden lg:block bg-gradient-to-r from-[var(--gold-dark)] via-[var(--gold)] to-[var(--gold-dark)] rounded-2xl px-6 py-8 md:px-8 md:py-10 shadow-lg mb-6">
+    <div className="hidden lg:block bg-gradient-to-r from-[#3D2C1F] via-[#4A3728] to-[#3D2C1F] rounded-2xl px-6 py-8 md:px-8 md:py-10 shadow-lg mb-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         {/* Left side - Greeting */}
         <div className="text-white">

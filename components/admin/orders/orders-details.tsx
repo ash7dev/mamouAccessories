@@ -272,53 +272,53 @@ export function CommandeDetail({ order: initialOrder }: { order: OrderDetailData
     order.paymentMethod === "wave" && order.paymentStatus === "pending_verification";
 
   return (
-    <div className="-mx-6 -mt-6 lg:-mx-8 lg:-mt-8">
-      {/* ===== Bandeau sombre ===== */}
-      <div className="relative overflow-hidden rounded-b-3xl bg-[#241B14] px-6 pb-8 pt-6 lg:px-8">
-        <div aria-hidden className="pointer-events-none absolute -right-12 -top-12 opacity-60">
-          <div className="h-44 w-44 rounded-full border border-[var(--gold)]/15" />
-          <div className="absolute inset-6 rounded-full border border-[var(--gold)]/20" />
-          <div className="absolute inset-12 rounded-full border border-[var(--gold)]/25" />
-        </div>
-
-        <div className="relative mx-auto max-w-5xl">
-          <Link
-            href="/admin/orders"
-            className="mb-3 inline-flex items-center gap-1.5 text-sm font-medium text-[#F4EFE6]/60 transition-colors hover:text-[#F4EFE6]"
-          >
-            <ChevronLeftIcon />
-            Commandes
-          </Link>
-
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <h1 className="text-xl font-bold text-[#F4EFE6] lg:text-2xl">{order.orderNumber}</h1>
-              <p className="mt-0.5 text-sm text-[#F4EFE6]/50">
-                Passée le{" "}
-                {new Date(order.createdAt).toLocaleDateString("fr-FR", {
-                  day: "numeric",
-                  month: "long",
-                  year: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </p>
+    <div className="min-h-screen">
+      {/* ===== Header compact ===== */}
+      <div className="sticky top-0 z-10 border-b border-[var(--gold)]/15 bg-white/95 backdrop-blur-sm">
+        <div className="mx-auto max-w-4xl px-4 py-3 lg:px-6">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3 min-w-0">
+              <Link
+                href="/admin/orders"
+                className="inline-flex items-center gap-1 text-sm font-medium text-[var(--text-dark)]/50 transition-colors hover:text-[var(--text-dark)] shrink-0"
+              >
+                <ChevronLeftIcon />
+                <span className="hidden sm:inline">Commandes</span>
+              </Link>
+              <div className="h-4 w-px bg-[var(--gold)]/20 shrink-0" />
+              <div className="min-w-0">
+                <h1 className="text-base font-bold text-[var(--text-dark)] lg:text-lg truncate">
+                  {order.orderNumber}
+                </h1>
+              </div>
             </div>
 
             <a
               href={`https://wa.me/${phone}?text=${waMessage}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex h-11 items-center gap-2 rounded-full bg-emerald-500 px-5 text-sm font-bold text-white shadow-lg transition-transform hover:brightness-105 active:scale-95"
+              className="flex h-9 items-center gap-2 rounded-full bg-emerald-500 px-4 text-xs font-bold text-white shadow-md transition-transform hover:brightness-105 active:scale-95 shrink-0 lg:h-10 lg:text-sm"
             >
-              <WhatsAppIcon />
-              WhatsApp
+              <WhatsAppIcon className="w-4 h-4" />
+              <span className="hidden sm:inline">WhatsApp</span>
             </a>
           </div>
         </div>
       </div>
 
-      <div className="mx-auto max-w-5xl space-y-6 px-6 pb-28 pt-6 lg:px-8 lg:pb-10">
+      <div className="mx-auto max-w-4xl space-y-4 px-4 py-4 lg:px-6 lg:py-6 lg:space-y-6">
+        {/* ===== Info rapide ===== */}
+        <div className="rounded-2xl bg-[var(--ivory)]/40 px-4 py-2 text-xs text-[var(--text-dark)]/60">
+          Passée le{" "}
+          {new Date(order.createdAt).toLocaleDateString("fr-FR", {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          })}
+        </div>
+
         {/* ===== Progression ===== */}
         <Card>
           <Eyebrow>Progression</Eyebrow>

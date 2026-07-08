@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import { CommandeHeader } from '@/components/admin/orders/orders-header';
 import { CommandeDetail } from '@/components/admin/orders/orders-details';
 import { adaptOrderForDisplay } from '@/lib/adapters/order-adapter';
 import { createServiceRoleClient } from '@/lib/supabase/service-role';
@@ -30,6 +31,32 @@ export default async function OrderDetailPage({ params }: PageProps) {
     notFound();
   }
 
+  // Récupérer les images des produits pour chaque item
+  if (order.items && order.items.length > 0) {
+    const productIds = order.items
+      .map((item: any) => item.product_id)
+      .filter((id: any) => id !== null);
+
+    if (productIds.length > 0) {
+      const { data: productImages } = await supabase
+        .from('product_images')
+        .select('product_id, cloudinary_public_id')
+        .in('product_id', productIds)
+        .eq('position', 0); // Première image seulement
+
+      // Mapper les images aux items
+      if (productImages) {
+        order.items = order.items.map((item: any) => {
+          const image = productImages.find((img: any) => img.product_id === item.product_id);
+          return {
+            ...item,
+            product_image: image?.cloudinary_public_id || null,
+          };
+        });
+      }
+    }
+  }
+
   // Récupérer les statistiques du client
   const { data: customerStats } = await supabase
     .from('orders')
@@ -57,5 +84,13 @@ export default async function OrderDetailPage({ params }: PageProps) {
   // Adapter les données pour le composant
   const displayOrder = adaptOrderForDisplay(orderWithDetails);
 
-  return <CommandeDetail order={displayOrder} />;
+  return (
+    <div className="p-6 lg:p-8">
+      {/* Orders Header */}
+      <CommandeHeader />
+      
+      {/* Order Detail */}
+      <CommandeDetail order={displayOrder} />
+    </div>
+  );
 }

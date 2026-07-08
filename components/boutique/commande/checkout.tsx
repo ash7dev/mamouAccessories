@@ -153,19 +153,46 @@ export function Checkout({
     setSubmitting(true);
     try {
       const phone = normalizePhone(form.phone)!;
-      // TODO: Server Action createOrder({
-      //   customer: { name, phone, email, address, note },
-      //   items: lines.map(l => ({ productId, quantity })),  // prix refixés serveur
-      //   paymentMethod: payment,
-      //   deliveryZone: zone,
-      // })
-      // → renvoie { orderNumber }
-      const fakeOrderNumber = "CMD-2026-0042"; // placeholder
 
-      clear();
-      router.push(`/commande/confirmation/${fakeOrderNumber}`);
-    } catch {
-      setErrors({ submit: "Une erreur est survenue. Réessayez." });
+      // Créer la commande via l'API
+      const response = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customer_name: form.name.trim(),
+          customer_phone: phone,
+          customer_email: form.email.trim() || undefined,
+          delivery_address: form.address.trim(),
+          delivery_note: form.note.trim() || undefined,
+          delivery_fee: deliveryFee,
+          payment_method: payment,
+          items: lines.map(l => ({
+            product_id: l.id,
+            quantity: l.quantity,
+          })),
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Erreur lors de la création de la commande');
+      }
+
+      const { order } = await response.json();
+
+      // Naviguer vers la confirmation d'abord, puis vider le panier
+      // pour éviter d'afficher "panier vide" avant la redirection
+      router.push(`/commande/confirmation/${order.order_number}`);
+
+      // Vider le panier après un court délai pour laisser la navigation se faire
+      setTimeout(() => {
+        clear();
+      }, 100);
+    } catch (error) {
+      console.error('Order creation error:', error);
+      setErrors({
+        submit: error instanceof Error ? error.message : "Une erreur est survenue. Réessayez."
+      });
       setSubmitting(false);
     }
   };

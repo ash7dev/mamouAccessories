@@ -52,25 +52,42 @@ function StackCard({
 export default function AdminDashboard() {
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const loadStats = async (showRefreshing = false) => {
+    if (showRefreshing) setRefreshing(true);
+    try {
+      const response = await fetch('/api/admin/stats?period=month', {
+        cache: 'no-store',
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setStats(data);
+      }
+    } catch (error) {
+      console.error('Error loading stats:', error);
+    } finally {
+      setLoading(false);
+      if (showRefreshing) setRefreshing(false);
+    }
+  };
 
   useEffect(() => {
-    async function loadStats() {
-      try {
-        const response = await fetch('/api/admin/stats?period=month');
-        if (response.ok) {
-          const data = await response.json();
-          setStats(data);
-        }
-      } catch (error) {
-        console.error('Error loading stats:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
     loadStats();
+
+    // Rafraîchir automatiquement toutes les 30 secondes
+    const interval = setInterval(() => {
+      loadStats();
+    }, 30000);
+
+    return () => clearInterval(interval);
   }, []);
 
   const formatFCFA = (n: number) => new Intl.NumberFormat("fr-FR").format(n) + " FCFA";
+
+  // Calculer le mois actuel en français
+  const currentMonth = new Date().toLocaleDateString("fr-FR", { month: "long" });
+  const monthCapitalized = currentMonth.charAt(0).toUpperCase() + currentMonth.slice(1);
 
   if (loading || !stats) {
     return (
@@ -89,10 +106,18 @@ export default function AdminDashboard() {
       <AdminHeader />
 
       {/* Mobile Header */}
-      <AdminHeaderMobile />
+      <AdminHeaderMobile
+        monthRevenue={stats.revenueChart.currentTotal}
+        totalRevenue={stats.kpi.revenue}
+        month={monthCapitalized}
+      />
 
       {/* Mobile Activity Stats */}
-      <ActivityStats />
+      <ActivityStats
+        totalProducts={stats.kpi.products}
+        totalOrders={stats.kpi.orders}
+        totalClients={stats.kpi.customers}
+      />
 
       {/* ================= MOBILE ================= */}
       <div className="lg:hidden">
@@ -107,11 +132,11 @@ export default function AdminDashboard() {
         {/* Le deck commence ici : TopProducts est la carte 0 */}
         <div className="space-y-6 pb-10">
           <StackCard index={0}>
-            <TopProducts isEmpty={stats.topProducts.length === 0} />
+            <TopProducts products={stats.topProducts || []} isEmpty={!stats.topProducts || stats.topProducts.length === 0} />
           </StackCard>
 
           <StackCard index={1}>
-            <RecentOrders isEmpty={stats.recentOrders.length === 0} />
+            <RecentOrders orders={stats.recentOrders || []} isEmpty={!stats.recentOrders || stats.recentOrders.length === 0} />
           </StackCard>
 
           <StackCard index={2}>
@@ -119,15 +144,15 @@ export default function AdminDashboard() {
           </StackCard>
 
           <StackCard index={3}>
-            <LowStockAlert isEmpty={stats.lowStockAlert.length === 0} />
+            <LowStockAlert products={stats.lowStockAlert || []} isEmpty={!stats.lowStockAlert || stats.lowStockAlert.length === 0} />
           </StackCard>
 
           <StackCard index={4}>
-            <SalesByCategory isEmpty={stats.salesByCategory.length === 0} />
+            <SalesByCategory isEmpty={!stats.salesByCategory || stats.salesByCategory.length === 0} />
           </StackCard>
 
           <StackCard index={5}>
-            <ActivePromotions isEmpty={stats.activePromotions.length === 0} />
+            <ActivePromotions promotions={stats.activePromotions || []} isEmpty={!stats.activePromotions || stats.activePromotions.length === 0} />
           </StackCard>
         </div>
       </div>
@@ -193,21 +218,21 @@ export default function AdminDashboard() {
 
       {/* Required Actions & Top Products */}
       <div className="mb-6 hidden gap-6 lg:grid lg:grid-cols-2">
-        <RequiredActions isEmpty={true} />
-        <TopProducts isEmpty={stats.topProducts.length === 0} />
+        <RequiredActions actions={stats.requiredActions || []} isEmpty={!stats.requiredActions || stats.requiredActions.length === 0} />
+        <TopProducts products={stats.topProducts || []} isEmpty={!stats.topProducts || stats.topProducts.length === 0} />
       </div>
 
       {/* Recent Orders & Reviews + dernière rangée */}
       <div className="hidden lg:block">
         <div className="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <RecentOrders isEmpty={stats.recentOrders.length === 0} />
+          <RecentOrders orders={stats.recentOrders || []} isEmpty={!stats.recentOrders || stats.recentOrders.length === 0} />
           <RecentReviews isEmpty={true} />
         </div>
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-          <LowStockAlert isEmpty={stats.lowStockAlert.length === 0} />
-          <SalesByCategory isEmpty={stats.salesByCategory.length === 0} />
-          <ActivePromotions isEmpty={stats.activePromotions.length === 0} />
+          <LowStockAlert products={stats.lowStockAlert || []} isEmpty={!stats.lowStockAlert || stats.lowStockAlert.length === 0} />
+          <SalesByCategory isEmpty={!stats.salesByCategory || stats.salesByCategory.length === 0} />
+          <ActivePromotions promotions={stats.activePromotions || []} isEmpty={!stats.activePromotions || stats.activePromotions.length === 0} />
         </div>
       </div>
     </div>

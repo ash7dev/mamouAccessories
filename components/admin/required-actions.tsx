@@ -6,36 +6,15 @@ interface RequiredAction {
   description: string;
   priority: "high" | "medium" | "low";
   href: string;
-  icon: React.ReactNode;
 }
 
 interface RequiredActionsProps {
+  actions?: RequiredAction[];
   isEmpty?: boolean;
 }
 
-export function RequiredActions({ isEmpty = true }: RequiredActionsProps) {
-  // Mock data - will be replaced with real data later
-  const actions: RequiredAction[] = isEmpty
-    ? []
-    : [
-        {
-          id: "1",
-          title: "Commande #1234 en attente",
-          description: "Nouvelle commande à traiter",
-          priority: "high",
-          href: "/admin/orders/1234",
-          icon: (
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
-              />
-            </svg>
-          ),
-        },
-      ];
+export function RequiredActions({ actions = [], isEmpty = false }: RequiredActionsProps) {
+  const actualActions = isEmpty ? [] : actions.slice(0, 5);
 
   const priorityStyles = {
     high: "bg-red-50 text-red-700 border-red-200",
@@ -43,32 +22,46 @@ export function RequiredActions({ isEmpty = true }: RequiredActionsProps) {
     low: "bg-blue-50 text-blue-700 border-blue-200",
   };
 
+  const getOrderIcon = () => (
+    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+      />
+    </svg>
+  );
+
   return (
-    <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm h-full flex flex-col">
+    <div className="bg-white rounded-3xl p-6 border border-[var(--gold)]/15 shadow-[0_1px_2px_rgba(43,33,24,0.04),0_8px_24px_-12px_rgba(43,33,24,0.12)] h-full flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-start justify-between mb-6">
         <div>
-          <h2 className="text-base font-semibold text-[var(--text-dark)]">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--gold-dark)] mb-1">
             Actions requises
-          </h2>
-          <p className="text-xs text-gray-500 mt-0.5">
-            {isEmpty ? "Aucune action en attente" : `${actions.length} action(s)`}
           </p>
+          <h2 className="text-lg font-bold tracking-tight text-[var(--text-dark)]">
+            {isEmpty ? "Aucune action en attente" : `${actualActions.length} commande(s) à confirmer`}
+          </h2>
         </div>
 
-        {!isEmpty && (
+        {!isEmpty && actualActions.length > 0 && (
           <Link
-            href="/admin/orders"
-            className="text-xs font-medium text-[var(--gold-dark)] hover:text-[var(--gold)] transition-colors"
+            href="/admin/orders?filter=pending"
+            className="inline-flex items-center gap-1 text-xs font-semibold text-[var(--gold-dark)] hover:text-[var(--gold)] transition-colors group"
           >
-            Tout voir
+            <span>Tout voir</span>
+            <svg className="w-3 h-3 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+            </svg>
           </Link>
         )}
       </div>
 
       {/* Content */}
       <div className="flex-1 flex items-center justify-center">
-        {isEmpty ? (
+        {isEmpty || actualActions.length === 0 ? (
           <div className="text-center py-8">
             {/* Empty state icon */}
             <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-green-50">
@@ -91,26 +84,26 @@ export function RequiredActions({ isEmpty = true }: RequiredActionsProps) {
             <h3 className="text-sm font-semibold text-[var(--text-dark)] mb-1">
               Tout est à jour !
             </h3>
-            <p className="text-xs text-gray-500 max-w-xs mx-auto">
-              Aucune action n'est requise pour le moment. Vous serez notifié des nouvelles tâches.
+            <p className="text-xs text-[var(--text-dark)]/50 max-w-xs mx-auto">
+              Aucune commande n'est en attente de confirmation.
             </p>
           </div>
         ) : (
-          <div className="w-full space-y-2">
-            {actions.map((action) => (
+          <div className="w-full space-y-3">
+            {actualActions.map((action) => (
               <Link
                 key={action.id}
                 href={action.href}
-                className="group block p-3 rounded-xl border border-gray-100 hover:border-[var(--gold)]/30 hover:bg-[var(--ivory)]/30 transition-all"
+                className="group block p-3 rounded-2xl border border-[var(--gold)]/10 hover:border-[var(--gold)]/30 hover:bg-[var(--ivory)]/30 transition-all"
               >
                 <div className="flex items-start gap-3">
                   {/* Priority badge */}
                   <div
-                    className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border ${
+                    className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border ${
                       priorityStyles[action.priority]
                     }`}
                   >
-                    {action.icon}
+                    {getOrderIcon()}
                   </div>
 
                   {/* Text */}
@@ -118,14 +111,14 @@ export function RequiredActions({ isEmpty = true }: RequiredActionsProps) {
                     <h3 className="text-sm font-semibold text-[var(--text-dark)] group-hover:text-[var(--gold-dark)] transition-colors">
                       {action.title}
                     </h3>
-                    <p className="text-xs text-gray-500 truncate mt-0.5">
+                    <p className="text-xs text-[var(--text-dark)]/50 truncate mt-0.5">
                       {action.description}
                     </p>
                   </div>
 
                   {/* Arrow */}
                   <svg
-                    className="h-4 w-4 shrink-0 text-gray-400 transition-all group-hover:text-[var(--gold-dark)] group-hover:translate-x-0.5 mt-1"
+                    className="h-4 w-4 shrink-0 text-[var(--text-dark)]/30 transition-all group-hover:text-[var(--gold-dark)] group-hover:translate-x-0.5 mt-1"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"

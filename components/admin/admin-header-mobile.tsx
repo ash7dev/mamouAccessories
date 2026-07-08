@@ -70,7 +70,7 @@ export function AdminHeaderMobile({
   const [hidden, setHidden] = useState(false);
 
   return (
-    <div className="lg:hidden -mx-4 -mt-4 mb-6 rounded-b-[2.5rem] bg-[#241B14] px-5 pb-8 pt-6 shadow-2xl">
+    <div className="lg:hidden -mx-4 -mt-4 mb-6 rounded-b-[2.5rem] bg-gradient-to-b from-[#4A3728] to-[#3D2C1F] px-5 pb-8 pt-6 shadow-2xl">
       {/* Barre du haut : avatar + salutation + cloche */}
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-3">

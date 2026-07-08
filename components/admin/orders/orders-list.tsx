@@ -130,6 +130,8 @@ function InboxIcon({ className = "w-7 h-7" }: { className?: string }) {
 /* ---------- WhatsApp : message pré-rempli selon le contexte ---------- */
 
 function whatsAppUrl(order: OrderListItem) {
+  if (!order.customerPhone) return "#";
+
   const phone = order.customerPhone.replace(/[^\d]/g, "");
   let message: string;
 
@@ -189,10 +191,10 @@ export function CommandesList({ orders }: { orders: OrderListItem[] }) {
       {/* ===================== MOBILE : cartes ===================== */}
       <div className="space-y-3 lg:hidden">
         {orders.map((order) => (
-          <Link
+          <div
             key={order.id}
-            href={`/admin/orders/${order.id}`}
-            className="block rounded-3xl border border-[var(--gold)]/15 bg-white p-4 shadow-[0_1px_2px_rgba(43,33,24,0.04),0_8px_24px_-12px_rgba(43,33,24,0.12)] transition-transform active:scale-[0.99]"
+            onClick={() => window.location.href = `/admin/orders/${order.id}`}
+            className="cursor-pointer block rounded-3xl border border-[var(--gold)]/15 bg-white p-4 shadow-[0_1px_2px_rgba(43,33,24,0.04),0_8px_24px_-12px_rgba(43,33,24,0.12)] transition-transform active:scale-[0.99]"
           >
             {/* Ligne 1 : n° + heure + urgence */}
             <div className="mb-2.5 flex items-center justify-between gap-2">
@@ -228,7 +230,7 @@ export function CommandesList({ orders }: { orders: OrderListItem[] }) {
                 {formatFCFA(order.total)} F
               </span>
             </div>
-          </Link>
+          </div>
         ))}
       </div>
 

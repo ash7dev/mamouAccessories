@@ -66,11 +66,12 @@ function PlusIcon({ className = "w-4 h-4" }: { className?: string }) {
 
 export function RevenueChart({ data = [], currentTotal = 0, onPeriodChange }: RevenueChartProps) {
   const [period, setPeriod] = useState<Period>("month");
-  const isEmpty = data.length < 2;
+  const isEmpty = data.length === 0;
 
   const W = 600;
   const H = 220;
   const PAD = 16;
+
   const paths = !isEmpty ? buildPaths(data, W, H, PAD) : null;
 
   const handlePeriod = (p: Period) => {
