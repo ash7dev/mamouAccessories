@@ -251,10 +251,10 @@ export function CommandesList({ orders }: { orders: OrderListItem[] }) {
 
         <div className="divide-y divide-[var(--gold)]/8">
           {orders.map((order) => (
-            <Link
+            <div
               key={order.id}
-              href={`/admin/orders/${order.id}`}
-              className="group grid grid-cols-[150px_1fr_90px_120px_170px_120px_56px] items-center gap-4 px-6 py-3.5 transition-colors hover:bg-[var(--ivory)]/30"
+              onClick={() => window.location.href = `/admin/orders/${order.id}`}
+              className="group grid grid-cols-[150px_1fr_90px_120px_170px_120px_56px] items-center gap-4 px-6 py-3.5 transition-colors hover:bg-[var(--ivory)]/30 cursor-pointer"
             >
               {/* Commande */}
               <div>
@@ -300,7 +300,7 @@ export function CommandesList({ orders }: { orders: OrderListItem[] }) {
                 order={order}
                 className="ml-auto opacity-0 transition-opacity group-hover:opacity-100"
               />
-            </Link>
+            </div>
           ))}
         </div>
       </div>

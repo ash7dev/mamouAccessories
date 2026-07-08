@@ -1,19 +1,25 @@
 import { PromotionHeader } from "@/components/admin/promotions/promotion-header";
 import { PromotionList } from "@/components/admin/promotions/promotion-list";
 import type { PromotionListItem } from "@/components/admin/promotions/promotion-list";
+import { createServiceRoleClient } from '@/lib/supabase/service-role';
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
 
 async function getPromotions(): Promise<PromotionListItem[]> {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/admin/promotions`, {
-    cache: 'no-store',
-  });
-  if (!response.ok) {
-    throw new Error('Failed to fetch promotions');
+  const supabase = createServiceRoleClient();
+
+  const { data: promotions, error } = await supabase
+    .from('promotions')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching promotions:', error);
+    return [];
   }
-  const data = await response.json();
-  return data.promotions || [];
+
+  return promotions || [];
 }
 
 export default async function PromotionsPage() {

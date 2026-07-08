@@ -1,6 +1,6 @@
 import { ProductDetail } from "@/components/admin/products/product-detail";
-import { getProductById } from "@/lib/api/products";
 import type { ProductDetailData } from "@/components/admin/products/product-detail";
+import { createServiceRoleClient } from '@/lib/supabase/service-role';
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
@@ -13,12 +13,50 @@ function buildCloudinaryImageUrl(publicId: string) {
   return `https://res.cloudinary.com/${cloudName}/image/upload/${publicId}`;
 }
 
+async function getProductById(id: string) {
+  const supabase = createServiceRoleClient();
+
+  const { data: product, error } = await supabase
+    .from('products')
+    .select(`
+      id,
+      name,
+      slug,
+      description,
+      price,
+      compare_at_price,
+      stock,
+      image_orientation,
+      is_active,
+      is_featured,
+      created_at,
+      categories (
+        id,
+        name
+      ),
+      product_images (
+        id,
+        cloudinary_public_id,
+        position
+      )
+    `)
+    .eq('id', id)
+    .single();
+
+  if (error) {
+    console.error('Error fetching product:', error);
+    throw new Error('Product not found');
+  }
+
+  return product;
+}
+
 function mapProductToDetail(product: any): ProductDetailData {
   return {
     id: product.id,
     name: product.name,
     slug: product.slug,
-    categoryName: product.category?.name ?? "Sans catégorie",
+    categoryName: product.categories?.name ?? "Sans catégorie",
     description: product.description ?? "",
     price: Number(product.price ?? 0),
     compareAtPrice: product.compare_at_price ?? null,
@@ -27,10 +65,12 @@ function mapProductToDetail(product: any): ProductDetailData {
     isFeatured: Boolean(product.is_featured),
     isActive: Boolean(product.is_active),
     createdAt: product.created_at,
-    images: (product.images ?? []).map((image: any) => ({
-      id: image.id,
-      url: buildCloudinaryImageUrl(image.cloudinary_public_id) ?? "/placeholder-product.jpg",
-    })),
+    images: (product.product_images ?? [])
+      .sort((a: any, b: any) => a.position - b.position)
+      .map((image: any) => ({
+        id: image.id,
+        url: buildCloudinaryImageUrl(image.cloudinary_public_id) ?? "/placeholder-product.jpg",
+      })),
     stats: {
       unitsSold: 0,
       revenue: 0,
