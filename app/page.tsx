@@ -16,6 +16,9 @@ import {
   getRecommendedProducts,
 } from "@/lib/data/home-data";
 
+// Revalidate the homepage every 10 minutes
+export const revalidate = 600;
+
 /* ============================================================
    Page d'accueil — /
 

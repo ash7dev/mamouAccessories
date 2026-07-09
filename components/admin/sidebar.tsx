@@ -14,13 +14,6 @@ function DashboardIcon({ className = "w-6 h-6" }: { className?: string }) {
   );
 }
 
-function CategoryIcon({ className = "w-6 h-6" }: { className?: string }) {
-  return (
-    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-    </svg>
-  );
-}
 
 function ProductIcon({ className = "w-6 h-6" }: { className?: string }) {
   return (
@@ -134,7 +127,7 @@ export function Sidebar() {
           {/* Logo */}
           <div className="flex items-center gap-2 px-3 pb-4 pt-6">
             <div className="flex flex-col leading-none">
-              <span className="font-cinzel italic text-xl font-semibold tracking-wide" style={{ letterSpacing: '0.05em' }}>Mamou's</span>
+              <span className="font-cinzel italic text-xl font-semibold tracking-wide" style={{ letterSpacing: '0.05em' }}>Mamou&#39;s</span>
               <span className="font-cinzel text-[9px] font-medium tracking-[0.3em] text-[var(--gold)] uppercase" style={{ letterSpacing: '0.35em' }}>
                 ACCESSORIES
               </span>
@@ -147,7 +140,7 @@ export function Sidebar() {
               MA
             </div>
             <div className="flex flex-col leading-tight">
-              <span className="text-sm font-medium">Mamou's Accessories</span>
+              <span className="text-sm font-medium">Mamou&lsquo;s </span>
               <span className="text-xs text-white/70">Administration</span>
             </div>
           </div>

@@ -32,6 +32,7 @@ export function ProductCard({ product }: { product: PublicProductCard }) {
   const { addItem } = useCart();
   const [justAdded, setJustAdded] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [imageError, setImageError] = useState(false);
   const isOut = product.stock === 0;
   const discount =
     product.compareAtPrice && product.compareAtPrice > product.price
@@ -60,6 +61,11 @@ export function ProductCard({ product }: { product: PublicProductCard }) {
     setIsFavorite(!isFavorite);
   };
 
+  const handleImageError = () => {
+    console.error('Image failed to load:', product.imageUrl);
+    setImageError(true);
+  };
+
   return (
     <Link href={`/produit/${product.slug}`} className="group block">
       <motion.div
@@ -69,11 +75,12 @@ export function ProductCard({ product }: { product: PublicProductCard }) {
         <div
           className={`relative ${aspect} overflow-hidden rounded-[1.5rem] border border-[var(--gold)]/20 bg-gradient-to-br from-[var(--ivory)]/50 to-[var(--gold)]/5 shadow-[0_-4px_16px_-8px_rgba(185,138,68,0.1)]`}
         >
-          {product.imageUrl ? (
+          {product.imageUrl && !imageError ? (
             <img
               src={product.imageUrl}
               alt={product.name}
               loading="lazy"
+              onError={handleImageError}
               className={`h-full w-full object-cover transition-transform duration-700 group-hover:scale-105 ${
                 isOut ? "opacity-60" : ""
               }`}

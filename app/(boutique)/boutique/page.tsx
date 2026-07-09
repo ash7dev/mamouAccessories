@@ -1,6 +1,9 @@
 import { Navbar } from "@/components/boutique/navbar";
 import { Footer } from "@/components/footer";
 
+// Revalidate the boutique page every 10 minutes
+export const revalidate = 600;
+
 export default function BoutiquePage() {
   return (
     <div className="min-h-screen bg-background flex flex-col">

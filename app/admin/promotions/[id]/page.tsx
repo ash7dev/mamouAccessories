@@ -1,18 +1,31 @@
 import { PromotionDetail } from "@/components/admin/promotions/promotion-detail";
 import type { PromotionDetailData } from "@/components/admin/promotions/promotion-detail";
+import { createServiceRoleClient } from '@/lib/supabase/service-role';
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
 
-async function getPromotionById(id: string): Promise<PromotionDetailData> {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/admin/promotions/${id}`, {
-    cache: 'no-store',
-  });
-  if (!response.ok) {
-    throw new Error('Failed to fetch promotion');
+async function getPromotionById(id: string): Promise<any> {
+  const supabase = createServiceRoleClient();
+
+  const { data: promotion, error } = await supabase
+    .from('promotions')
+    .select(`
+      *,
+      categories (
+        id,
+        name
+      )
+    `)
+    .eq('id', id)
+    .single();
+
+  if (error) {
+    console.error('Error fetching promotion:', error);
+    throw new Error('Promotion not found');
   }
-  const data = await response.json();
-  return data.promotion;
+
+  return promotion;
 }
 
 function mapPromotionToDetail(promotion: any): PromotionDetailData {

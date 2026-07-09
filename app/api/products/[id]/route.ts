@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { createServiceRoleClient } from '@/lib/supabase/service-role';
 import { deleteImages } from '@/lib/cloudinary';
 import type { UpdateProductInput } from '@/lib/types/product';
@@ -159,6 +160,10 @@ export async function PUT(
       .eq('id', id)
       .single();
 
+    revalidatePath('/');
+    revalidatePath('/boutique');
+    revalidatePath('/produit');
+
     return NextResponse.json(
       { product: productWithImages },
       { status: 200 }
@@ -208,6 +213,10 @@ export async function DELETE(
         console.error('Error deleting images from Cloudinary:', err)
       );
     }
+
+    revalidatePath('/');
+    revalidatePath('/boutique');
+    revalidatePath('/produit');
 
     return NextResponse.json(
       { message: 'Produit supprimé avec succès' },

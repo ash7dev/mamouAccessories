@@ -45,23 +45,18 @@ export function buildImageUrl(
 ) {
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'utngoden'
 
-  if (!publicId) {
-    console.error('buildImageUrl: No publicId provided')
+  if (!publicId?.trim()) {
+    console.warn('buildImageUrl: No publicId provided')
     return null
   }
 
-  // Nettoyer le public_id s'il contient déjà le chemin complet
-  // Certains IDs sont stockés comme "products/xxx" d'autres comme "xxx"
-  let cleanId = publicId;
-  if (publicId.startsWith('products/')) {
-    cleanId = publicId; // Garder le chemin complet
-  }
+  const normalizedId = publicId.trim().replace(/^\/+/, '')
+  const cleanId = normalizedId
+    .split('/')
+    .map((segment) => encodeURIComponent(segment))
+    .join('/')
 
-  // URL simple sans transformations car les transformations causent des 404
-  // Les transformations Cloudinary nécessitent peut-être une configuration spéciale
   const url = `https://res.cloudinary.com/${cloudName}/image/upload/${cleanId}`
-
-  console.log('buildImageUrl (simple):', url, 'from publicId:', publicId)
   return url
 }
 

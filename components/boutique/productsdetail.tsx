@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useState } from "react";
@@ -49,6 +50,8 @@ export function ProductDetailPublic({ product }: { product: PublicProduct }) {
   const [activeImage, setActiveImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [justAdded, setJustAdded] = useState(false);
+  const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
+  const fallbackImage = "/placeholder-product.svg";
 
   const isOut = product.stock === 0;
   const isLow = product.stock > 0 && product.stock <= 3;
@@ -77,6 +80,12 @@ export function ProductDetailPublic({ product }: { product: PublicProduct }) {
   const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
     `Bonjour 🌸 Je suis intéressée par « ${product.name} » (${formatFCFA(product.price)} FCFA). Est-il disponible ?`
   )}`;
+
+  const handleImageError = (imageId: string) => {
+    setImageErrors((prev) => ({ ...prev, [imageId]: true }));
+  };
+
+  const getImageSrc = (imageId: string, url: string) => (imageErrors[imageId] ? fallbackImage : url);
 
   return (
     <motion.div
@@ -107,13 +116,14 @@ export function ProductDetailPublic({ product }: { product: PublicProduct }) {
               {product.images[activeImage] ? (
                 <motion.img
                   key={activeImage}
-                  src={product.images[activeImage].url}
+                  src={getImageSrc(product.images[activeImage].id, product.images[activeImage].url)}
                   alt={product.name}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.3 }}
                   className="h-full w-full object-cover"
+                  onError={() => handleImageError(product.images[activeImage].id)}
                 />
               ) : (
                 <motion.div
@@ -142,7 +152,12 @@ export function ProductDetailPublic({ product }: { product: PublicProduct }) {
                   }`}
                   style={{ width: "5rem", height: "5rem" }}
                 >
-                  <img src={img.url} alt="" className="h-full w-full object-cover" />
+                  <img
+                    src={getImageSrc(img.id, img.url)}
+                    alt=""
+                    className="h-full w-full object-cover"
+                    onError={() => handleImageError(img.id)}
+                  />
                   {i === activeImage && (
                     <div className="absolute inset-0 rounded-2xl ring-2 ring-[var(--gold)] ring-inset" />
                   )}

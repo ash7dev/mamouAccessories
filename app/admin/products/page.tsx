@@ -1,17 +1,11 @@
 import { ProductsHeader } from "@/components/admin/products/products-header";
 import { ProductsList } from "@/components/admin/products/products-list";
+import { buildImageUrl } from '@/lib/cloudinary';
 import { createServiceRoleClient } from '@/lib/supabase/service-role';
 
 // Force dynamic rendering - ne pas pré-rendre au build
 export const dynamic = 'force-dynamic';
-
-function buildCloudinaryImageUrl(publicId: string) {
-  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-
-  if (!cloudName || !publicId) return null;
-
-  return `https://res.cloudinary.com/${cloudName}/image/upload/${publicId}`;
-}
+export const revalidate = 30;
 
 async function getProducts() {
   const supabase = createServiceRoleClient();
@@ -55,7 +49,7 @@ export default async function ProductsPage() {
     price: Number(product.price ?? 0),
     compareAtPrice: product.compare_at_price ?? null,
     stock: Number(product.stock ?? 0),
-    imageUrl: buildCloudinaryImageUrl(
+    imageUrl: buildImageUrl(
       product.product_images?.find((img: any) => img.position === 0)?.cloudinary_public_id
     ) ?? null,
     isActive: Boolean(product.is_active),

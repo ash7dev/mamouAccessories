@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { createServiceRoleClient } from '@/lib/supabase/service-role';
 import { deleteImages } from '@/lib/cloudinary';
 import type { CreateProductInput, ProductFilters } from '@/lib/types/product';
@@ -149,6 +150,10 @@ export async function POST(request: NextRequest) {
       `)
       .eq('id', product.id)
       .single();
+
+    revalidatePath('/');
+    revalidatePath('/boutique');
+    revalidatePath('/produit');
 
     return NextResponse.json(
       { product: productWithImages },

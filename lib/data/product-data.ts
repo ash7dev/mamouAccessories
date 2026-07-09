@@ -38,13 +38,11 @@ export async function getProductBySlug(slug: string): Promise<PublicProduct | nu
     .eq('product_id', product.id)
     .order('position', { ascending: true });
 
-  // Transformer les images avec Cloudinary URLs (sans transformations pour éviter 404)
-  const productImages: Array<{ id: string; url: string }> = (images || [])
-    .map((img) => {
-      const url = buildImageUrl(img.cloudinary_public_id, {});
-      return url ? { id: img.id, url } : null;
-    })
-    .filter((img): img is { id: string; url: string } => img !== null);
+  // Transformer les images avec Cloudinary URLs avec fallback automatique
+  const productImages: Array<{ id: string; url: string }> = (images || []).map((img) => {
+    const url = buildImageUrl(img.cloudinary_public_id, {}) || '/placeholder-product.svg';
+    return { id: img.id, url };
+  });
 
   return {
     id: product.id,
