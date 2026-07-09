@@ -41,6 +41,7 @@ export function buildImageUrl(
     crop?: string
     quality?: string | number
     format?: string
+    bustCache?: boolean
   } = {}
 ) {
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'utngoden'
@@ -56,7 +57,28 @@ export function buildImageUrl(
     .map((segment) => encodeURIComponent(segment))
     .join('/')
 
-  const url = `https://res.cloudinary.com/${cloudName}/image/upload/${cleanId}`
+  // Construire l'URL avec transformations
+  let url = `https://res.cloudinary.com/${cloudName}/image/upload`
+  
+  // Ajouter les transformations si spécifiées
+  const transformations: string[] = []
+  if (options.width) transformations.push(`w_${options.width}`)
+  if (options.height) transformations.push(`h_${options.height}`)
+  if (options.crop) transformations.push(`c_${options.crop}`)
+  if (options.quality) transformations.push(`q_${options.quality}`)
+  if (options.format) transformations.push(`f_${options.format}`)
+  
+  if (transformations.length > 0) {
+    url += '/' + transformations.join(',')
+  }
+  
+  url += `/${cleanId}`
+  
+  // Ajouter cache-busting si demandé
+  if (options.bustCache) {
+    url += `?_t=${Date.now()}`
+  }
+
   return url
 }
 

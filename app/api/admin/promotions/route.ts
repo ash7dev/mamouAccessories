@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { createServiceRoleClient } from '@/lib/supabase/service-role';
 
 // POST /api/admin/promotions - Créer une nouvelle promotion
@@ -70,6 +71,10 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
+
+    revalidatePath('/');
+    revalidatePath('/admin/promotions');
+    revalidatePath('/admin');
 
     return NextResponse.json({ promotion }, { status: 201 });
   } catch (error) {

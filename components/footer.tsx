@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { AdminFooterButton } from "@/components/admin/admin-footer-button";
 
 /* ============================================================
    Footer — pied de page public
@@ -132,9 +133,12 @@ export function Footer() {
 
         {/* Bas de page */}
         <div className="mx-auto mt-10 max-w-5xl border-t border-white/10 pt-6">
-          <p className="text-center text-xs text-[#F4EFE6]/40">
-            © {new Date().getFullYear()} Mamou's Accessories. Tous droits réservés.
-          </p>
+          <div className="flex items-center justify-center gap-3">
+            <p className="text-center text-xs text-[#F4EFE6]/40">
+              © {new Date().getFullYear()} Mamou's Accessories. Tous droits réservés.
+            </p>
+            <AdminFooterButton />
+          </div>
         </div>
       </div>
     </footer>

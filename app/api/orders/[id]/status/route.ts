@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { createServiceRoleClient } from '@/lib/supabase/service-role';
 import type { UpdateOrderStatusInput } from '@/lib/types/order';
 
@@ -67,6 +68,9 @@ export async function PATCH(
         { status: 500 }
       );
     }
+
+    revalidatePath('/admin/orders');
+    revalidatePath('/admin');
 
     return NextResponse.json(
       { order, message: 'Statut mis à jour avec succès' },

@@ -3,9 +3,8 @@ import { ProductsList } from "@/components/admin/products/products-list";
 import { buildImageUrl } from '@/lib/cloudinary';
 import { createServiceRoleClient } from '@/lib/supabase/service-role';
 
-// Force dynamic rendering - ne pas pré-rendre au build
+// Force dynamic rendering - no caching for admin pages
 export const dynamic = 'force-dynamic';
-export const revalidate = 30;
 
 async function getProducts() {
   const supabase = createServiceRoleClient();

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { createServiceRoleClient } from '@/lib/supabase/service-role';
 
 // GET /api/admin/promotions/[id] - Récupérer une promotion par ID
@@ -110,6 +111,10 @@ export async function PUT(
       );
     }
 
+    revalidatePath('/');
+    revalidatePath('/admin/promotions');
+    revalidatePath('/admin');
+
     return NextResponse.json({ promotion }, { status: 200 });
   } catch (error) {
     console.error('Unexpected error:', error);
@@ -156,6 +161,10 @@ export async function DELETE(
         { status: 500 }
       );
     }
+
+    revalidatePath('/');
+    revalidatePath('/admin/promotions');
+    revalidatePath('/admin');
 
     return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {

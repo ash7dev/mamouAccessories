@@ -162,7 +162,9 @@ export async function PUT(
 
     revalidatePath('/');
     revalidatePath('/boutique');
-    revalidatePath('/produit');
+    revalidatePath('/produit/[slug]');
+    revalidatePath('/admin/products');
+    revalidatePath('/admin');
 
     return NextResponse.json(
       { product: productWithImages },
@@ -216,7 +218,9 @@ export async function DELETE(
 
     revalidatePath('/');
     revalidatePath('/boutique');
-    revalidatePath('/produit');
+    revalidatePath('/produit/[slug]');
+    revalidatePath('/admin/products');
+    revalidatePath('/admin');
 
     return NextResponse.json(
       { message: 'Produit supprimé avec succès' },

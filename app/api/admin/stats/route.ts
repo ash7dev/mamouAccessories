@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServiceRoleClient } from '@/lib/supabase/service-role';
 
 // GET /api/admin/stats - Récupérer toutes les statistiques du dashboard
+// Force dynamic rendering - no caching for admin stats
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     const supabase = createServiceRoleClient();

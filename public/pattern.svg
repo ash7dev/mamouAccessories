@@ -1,0 +1,17 @@
+<svg width="60" height="60" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse">
+      <!-- Subtle geometric pattern -->
+      <circle cx="30" cy="30" r="1.5" fill="#B8935E" opacity="0.3"/>
+      <circle cx="0" cy="0" r="1.5" fill="#B8935E" opacity="0.3"/>
+      <circle cx="60" cy="0" r="1.5" fill="#B8935E" opacity="0.3"/>
+      <circle cx="0" cy="60" r="1.5" fill="#B8935E" opacity="0.3"/>
+      <circle cx="60" cy="60" r="1.5" fill="#B8935E" opacity="0.3"/>
+
+      <!-- Diagonal lines for elegance -->
+      <line x1="0" y1="0" x2="60" y2="60" stroke="#B8935E" stroke-width="0.5" opacity="0.15"/>
+      <line x1="60" y1="0" x2="0" y2="60" stroke="#B8935E" stroke-width="0.5" opacity="0.15"/>
+    </pattern>
+  </defs>
+  <rect width="60" height="60" fill="url(#grid)"/>
+</svg>

@@ -153,7 +153,9 @@ export async function POST(request: NextRequest) {
 
     revalidatePath('/');
     revalidatePath('/boutique');
-    revalidatePath('/produit');
+    revalidatePath('/produit/[slug]');
+    revalidatePath('/admin/products');
+    revalidatePath('/admin');
 
     return NextResponse.json(
       { product: productWithImages },
