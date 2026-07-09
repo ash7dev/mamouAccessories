@@ -6,6 +6,7 @@ import { ProductSection } from "@/components/home/ProductSection";
 import { PromoBanner } from "@/components/home/PromoBanner";
 import { TrustBadges } from "@/components/home/TrustBadges";
 import { Testimonials } from "@/components/home/Testimonials";
+import { NewsletterSection } from "@/components/NewsletterSection";
 import { Footer } from "@/components/footer";
 import { PWAInstallPrompt } from "@/components/ui/pwa-install-prompt";
 import {
@@ -78,6 +79,8 @@ export default async function HomePage() {
       <TrustBadges />
 
       <Testimonials reviews={reviews} />
+
+      <NewsletterSection />
 
       <Footer />
 

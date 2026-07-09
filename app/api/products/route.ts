@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { createServiceRoleClient } from '@/lib/supabase/service-role';
-import { deleteImages } from '@/lib/cloudinary';
+import { deleteImages, buildImageUrl } from '@/lib/cloudinary';
 import type { CreateProductInput, ProductFilters } from '@/lib/types/product';
 
 // GET /api/products - Récupérer tous les produits avec filtres
@@ -25,6 +25,7 @@ export async function GET(request: NextRequest) {
       .from('products')
       .select(`
         *,
+        categories(id, name),
         images:product_images(*)
       `)
       .order('created_at', { ascending: false });
@@ -49,7 +50,7 @@ export async function GET(request: NextRequest) {
       query = query.lte('price', filters.max_price);
     }
 
-    const { data: products, error } = await query;
+    const { data: rawProducts, error } = await query;
 
     if (error) {
       console.error('Error fetching products:', error);
@@ -58,6 +59,25 @@ export async function GET(request: NextRequest) {
         { status: 500 }
       );
     }
+
+    // Format products for admin list and public pages
+    const products = (rawProducts || []).map((product: any) => ({
+      id: product.id,
+      name: product.name,
+      slug: product.slug,
+      categoryId: product.category_id,
+      categoryName: product.categories?.name ?? "Sans catégorie",
+      price: Number(product.price ?? 0),
+      compareAtPrice: product.compare_at_price ?? null,
+      stock: Number(product.stock ?? 0),
+      imageOrientation: product.image_orientation || 'portrait',
+      imageUrl: buildImageUrl(
+        product.images?.find((img: any) => img.position === 0)?.cloudinary_public_id
+      ) ?? null,
+      isActive: Boolean(product.is_active),
+      isFeatured: Boolean(product.is_featured),
+      unitsSold: 0, // TODO: calculate from orders
+    }));
 
     return NextResponse.json({ products }, { status: 200 });
   } catch (error) {

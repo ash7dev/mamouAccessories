@@ -17,6 +17,7 @@ import Link from "next/link";
 export interface ProductListItem {
   id: string;
   name: string;
+  categoryId?: string;
   categoryName: string;
   price: number;
   compareAtPrice: number | null;

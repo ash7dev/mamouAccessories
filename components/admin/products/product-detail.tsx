@@ -3,6 +3,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { toast } from "sonner";
 
 /* ============================================================
    Page détail produit (admin) — /admin/products/[id]
@@ -113,9 +114,40 @@ export function ProductDetail({ product }: { product: ProductDetailData }) {
     }
   };
 
-  const adjustStock = (delta: number) => {
-    setStock((s) => Math.max(0, s + delta));
-    // TODO: Server Action adjustStock(product.id, delta) avec debounce
+  const adjustStock = async (delta: number) => {
+    const newStock = Math.max(0, stock + delta);
+    const previousStock = stock;
+
+    // Optimistic update
+    setStock(newStock);
+
+    try {
+      const response = await fetch(`/api/products/${product.id}/stock`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ stock: newStock }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update stock");
+      }
+
+      const data = await response.json();
+      setStock(data.stock);
+
+      toast.success(delta > 0 ? "Stock augmenté" : "Stock diminué", {
+        description: `Nouveau stock: ${data.stock} unité${data.stock > 1 ? "s" : ""}`,
+      });
+    } catch (error) {
+      console.error("Error updating stock:", error);
+      // Revert on error
+      setStock(previousStock);
+      toast.error("Erreur lors de la mise à jour du stock", {
+        description: "Veuillez réessayer",
+      });
+    }
   };
 
   const aspect = product.imageOrientation === "portrait" ? "aspect-[3/4]" : "aspect-[4/3]";

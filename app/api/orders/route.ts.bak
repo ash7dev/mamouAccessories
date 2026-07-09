@@ -228,3 +228,74 @@ export async function POST(request: NextRequest) {
   }
 }
 
+// GET /api/orders - Récupérer toutes les commandes avec filtres
+export async function GET(request: NextRequest) {
+  try {
+    const supabase = createServiceRoleClient();
+    const { searchParams } = new URL(request.url);
+
+    // Extraire les filtres depuis les query params
+    const filters: OrderFilters = {
+      status: searchParams.get('status') as any || undefined,
+      payment_status: searchParams.get('payment_status') as any || undefined,
+      payment_method: searchParams.get('payment_method') as any || undefined,
+      customer_phone: searchParams.get('customer_phone') || undefined,
+      order_number: searchParams.get('order_number') || undefined,
+      date_from: searchParams.get('date_from') || undefined,
+      date_to: searchParams.get('date_to') || undefined,
+    };
+
+    // Construire la requête
+    let query = supabase
+      .from('orders')
+      .select(`
+        *,
+        items:order_items(*)
+      `)
+      .order('created_at', { ascending: false });
+
+    // Appliquer les filtres
+    if (filters.status) {
+      query = query.eq('status', filters.status);
+    }
+    if (filters.payment_status) {
+      query = query.eq('payment_status', filters.payment_status);
+    }
+    if (filters.payment_method) {
+      query = query.eq('payment_method', filters.payment_method);
+    }
+    if (filters.customer_phone) {
+      query = query.eq('customer_phone', filters.customer_phone);
+    }
+    if (filters.order_number) {
+      query = query.ilike('order_number', `%${filters.order_number}%`);
+    }
+    if (filters.date_from) {
+      query = query.gte('created_at', filters.date_from);
+    }
+    if (filters.date_to) {
+      // Ajouter un jour pour inclure toute la journée
+      const dateTo = new Date(filters.date_to);
+      dateTo.setDate(dateTo.getDate() + 1);
+      query = query.lt('created_at', dateTo.toISOString());
+    }
+
+    const { data: orders, error } = await query;
+
+    if (error) {
+      console.error('Error fetching orders:', error);
+      return NextResponse.json(
+        { error: 'Erreur lors de la récupération des commandes' },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({ orders }, { status: 200 });
+  } catch (error) {
+    console.error('Unexpected error:', error);
+    return NextResponse.json(
+      { error: 'Erreur inattendue' },
+      { status: 500 }
+    );
+  }
+}

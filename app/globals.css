@@ -66,6 +66,10 @@
 }
 
 :root {
+  --font-playfair: "Playfair Display", "Georgia", serif;
+  --font-inter: "Inter", "Segoe UI", Arial, sans-serif;
+  --font-cinzel: "Cinzel", "Georgia", serif;
+
   /* ===================================
      PALETTE IVOIRE & OR — BIJOUTERIE
      Source de vérité UNIQUE : les hex ci-dessous.
