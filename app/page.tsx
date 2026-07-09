@@ -7,6 +7,7 @@ import { PromoBanner } from "@/components/home/PromoBanner";
 import { TrustBadges } from "@/components/home/TrustBadges";
 import { Testimonials } from "@/components/home/Testimonials";
 import { Footer } from "@/components/footer";
+import { PWAInstallPrompt } from "@/components/ui/pwa-install-prompt";
 import {
   getHomeCategories,
   getFeaturedProducts,
@@ -79,6 +80,9 @@ export default async function HomePage() {
       <Testimonials reviews={reviews} />
 
       <Footer />
+
+      {/* PWA Install Prompt Modal */}
+      <PWAInstallPrompt />
     </>
   );
 }
