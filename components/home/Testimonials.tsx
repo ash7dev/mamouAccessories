@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { motion } from "framer-motion";
@@ -134,7 +135,7 @@ export function Testimonials({ reviews }: { reviews?: HomeReview[] }) {
           viewport={viewportOnce}
           className="flex gap-6 overflow-x-auto pb-6 snap-x snap-mandatory scrollbar-hide -mx-6 px-6 lg:mx-0 lg:px-0"
         >
-          {displayReviews.map((review, index) => (
+          {displayReviews.map((review, _index) => (
             <motion.div
               key={review.id}
               variants={fadeUp}
@@ -151,7 +152,7 @@ export function Testimonials({ reviews }: { reviews?: HomeReview[] }) {
 
                 {/* Content */}
                 <blockquote className="mb-6 text-base leading-relaxed text-[var(--text-dark)]/70">
-                  "{review.content}"
+                  &quot;{review.content}&quot;
                 </blockquote>
 
                 {/* Author Info */}

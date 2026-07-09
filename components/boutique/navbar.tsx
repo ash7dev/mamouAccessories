@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import Link from "next/link";
@@ -35,7 +36,7 @@ export function Navbar() {
           <Link href="/" className="flex items-center gap-2 group">
             <div className="flex flex-col leading-none">
               <span className="font-cinzel italic text-xl font-semibold tracking-wide text-[var(--text-dark)] md:text-2xl transition-all group-hover:text-[var(--gold-dark)]" style={{ letterSpacing: '0.05em' }}>
-                Mamou's
+                Mamou&apos;s
               </span>
               <span className="font-cinzel text-[9px] font-medium tracking-[0.3em] text-[var(--gold-dark)] md:text-[10px] uppercase" style={{ letterSpacing: '0.35em' }}>
                 ACCESSORIES

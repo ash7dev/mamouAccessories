@@ -39,8 +39,6 @@ export function ProductCard({ product }: { product: PublicProductCard }) {
       ? Math.round((1 - product.price / product.compareAtPrice) * 100)
       : null;
 
-  const aspect = product.imageOrientation === "landscape" ? "aspect-[4/3]" : "aspect-[3/4]";
-
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     if (isOut) return;
@@ -73,7 +71,7 @@ export function ProductCard({ product }: { product: PublicProductCard }) {
         transition={{ duration: 0.3 }}
       >
         <div
-          className={`relative ${aspect} overflow-hidden rounded-[1.5rem] border border-[var(--gold)]/20 bg-gradient-to-br from-[var(--ivory)]/50 to-[var(--gold)]/5 shadow-[0_-4px_16px_-8px_rgba(185,138,68,0.1)]`}
+          className="relative aspect-[3/4] overflow-hidden rounded-[1.5rem] border border-[var(--gold)]/20 bg-gradient-to-br from-[var(--ivory)]/50 to-[var(--gold)]/5 shadow-[0_-4px_16px_-8px_rgba(185,138,68,0.1)]"
         >
           {product.imageUrl && !imageError ? (
             <img

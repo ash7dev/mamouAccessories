@@ -49,30 +49,96 @@ function StackCard({
   );
 }
 
-export default function AdminDashboard() {
-  const [stats, setStats] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-
-  const loadStats = async (showRefreshing = false) => {
-    if (showRefreshing) setRefreshing(true);
-    try {
-      const response = await fetch('/api/admin/stats?period=month', {
-        cache: 'no-store',
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setStats(data);
-      }
-    } catch (error) {
-      console.error('Error loading stats:', error);
-    } finally {
-      setLoading(false);
-      if (showRefreshing) setRefreshing(false);
-    }
+interface DashboardStats {
+  kpi: {
+    revenue: number;
+    products: number;
+    orders: number;
+    customers: number;
   };
+  revenueChart: {
+    data: Array<{ label: string; value: number }>;
+    currentTotal: number;
+  };
+  topProducts: Array<{
+    id: string;
+    name: string;
+    sales: number;
+    revenue: number;
+    image: string | null;
+    rank: number;
+  }>;
+  recentOrders: Array<{
+    id: string;
+    order_number: string;
+    customer_name: string;
+    customer_phone: string;
+    customer_address: string;
+    total: number;
+    status: "pending" | "confirmed" | "shipped" | "delivered" | "cancelled";
+    created_at: string;
+  }>;
+  requiredActions: Array<{
+    id: string;
+    title: string;
+    description: string;
+    priority: 'high' | 'medium' | 'low';
+    href: string;
+  }>;
+  lowStockAlert: Array<{
+    id: string;
+    name: string;
+    stock: number;
+    image: string | null;
+  }>;
+  salesByCategory: Array<{
+    id: string;
+    name: string;
+    sales: number;
+    revenue: number;
+  }>;
+  activePromotions: Array<{
+    id: string;
+    name: string;
+    description: string | null;
+    discount_type: "percentage" | "fixed_amount";
+    discount_value: number;
+    start_date: string;
+    end_date: string;
+    applies_to: "all_products" | "specific_category" | "specific_products";
+    min_purchase_amount: number;
+    max_discount_amount: number | null;
+    is_active: boolean;
+    usage_count: number;
+    created_at: string;
+  }>;
+}
+
+export default function AdminDashboard() {
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+
+    const loadStats = async () => {
+      try {
+        const response = await fetch('/api/admin/stats?period=month', {
+          cache: 'no-store',
+        });
+        if (response.ok && isMounted) {
+          const data = await response.json();
+          setStats(data);
+        }
+      } catch (error) {
+        console.error('Error loading stats:', error);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
     loadStats();
 
     // Rafraîchir automatiquement toutes les 30 secondes
@@ -80,7 +146,10 @@ export default function AdminDashboard() {
       loadStats();
     }, 30000);
 
-    return () => clearInterval(interval);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
   }, []);
 
   const formatFCFA = (n: number) => new Intl.NumberFormat("fr-FR").format(n) + " FCFA";

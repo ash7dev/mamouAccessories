@@ -63,7 +63,7 @@ export function Footer() {
             Une question ? Écrivez-nous<span className="text-[var(--gold)]">.</span>
           </h2>
           <p className="max-w-md text-sm text-[#F4EFE6]/60">
-            Nous répondons rapidement sur WhatsApp pour vous conseiller et prendre vos commandes d'accessoires.
+            Nous répondons rapidement sur WhatsApp pour vous conseiller et prendre vos commandes d&apos;accessoires.
           </p>
           <a
             href={whatsappUrl}
@@ -83,7 +83,7 @@ export function Footer() {
           {/* Marque */}
           <div>
             <div className="flex flex-col leading-none">
-              <span className="font-cinzel italic text-xl font-semibold tracking-wide" style={{ letterSpacing: '0.05em' }}>Mamou's</span>
+              <span className="font-cinzel italic text-xl font-semibold tracking-wide" style={{ letterSpacing: '0.05em' }}>Mamou&apos;s</span>
               <span className="font-cinzel text-[9px] font-medium tracking-[0.3em] text-[var(--gold)] uppercase" style={{ letterSpacing: '0.35em' }}>
                 ACCESSORIES
               </span>
@@ -160,7 +160,7 @@ export function Footer() {
         {/* Bas de page */}
         <div className="mx-auto mt-10 max-w-5xl border-t border-white/10 pt-6">
           <p className="text-center text-xs text-[#F4EFE6]/40">
-            © {new Date().getFullYear()} Mamou's Accessories. Tous droits réservés.
+            © {new Date().getFullYear()} Mamou&lsquo;s Accessories. Tous droits réservés.
           </p>
         </div>
       </div>

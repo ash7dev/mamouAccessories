@@ -136,7 +136,7 @@ export function RevenueChart({ data = [], currentTotal = 0, onPeriodChange }: Re
             </div>
 
             <h3 className="mb-1 text-sm font-semibold text-[var(--text-dark)]">
-              Aucun encaissement pour l'instant
+              Aucun encaissement pour l&apos;instant
             </h3>
             <p className="mb-5 max-w-xs text-xs leading-relaxed text-[var(--text-dark)]/50">
               La courbe apparaîtra dès votre première commande payée.

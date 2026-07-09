@@ -130,7 +130,7 @@ export function TrustBadges() {
             Pourquoi nous choisir ?
           </h2>
           <p className="text-base lg:text-lg text-[var(--text-dark)]/60 max-w-2xl mx-auto">
-            Une expérience d'achat pensée pour vous, avec des services adaptés à vos besoins
+            Une expérience d&apos;achat pensée pour vous, avec des services adaptés à vos besoins
           </p>
         </motion.div>
 
