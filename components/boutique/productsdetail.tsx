@@ -41,7 +41,7 @@ const formatFCFA = (n: number) => new Intl.NumberFormat("fr-FR").format(n);
 /* ---------- Composant ---------- */
 
 // TODO: à remplacer par le numéro WhatsApp de la boutique (table settings)
-const WHATSAPP_NUMBER = "221771234567";
+const WHATSAPP_NUMBER = "221774907955";
 
 export function ProductDetailPublic({ product }: { product: PublicProduct }) {
   const router = useRouter();
