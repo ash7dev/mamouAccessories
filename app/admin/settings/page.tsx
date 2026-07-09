@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 import { ParametreHeader } from "@/components/admin/settings/parametre-header";
 import { SettingsSection } from "@/components/admin/settings/settings-section";
-import { CreditCard, Truck, MessageSquare, Store, Bell, Shield } from "lucide-react";
+import { CreditCard, Truck, MessageSquare, Store, Bell, Shield, LogOut } from "lucide-react";
 import { toast } from "sonner";
 
 interface SettingsData {
@@ -18,7 +20,10 @@ interface SettingsData {
 }
 
 export default function SettingsPage() {
+  const router = useRouter();
+  const supabase = createClient();
   const [saveState, setSaveState] = useState<"saved" | "saving" | "dirty">("saved");
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [formData, setFormData] = useState<SettingsData>({
     wave_link: "",
     delivery_fee: "",
@@ -275,6 +280,36 @@ export default function SettingsPage() {
             </button>
             <button className="w-full rounded-2xl border border-[var(--gold)]/20 bg-white px-4 py-3 text-left text-sm font-medium text-[var(--text-dark)] transition-colors hover:border-[var(--gold)]/40 hover:bg-[var(--ivory)]">
               Activer l'authentification à deux facteurs
+            </button>
+
+            {/* Logout Button */}
+            <button
+              onClick={async (e) => {
+                e.preventDefault();
+                setIsLoggingOut(true);
+                try {
+                  // Clear temporary auth
+                  document.cookie = "temp_admin_auth=; path=/; max-age=0";
+                  localStorage.removeItem("temp_admin_auth");
+
+                  // Sign out from Supabase
+                  await supabase.auth.signOut();
+
+                  toast.success("Déconnexion réussie");
+
+                  // Redirect to home page using window.location for mobile compatibility
+                  window.location.href = "/";
+                } catch (error) {
+                  console.error("Erreur de déconnexion:", error);
+                  toast.error("Erreur lors de la déconnexion");
+                  setIsLoggingOut(false);
+                }
+              }}
+              disabled={isLoggingOut}
+              className="flex w-full items-center justify-center gap-2 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-600 transition-colors hover:border-red-300 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <LogOut className="h-4 w-4" />
+              <span>{isLoggingOut ? "Déconnexion..." : "Se déconnecter"}</span>
             </button>
           </div>
         </SettingsSection>

@@ -111,9 +111,8 @@ export function Sidebar() {
       // Sign out from Supabase (if authenticated)
       await supabase.auth.signOut();
 
-      // Redirect to home page (client side)
-      router.push("/");
-      router.refresh();
+      // Redirect to home page using window.location for mobile compatibility
+      window.location.href = "/";
     } catch (error) {
       console.error("Erreur de déconnexion:", error);
       setIsLoggingOut(false);

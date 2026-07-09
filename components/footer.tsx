@@ -84,18 +84,26 @@ export function Footer() {
             </p>
           </div>
 
-          {/* Navigation */}
-          <nav className="flex flex-col gap-2.5">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="text-sm text-[#F4EFE6]/60 transition-colors hover:text-[var(--gold)]"
-              >
-                {link.label}
-              </Link>
-            ))}
-          </nav>
+          {/* Navigation + Admin Button (mobile: côte à côte) */}
+          <div className="flex gap-8 lg:gap-12">
+            {/* Navigation */}
+            <nav className="flex flex-col gap-2.5">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="text-sm text-[#F4EFE6]/60 transition-colors hover:text-[var(--gold)]"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
+
+            {/* Admin Button - Discret à droite */}
+            <div className="flex items-end">
+              <AdminFooterButton />
+            </div>
+          </div>
 
           {/* Contact + réseaux */}
           <div>
@@ -133,12 +141,9 @@ export function Footer() {
 
         {/* Bas de page */}
         <div className="mx-auto mt-10 max-w-5xl border-t border-white/10 pt-6">
-          <div className="flex items-center justify-center gap-3">
-            <p className="text-center text-xs text-[#F4EFE6]/40">
-              © {new Date().getFullYear()} Mamou's Accessories. Tous droits réservés.
-            </p>
-            <AdminFooterButton />
-          </div>
+          <p className="text-center text-xs text-[#F4EFE6]/40">
+            © {new Date().getFullYear()} Mamou's Accessories. Tous droits réservés.
+          </p>
         </div>
       </div>
     </footer>

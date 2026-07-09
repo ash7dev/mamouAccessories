@@ -14,12 +14,12 @@ export function AdminFooterButton() {
   return (
     <button
       onClick={handleLogin}
-      className="group inline-flex items-center gap-1 opacity-20 hover:opacity-100 transition-opacity duration-300"
+      className="group flex flex-col items-center gap-1 opacity-30 hover:opacity-100 transition-all duration-300 py-1"
       title="Connexion admin"
     >
-      <Shield className="w-3 h-3 text-[#F4EFE6]/40 group-hover:text-[var(--gold)] transition-colors" />
-      <span className="text-[9px] text-[#F4EFE6]/30 group-hover:text-[var(--gold)] transition-colors">
-        admin
+      <Shield className="w-4 h-4 text-[#F4EFE6]/40 group-hover:text-[var(--gold)] transition-colors" />
+      <span className="text-[8px] text-[#F4EFE6]/40 group-hover:text-[var(--gold)] transition-colors uppercase tracking-wider">
+        •
       </span>
     </button>
   );
