@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { motion } from "framer-motion";
@@ -11,16 +10,7 @@ import { Star, Quote } from "lucide-react";
    Affiche des témoignages statiques avec design premium.
    ============================================================ */
 
-export interface HomeReview {
-  id: string;
-  authorName: string;
-  rating: number;
-  content: string;
-  productName?: string;
-  location: string;
-}
-
-const FAKE_REVIEWS: HomeReview[] = [
+const FAKE_REVIEWS = [
   {
     id: "1",
     authorName: "Aminata Diop",
@@ -84,7 +74,7 @@ function Stars({ rating }: { rating: number }) {
   );
 }
 
-export function Testimonials({ reviews }: { reviews?: HomeReview[] }) {
+export function Testimonials({ reviews }: { reviews?: any[] }) {
   const displayReviews = FAKE_REVIEWS;
 
   return (
@@ -135,15 +125,15 @@ export function Testimonials({ reviews }: { reviews?: HomeReview[] }) {
           viewport={viewportOnce}
           className="flex gap-6 overflow-x-auto pb-6 snap-x snap-mandatory scrollbar-hide -mx-6 px-6 lg:mx-0 lg:px-0"
         >
-          {displayReviews.map((review, _index) => (
+          {displayReviews.map((review, index) => (
             <motion.div
               key={review.id}
               variants={fadeUp}
               className="group flex-shrink-0 w-[85vw] md:w-[45vw] lg:w-[400px] snap-start"
             >
-              <figure className="relative h-full rounded-[2rem] bg-white border border-[var(--gold)]/10 shadow-lg shadow-[var(--gold)]/5 p-8 transition-all duration-300 hover:shadow-xl hover:shadow-[var(--gold)]/10 hover:border-[var(--gold)]/20 overflow-hidden">
+              <figure className="relative h-full rounded-[2rem] bg-white/40 backdrop-blur-xl border border-white/30 shadow-[0_8px_32px_rgba(0,0,0,0.08)] p-8 transition-all duration-500 hover:shadow-[0_16px_48px_rgba(0,0,0,0.12)] hover:border-white/50 hover:bg-white/50 overflow-hidden">
                 {/* Decorative Quote */}
-                <Quote className="absolute top-6 right-6 w-8 h-8 text-[var(--gold)]/10 group-hover:text-[var(--gold)]/20 transition-colors" />
+                <Quote className="absolute top-6 right-6 w-8 h-8 text-[var(--gold)]/15 group-hover:text-[var(--gold)]/25 transition-colors" />
 
                 {/* Rating */}
                 <div className="mb-4">
@@ -152,7 +142,7 @@ export function Testimonials({ reviews }: { reviews?: HomeReview[] }) {
 
                 {/* Content */}
                 <blockquote className="mb-6 text-base leading-relaxed text-[var(--text-dark)]/70">
-                  &quot;{review.content}&quot;
+                  "{review.content}"
                 </blockquote>
 
                 {/* Author Info */}
@@ -196,7 +186,7 @@ export function Testimonials({ reviews }: { reviews?: HomeReview[] }) {
           viewport={{ once: true }}
           className="mt-12 lg:mt-16 text-center"
         >
-          <div className="inline-flex items-center gap-3 rounded-full bg-[var(--ivory)] px-6 py-3 border border-[var(--gold)]/10">
+          <div className="inline-flex items-center gap-3 rounded-full bg-white/30 backdrop-blur-xl px-6 py-3 border border-white/30 shadow-[0_8px_32px_rgba(0,0,0,0.08)]">
             <div className="flex gap-0.5">
               {[1, 2, 3, 4, 5].map((i) => (
                 <Star
@@ -206,7 +196,7 @@ export function Testimonials({ reviews }: { reviews?: HomeReview[] }) {
               ))}
             </div>
             <span className="text-sm font-semibold text-[var(--text-dark)]">
-              4.9/5 basé sur +500 avis
+              4.9/5 basé sur +20 avis
             </span>
           </div>
         </motion.div>

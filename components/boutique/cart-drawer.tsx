@@ -104,7 +104,7 @@ export function CartDrawer() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsOpen(false)}
-              className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
+              className="fixed inset-0 z-50 bg-black/50 backdrop-blur-md"
             />
 
             {/* Drawer Panel */}
@@ -113,10 +113,10 @@ export function CartDrawer() {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 30, stiffness: 300 }}
-              className="fixed inset-y-0 right-0 z-[51] flex w-full max-w-md flex-col bg-[var(--ivory)]"
+              className="fixed inset-y-0 right-0 z-[51] flex w-full max-w-md flex-col bg-white/90 backdrop-blur-xl"
             >
               {/* Header */}
-              <div className="flex items-center justify-between bg-white border-b border-[var(--gold)]/20 px-6 py-5">
+              <div className="flex items-center justify-between bg-white/50 backdrop-blur-xl border-b border-white/30 px-6 py-5">
                 <div className="flex items-center gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--gold)]/10">
                     <ShoppingBag className="h-5 w-5 text-[var(--gold)]" />
@@ -203,7 +203,7 @@ function CartFooter({ onClose, onClear, items, products }: { onClose: () => void
   }, 0);
 
   return (
-    <div className="border-t border-[var(--gold)]/20 bg-white px-6 py-5">
+    <div className="border-t border-white/30 bg-white/60 backdrop-blur-xl px-6 py-5">
       <div className="mb-4 flex items-center justify-between">
         <span className="text-sm font-medium text-[var(--text-dark)]/70">Total</span>
         <span className="text-2xl font-bold text-[var(--text-dark)]">
@@ -214,7 +214,7 @@ function CartFooter({ onClose, onClear, items, products }: { onClose: () => void
       <Link
         href="/commande"
         onClick={onClose}
-        className="mb-3 flex w-full items-center justify-center gap-2 rounded-full bg-[var(--gold)] py-4 text-base font-bold text-[#241B14] shadow-lg shadow-[var(--gold)]/20 transition-all hover:brightness-110 active:scale-[0.98]"
+        className="mb-3 flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[var(--gold)] to-[var(--gold)]/90 py-4 text-base font-bold text-[#241B14] shadow-[0_8px_32px_rgba(185,138,68,0.35)] transition-all hover:shadow-[0_12px_40px_rgba(185,138,68,0.45)] hover:brightness-110 active:scale-[0.98] backdrop-blur-sm"
       >
         Passer la commande
       </Link>
@@ -224,7 +224,7 @@ function CartFooter({ onClose, onClear, items, products }: { onClose: () => void
           onClear();
           onClose();
         }}
-        className="flex w-full items-center justify-center gap-2 rounded-full border border-[var(--gold)]/30 bg-white py-3 text-sm font-medium text-[var(--text-dark)]/70 transition-colors hover:bg-[var(--ivory)]"
+        className="flex w-full items-center justify-center gap-2 rounded-full border border-white/30 bg-white/50 backdrop-blur-sm py-3 text-sm font-medium text-[var(--text-dark)]/70 transition-colors hover:bg-white/70"
       >
         <Trash2 className="h-4 w-4" />
         Vider le panier
@@ -290,7 +290,7 @@ function CartItem({ item, product, onUpdate, onRemove }: { item: any; product: a
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
-      className="flex gap-3 rounded-2xl bg-white p-3 shadow-sm"
+      className="flex gap-3 rounded-2xl bg-white/60 backdrop-blur-xl p-3 shadow-[0_4px_16px_rgba(0,0,0,0.08)] border border-white/30"
     >
       {/* Image */}
       <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl bg-[var(--ivory)]">

@@ -63,7 +63,7 @@ export function PromoBanner({
           </h2>
           <Link
             href={ctaHref}
-            className="group mt-6 inline-flex items-center gap-2.5 rounded-full bg-[var(--gold)] px-6 py-3.5 text-sm font-bold text-[#241B14] shadow-lg transition-transform hover:brightness-105 active:scale-95"
+            className="group mt-6 inline-flex items-center gap-2.5 rounded-full bg-gradient-to-r from-[var(--gold)] to-[var(--gold)]/90 px-6 py-3.5 text-sm font-bold text-[#241B14] shadow-[0_8px_32px_rgba(185,138,68,0.35)] transition-all hover:shadow-[0_12px_40px_rgba(185,138,68,0.45)] hover:brightness-105 active:scale-95 backdrop-blur-sm"
           >
             {ctaLabel}
             <ArrowRightIcon className="h-5 w-5 transition-transform group-hover:translate-x-1" />

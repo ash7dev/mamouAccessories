@@ -150,7 +150,7 @@ export function TrustBadges() {
                 variants={fadeUp}
                 className="group relative"
               >
-                <div className="relative h-full rounded-[2rem] bg-white border border-[var(--gold)]/10 p-5 md:p-8 shadow-lg shadow-[var(--gold)]/5 transition-all duration-300 hover:shadow-xl hover:shadow-[var(--gold)]/10 hover:border-[var(--gold)]/20 hover:-translate-y-1">
+                <div className="relative h-full rounded-[2rem] bg-white/40 backdrop-blur-xl border border-white/30 p-5 md:p-8 shadow-[0_8px_32px_rgba(0,0,0,0.08)] transition-all duration-500 hover:shadow-[0_16px_48px_rgba(0,0,0,0.12)] hover:border-white/50 hover:bg-white/50 hover:-translate-y-1">
                   {/* Icon Container */}
                   <motion.div
                     whileHover={{ scale: 1.05, rotate: 3 }}
@@ -185,7 +185,7 @@ export function TrustBadges() {
           viewport={{ once: true }}
           className="mt-12 lg:mt-16 text-center"
         >
-          <div className="inline-flex items-center gap-4 rounded-full bg-white px-8 py-4 border border-[var(--gold)]/10 shadow-lg shadow-[var(--gold)]/5">
+          <div className="inline-flex items-center gap-4 rounded-full bg-white/40 backdrop-blur-xl px-8 py-4 border border-white/30 shadow-[0_8px_32px_rgba(0,0,0,0.08)]">
             <div className="flex items-center gap-1">
               {[1, 2, 3, 4, 5].map((i) => (
                 <Sparkles

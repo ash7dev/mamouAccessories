@@ -66,10 +66,10 @@ export function ProductFilters({
             <button
               key={category.id}
               onClick={() => handleFilterChange('category', filters.category === category.id ? null : category.id)}
-              className={`w-full flex items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-sm transition-all ${
+              className={`w-full flex items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-sm transition-all backdrop-blur-sm ${
                 filters.category === category.id
-                  ? 'bg-[var(--gold)]/15 text-[var(--text-dark)] font-semibold border border-[var(--gold)]/40'
-                  : 'hover:bg-[var(--ivory)]/60 text-[var(--text-dark)]/70'
+                  ? 'bg-[var(--gold)]/20 text-[var(--text-dark)] font-semibold border border-[var(--gold)]/40 shadow-[0_4px_16px_rgba(185,138,68,0.15)]'
+                  : 'hover:bg-white/40 text-[var(--text-dark)]/70 border border-transparent'
               }`}
             >
               <span>{category.name}</span>
@@ -97,10 +97,10 @@ export function ProductFilters({
             <button
               key={option.label}
               onClick={() => handleFilterChange('priceRange', option.range)}
-              className={`w-full rounded-xl px-3.5 py-2.5 text-left text-sm transition-all ${
+              className={`w-full rounded-xl px-3.5 py-2.5 text-left text-sm transition-all backdrop-blur-sm ${
                 JSON.stringify(filters.priceRange) === JSON.stringify(option.range)
-                  ? 'bg-[var(--gold)]/15 text-[var(--text-dark)] font-semibold border border-[var(--gold)]/40'
-                  : 'hover:bg-[var(--ivory)]/60 text-[var(--text-dark)]/70'
+                  ? 'bg-[var(--gold)]/20 text-[var(--text-dark)] font-semibold border border-[var(--gold)]/40 shadow-[0_4px_16px_rgba(185,138,68,0.15)]'
+                  : 'hover:bg-white/40 text-[var(--text-dark)]/70 border border-transparent'
               }`}
             >
               {option.label}
@@ -162,7 +162,7 @@ export function ProductFilters({
   // Version Desktop
   if (!isMobile) {
     return (
-      <aside className="w-full bg-white rounded-2xl border border-[var(--gold)]/15 shadow-sm p-5">
+      <aside className="w-full bg-white/40 backdrop-blur-xl rounded-2xl border border-white/30 shadow-[0_8px_32px_rgba(0,0,0,0.08)] p-5">
         <h2 className="font-cinzel text-lg font-bold text-[var(--text-dark)] mb-5">
           Filtres
         </h2>
@@ -178,12 +178,12 @@ export function ProductFilters({
       {onToggle && (
         <button
           onClick={onToggle}
-          className="lg:hidden fixed bottom-24 right-6 z-[100] flex items-center gap-2.5 rounded-full bg-[var(--espresso)] pl-5 pr-5 py-3.5 text-white shadow-2xl hover:scale-105 active:scale-95 transition-transform"
+          className="lg:hidden fixed bottom-24 right-6 z-[100] flex items-center gap-2.5 rounded-full bg-gradient-to-r from-[var(--espresso)] to-[var(--espresso)]/90 pl-5 pr-5 py-3.5 text-white shadow-[0_8px_32px_rgba(36,27,20,0.4)] hover:shadow-[0_12px_40px_rgba(36,27,20,0.5)] hover:scale-105 active:scale-95 transition-all backdrop-blur-sm"
         >
           <SlidersHorizontal className="h-5 w-5" />
           <span className="text-sm font-semibold">Filtres</span>
           {hasActiveFilters && (
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[var(--gold)] text-xs font-bold text-[var(--espresso)]">
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[var(--gold)] text-xs font-bold text-[var(--espresso)] shadow-[0_4px_16px_rgba(185,138,68,0.3)]">
               {activeFiltersCount}
             </span>
           )}
@@ -200,7 +200,7 @@ export function ProductFilters({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={onToggle}
-              className="lg:hidden fixed inset-0 z-[110] bg-black/60 backdrop-blur-sm"
+              className="lg:hidden fixed inset-0 z-[110] bg-black/50 backdrop-blur-md"
             />
 
             {/* Drawer Panel */}
@@ -209,7 +209,7 @@ export function ProductFilters({
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "spring", damping: 30, stiffness: 300 }}
-              className="lg:hidden fixed inset-y-0 left-0 z-[120] w-[85vw] max-w-sm bg-white shadow-2xl"
+              className="lg:hidden fixed inset-y-0 left-0 z-[120] w-[85vw] max-w-sm bg-white/90 backdrop-blur-xl shadow-[0_16px_64px_rgba(0,0,0,0.2)]"
             >
               <div className="flex h-full flex-col">
                 {/* Header */}

@@ -55,7 +55,7 @@ export function CategoryRail({ categories }: { categories: HomeCategory[] }) {
                 href={`/boutique?categorie=${cat.slug}`}
                 className="group flex w-24 shrink-0 flex-col items-center gap-3 lg:w-28"
               >
-                <div className="relative aspect-square w-full overflow-hidden rounded-full border-2 border-[var(--gold)]/30 bg-gradient-to-br from-[var(--ivory)] to-[var(--gold)]/20 shadow-[0_8px_24px_-8px_rgba(185,138,68,0.25)] transition-all duration-300 group-hover:border-[var(--gold)]/60 group-hover:shadow-[0_12px_32px_-8px_rgba(185,138,68,0.35)] group-hover:scale-105">
+                <div className="relative aspect-square w-full overflow-hidden rounded-full border-2 border-white/30 bg-white/20 backdrop-blur-xl shadow-[0_8px_32px_-8px_rgba(185,138,68,0.3)] transition-all duration-500 group-hover:border-white/50 group-hover:shadow-[0_16px_48px_-8px_rgba(185,138,68,0.4)] group-hover:scale-110">
                   {cat.imageUrl ? (
                     <img
                       src={cat.imageUrl}
@@ -68,7 +68,7 @@ export function CategoryRail({ categories }: { categories: HomeCategory[] }) {
                     </div>
                   )}
                   {/* Overlay au hover */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#241B14]/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#241B14]/30 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100 backdrop-blur-[2px]" />
                 </div>
                 <span className="text-center text-sm font-semibold leading-tight text-[var(--text-dark)] transition-colors group-hover:text-[var(--gold-dark)]">
                   {cat.name}

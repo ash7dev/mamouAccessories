@@ -237,7 +237,7 @@ export async function getApprovedReviews(limit = 6): Promise<HomeReview[]> {
     rating: review.rating,
     content: review.content,
     productName: Array.isArray(review.product) && review.product.length > 0 ? review.product[0].name : undefined,
-    location: 'Dakar',
+    location: 'Sénégal',
   }));
 }
 

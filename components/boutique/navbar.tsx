@@ -28,7 +28,7 @@ export function Navbar() {
     <>
       {/* Navbar flottante en pilule */}
       <header className="fixed inset-x-0 top-4 z-50 px-4">
-        <nav className="mx-auto flex h-14 max-w-4xl items-center justify-between rounded-full border border-border/60 bg-card/85 px-4 shadow-sm backdrop-blur-md md:h-16 md:px-8">
+        <nav className="mx-auto flex h-14 max-w-4xl items-center justify-between rounded-full border border-white/30 bg-white/60 backdrop-blur-xl px-4 shadow-[0_8px_32px_rgba(0,0,0,0.12)] md:h-16 md:px-8">
           {/* Mobile : espace vide (bottom navigation gère la navigation) */}
           <div className="w-10 md:hidden" />
 
@@ -69,7 +69,7 @@ export function Navbar() {
       {/* Bottom Navigation Mobile */}
       {!shouldHideBottomNav && (
         <nav className="fixed bottom-4 left-4 right-4 z-50 md:hidden">
-          <div className="mx-auto max-w-md rounded-full border border-border/60 bg-card/95 px-2 py-2 shadow-lg backdrop-blur-md">
+          <div className="mx-auto max-w-md rounded-full border border-white/30 bg-white/60 backdrop-blur-xl px-2 py-2 shadow-[0_8px_32px_rgba(0,0,0,0.15)]">
             <div className="flex items-center justify-around">
               {navLinks.map((link) => {
                 const Icon = link.icon;

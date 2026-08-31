@@ -53,7 +53,7 @@ export function CollectionCards({ collections }: CollectionCardsProps) {
               <Link href={`/boutique?category=${collection.slug}`}>
                 <motion.div
                   whileHover={{ scale: 1.02 }}
-                  className="group relative h-[380px] rounded-[2rem] overflow-hidden shadow-lg"
+                  className="group relative h-[380px] rounded-[2rem] overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.15)] hover:shadow-[0_16px_48px_rgba(0,0,0,0.25)] transition-shadow duration-500"
                 >
                   {/* Background Image */}
                   <div
@@ -62,7 +62,7 @@ export function CollectionCards({ collections }: CollectionCardsProps) {
                   />
                   
                   {/* Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent backdrop-blur-[2px] group-hover:backdrop-blur-[4px] transition-all duration-500" />
                   
                   {/* Content */}
                   <div className="absolute inset-0 flex flex-col justify-end p-6">

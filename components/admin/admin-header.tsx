@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -14,7 +15,7 @@ export function AdminHeader({
   showActions = false,
 }: AdminHeaderProps) {
   const [greeting, setGreeting] = useState("Bonjour");
-  const [adminName] = useState("Admin");
+  const [adminName] = useState("Mamou's Jewelry"); // TODO: Fetch the admin's name from context or API
 
   useEffect(() => {
     const hour = new Date().getHours();
@@ -28,7 +29,7 @@ export function AdminHeader({
   }, []);
 
   return (
-    <div className="hidden lg:block bg-gradient-to-r from-[#3D2C1F] via-[#4A3728] to-[#3D2C1F] rounded-2xl px-6 py-8 md:px-8 md:py-10 shadow-lg mb-6">
+    <div className="bg-gradient-to-r from-[#4A1D4D] via-[#5C2D5E] to-[#4A1D4D] rounded-2xl px-6 py-8 md:px-8 md:py-10 shadow-lg mb-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         {/* Left side - Greeting */}
         <div className="text-white">
@@ -36,7 +37,7 @@ export function AdminHeader({
             {title || `${greeting}, ${adminName}`}
             <span className="animate-wave inline-block origin-[70%_70%]">👋</span>
           </h1>
-          <p className="text-white/90 text-sm md:text-base max-w-2xl">
+          <p className="text-white/80 text-sm md:text-base max-w-2xl">
             {subtitle ||
               "Gagnez du temps et pilotez votre boutique de bijoux en toute simplicité depuis votre espace."}
           </p>
@@ -48,7 +49,7 @@ export function AdminHeader({
             <button className="px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-lg text-sm font-medium transition-colors border border-white/20">
               + Nouveau devis
             </button>
-            <button className="px-4 py-2.5 bg-white hover:bg-[var(--ivory)] text-[var(--gold-dark)] rounded-lg text-sm font-medium transition-colors shadow-lg">
+            <button className="px-4 py-2.5 bg-[var(--gold)] hover:bg-[var(--gold-dark)] text-white rounded-lg text-sm font-medium transition-colors shadow-lg">
               + Nouveau projet
             </button>
           </div>

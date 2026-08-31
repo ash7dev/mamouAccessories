@@ -54,7 +54,7 @@ export function FeaturedProductsHero({ featuredProducts }: FeaturedProductsHeroP
         >
           <Link
             href="/boutique"
-            className="inline-flex items-center gap-2 rounded-full bg-[var(--espresso)] px-8 py-4 text-base font-semibold text-white transition-all hover:bg-[var(--espresso)]/90 hover:scale-105 shadow-lg"
+            className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[var(--espresso)] to-[var(--espresso)]/90 px-8 py-4 text-base font-semibold text-white transition-all hover:shadow-[0_12px_40px_rgba(36,27,20,0.4)] hover:scale-105 shadow-[0_8px_32px_rgba(36,27,20,0.3)] backdrop-blur-sm"
           >
             Voir Toute la Collection
           </Link>

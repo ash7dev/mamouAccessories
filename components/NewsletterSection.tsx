@@ -66,7 +66,7 @@ export function NewsletterSection() {
           className="relative"
         >
           {/* Premium Card Container */}
-          <div className="relative bg-white rounded-[2.5rem] shadow-2xl shadow-[var(--gold)]/10 border border-[var(--gold)]/20 overflow-hidden">
+          <div className="relative bg-white/40 backdrop-blur-xl rounded-[2.5rem] shadow-[0_16px_64px_rgba(0,0,0,0.12)] border border-white/30 overflow-hidden">
             {/* Decorative Top Border */}
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[var(--gold)] to-transparent" />
             
@@ -137,15 +137,15 @@ export function NewsletterSection() {
                     transition={{ delay: 0.6 }}
                     className="flex flex-wrap gap-3 justify-center md:justify-start"
                   >
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--ivory)] px-4 py-2 text-xs font-medium text-[var(--text-dark)]/70">
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-white/40 backdrop-blur-sm border border-white/30 px-4 py-2 text-xs font-medium text-[var(--text-dark)]/70">
                       <span className="h-1.5 w-1.5 rounded-full bg-[var(--gold)]" />
                       Promotions exclusives
                     </span>
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--ivory)] px-4 py-2 text-xs font-medium text-[var(--text-dark)]/70">
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-white/40 backdrop-blur-sm border border-white/30 px-4 py-2 text-xs font-medium text-[var(--text-dark)]/70">
                       <span className="h-1.5 w-1.5 rounded-full bg-[var(--gold)]" />
                       Nouveautés en avant-première
                     </span>
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--ivory)] px-4 py-2 text-xs font-medium text-[var(--text-dark)]/70">
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-white/40 backdrop-blur-sm border border-white/30 px-4 py-2 text-xs font-medium text-[var(--text-dark)]/70">
                       <span className="h-1.5 w-1.5 rounded-full bg-[var(--gold)]" />
                       Conseils de style
                     </span>
@@ -158,7 +158,7 @@ export function NewsletterSection() {
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: 0.5 }}
-                  className="bg-gradient-to-br from-[var(--ivory)]/80 to-[var(--ivory)]/40 rounded-3xl p-6 md:p-8 border border-[var(--gold)]/10"
+                  className="bg-white/40 backdrop-blur-xl rounded-3xl p-6 md:p-8 border border-white/30 shadow-[0_8px_32px_rgba(0,0,0,0.08)]"
                 >
                   {!isSubscribed ? (
                     <form onSubmit={handleSubscribe} className="space-y-5">
@@ -173,7 +173,7 @@ export function NewsletterSection() {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             placeholder="votre@email.com"
-                            className="w-full rounded-2xl bg-white border border-[var(--gold)]/20 pl-12 pr-4 py-4 text-[var(--text-dark)] placeholder:text-[var(--text-dark)]/40 focus:border-[var(--gold)]/50 focus:outline-none focus:ring-2 focus:ring-[var(--gold)]/20 transition-all"
+                            className="w-full rounded-2xl bg-white/50 backdrop-blur-sm border border-white/30 pl-12 pr-4 py-4 text-[var(--text-dark)] placeholder:text-[var(--text-dark)]/40 focus:border-[var(--gold)]/50 focus:bg-white/70 focus:outline-none focus:ring-2 focus:ring-[var(--gold)]/20 transition-all"
                             disabled={isLoading}
                           />
                         </div>

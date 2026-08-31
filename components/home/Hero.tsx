@@ -47,7 +47,7 @@ export function Hero({ heroImage }: HeroProps) {
         >
           <motion.span
             variants={fadeUp}
-            className="inline-block rounded-full border border-[var(--gold)]/30 bg-[var(--gold)]/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.15em] text-[var(--gold-dark)]"
+            className="inline-block rounded-full border border-[var(--gold)]/30 bg-white/20 backdrop-blur-xl px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.15em] text-[var(--gold-dark)] shadow-[0_8px_32px_rgba(185,138,68,0.2)]"
           >
             Bijoux faits avec amour
           </motion.span>
@@ -72,7 +72,7 @@ export function Hero({ heroImage }: HeroProps) {
           <motion.div variants={fadeUp} className="mt-8 flex justify-center lg:justify-start">
             <Link
               href="/boutique"
-              className="group inline-flex items-center gap-2.5 rounded-full bg-[var(--gold)] px-7 py-4 text-sm font-bold text-[#241B14] shadow-lg shadow-[var(--gold)]/25 transition-transform hover:brightness-105 active:scale-95"
+              className="group inline-flex items-center gap-2.5 rounded-full bg-gradient-to-r from-[var(--gold)] to-[var(--gold)]/90 px-7 py-4 text-sm font-bold text-[#241B14] shadow-[0_8px_32px_rgba(185,138,68,0.35)] transition-all hover:shadow-[0_12px_40px_rgba(185,138,68,0.45)] hover:brightness-105 active:scale-95 backdrop-blur-sm"
             >
               Découvrir la collection
               <ArrowRightIcon className="h-5 w-5 transition-transform group-hover:translate-x-1" />
@@ -102,7 +102,7 @@ export function Hero({ heroImage }: HeroProps) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6, duration: 0.5 }}
-            className="absolute -bottom-4 -left-4 rounded-2xl border border-[var(--gold)]/15 bg-white/95 px-4 py-3 shadow-lg backdrop-blur-sm"
+            className="absolute -bottom-4 -left-4 rounded-2xl border border-white/30 bg-white/30 backdrop-blur-xl px-4 py-3 shadow-[0_8px_32px_rgba(0,0,0,0.12)]"
           >
             <p className="text-[10px] font-medium uppercase tracking-wider text-[var(--text-dark)]/40">
               Livraison

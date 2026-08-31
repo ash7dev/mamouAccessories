@@ -67,11 +67,11 @@ export function ProductCard({ product }: { product: PublicProductCard }) {
   return (
     <Link href={`/produit/${product.slug}`} className="group block">
       <motion.div
-        whileHover={{ y: -4 }}
-        transition={{ duration: 0.3 }}
+        whileHover={{ y: -8 }}
+        transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
       >
         <div
-          className="relative aspect-[3/4] overflow-hidden rounded-[1.5rem] border border-[var(--gold)]/20 bg-gradient-to-br from-[var(--ivory)]/50 to-[var(--gold)]/5 shadow-[0_-4px_16px_-8px_rgba(185,138,68,0.1)]"
+          className="relative aspect-[3/4] overflow-hidden rounded-[2rem] bg-gradient-to-br from-[var(--ivory)] via-[var(--ivory)]/80 to-[var(--gold)]/10 shadow-[0_8px_32px_-12px_rgba(185,138,68,0.15)] group-hover:shadow-[0_16px_48px_-12px_rgba(185,138,68,0.25)] transition-shadow duration-500"
         >
           {product.imageUrl && !imageError ? (
             <img
@@ -79,34 +79,41 @@ export function ProductCard({ product }: { product: PublicProductCard }) {
               alt={product.name}
               loading="lazy"
               onError={handleImageError}
-              className={`h-full w-full object-cover transition-transform duration-700 group-hover:scale-105 ${
-                isOut ? "opacity-60" : ""
+              className={`h-full w-full object-cover transition-transform duration-1000 group-hover:scale-110 ${
+                isOut ? "opacity-50 grayscale" : ""
               }`}
             />
           ) : (
-            <div className="flex h-full items-center justify-center text-4xl text-[var(--gold)]/30">
+            <div className="flex h-full items-center justify-center text-5xl text-[var(--gold)]/20">
               ◆
             </div>
           )}
 
+          {/* Subtle overlay on hover */}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#241B14]/0 via-transparent to-[#241B14]/0 group-hover:from-[#241B14]/5 group-hover:via-transparent group-hover:to-[#241B14]/0 transition-all duration-500" />
+
           {/* Badges */}
-          <div className="absolute left-3 top-3 flex flex-col gap-1.5">
+          <div className="absolute left-4 top-4 flex flex-col gap-2">
             {discount && (
-              <span className="rounded-full bg-[var(--gold)] px-2.5 py-1 text-[11px] font-bold text-[#241B14] shadow-md">
+              <motion.span
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="rounded-full bg-white/30 backdrop-blur-xl border border-white/40 px-3 py-1.5 text-[10px] font-bold text-[#241B14] shadow-[0_8px_32px_rgba(185,138,68,0.4)]"
+              >
                 −{discount}%
-              </span>
+              </motion.span>
             )}
           </div>
 
           {/* Favorite Icon */}
           <motion.button
-            whileHover={{ scale: 1.1 }}
+            whileHover={{ scale: 1.15, rotate: 5 }}
             whileTap={{ scale: 0.9 }}
             onClick={handleFavorite}
-            className="absolute top-2 right-2 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 backdrop-blur-md shadow-lg transition-colors hover:bg-white"
+            className="absolute top-4 right-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/20 backdrop-blur-xl border border-white/30 shadow-[0_8px_32px_rgba(0,0,0,0.15)] transition-all hover:bg-white/30 hover:border-white/50 hover:shadow-[0_12px_40px_rgba(0,0,0,0.25)]"
           >
             <Heart
-              className={`h-4 w-4 transition-colors ${
+              className={`h-5 w-5 transition-colors ${
                 isFavorite ? "fill-red-500 text-red-500" : "text-gray-400"
               }`}
             />
@@ -115,69 +122,76 @@ export function ProductCard({ product }: { product: PublicProductCard }) {
           {/* Quick Add Button */}
           {!isOut && (
             <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
               onClick={handleAddToCart}
-              className={`absolute bottom-3 right-3 flex h-10 w-10 items-center justify-center rounded-full shadow-lg transition-all ${
+              className={`absolute bottom-4 right-4 flex h-12 w-12 items-center justify-center rounded-full backdrop-blur-xl border border-white/30 shadow-[0_8px_32px_rgba(0,0,0,0.2)] transition-all hover:shadow-[0_12px_40px_rgba(0,0,0,0.3)] ${
                 justAdded
-                  ? "bg-emerald-500 text-white"
-                  : "bg-[var(--gold)] text-[#241B14] hover:bg-[var(--gold)]/90"
+                  ? "bg-emerald-500/90 text-white border-emerald-400/50"
+                  : "bg-gradient-to-br from-[var(--gold)]/90 to-[var(--gold)]/70 text-[#241B14] hover:from-[var(--gold)] hover:to-[var(--gold)]/90"
               }`}
             >
               {justAdded ? (
                 <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
+                  initial={{ scale: 0, rotate: -180 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{ type: "spring", stiffness: 200, damping: 15 }}
                   className="flex items-center justify-center"
                 >
-                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4.5 12.75l6 6 9-13.5" />
                   </svg>
                 </motion.div>
               ) : (
-                <Plus className="h-5 w-5" />
+                <Plus className="h-6 w-6" />
               )}
             </motion.button>
           )}
 
           {isOut && (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <span className="rounded-full bg-[#241B14]/85 px-4 py-1.5 text-xs font-semibold text-[#F4EFE6]">
+            <div className="absolute inset-0 flex items-center justify-center bg-[#241B14]/40 backdrop-blur-md">
+              <motion.span
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="rounded-full bg-[#241B14]/80 backdrop-blur-xl border border-white/10 px-5 py-2 text-xs font-semibold text-[#F4EFE6] shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
+              >
                 Rupture de stock
-              </span>
+              </motion.span>
             </div>
           )}
         </div>
 
         {/* Infos */}
-        <div className="mt-4 px-1">
-          <p className="text-[9px] font-semibold uppercase tracking-[0.15em] text-[var(--gold-dark)] mb-1">
+        <div className="mt-5 px-1">
+          <motion.p 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.1 }}
+            className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--gold-dark)] mb-1.5"
+          >
             {product.categoryName}
-          </p>
-          <h3 className="font-heading text-base font-bold text-[var(--text-dark)] leading-tight mb-2">
+          </motion.p>
+          <h3 className="font-heading text-lg font-bold text-[var(--text-dark)] leading-snug mb-2.5 line-clamp-2 group-hover:text-[var(--gold-dark)] transition-colors duration-300">
             {product.name}
           </h3>
-          <div className="flex items-baseline gap-2 mb-3">
-            <span className="text-lg font-bold text-[var(--text-dark)] tabular-nums">
+          <div className="flex items-baseline gap-2.5 mb-4">
+            <span className="text-xl font-bold text-[var(--text-dark)] tabular-nums tracking-tight">
               {formatFCFA(product.price)} FCFA
             </span>
             {product.compareAtPrice && (
-              <span className="text-sm text-[var(--text-dark)]/40 line-through tabular-nums">
+              <span className="text-sm text-[var(--text-dark)]/50 line-through tabular-nums">
                 {formatFCFA(product.compareAtPrice)}
               </span>
             )}
           </div>
           
-          {/* Espace blanc */}
-          <div className="mt-2" />
-          
           {/* Buy Button */}
           {!isOut && (
             <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+              whileHover={{ scale: 1.03, y: -2 }}
+              whileTap={{ scale: 0.97 }}
               onClick={handleBuyNow}
-              className="w-full rounded-xl bg-gradient-to-r from-[var(--gold)] to-[var(--gold)]/90 py-3 text-sm font-bold text-[#241B14] shadow-lg shadow-[var(--gold)]/30 transition-all hover:brightness-105"
+              className="w-full rounded-2xl bg-gradient-to-r from-[var(--gold)] via-[var(--gold)] to-[var(--gold)]/90 py-3.5 text-sm font-bold text-[#241B14] shadow-[0_4px_20px_rgba(185,138,68,0.25)] transition-all hover:shadow-[0_8px_32px_rgba(185,138,68,0.35)] hover:brightness-105"
             >
               Acheter maintenant
             </motion.button>
