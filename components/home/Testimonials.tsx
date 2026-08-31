@@ -10,6 +10,15 @@ import { Star, Quote } from "lucide-react";
    Affiche des témoignages statiques avec design premium.
    ============================================================ */
 
+export interface HomeReview {
+  id: string;
+  authorName: string;
+  rating: number;
+  content: string;
+  productName?: string;
+  location: string;
+}
+
 const FAKE_REVIEWS = [
   {
     id: "1",
@@ -74,8 +83,8 @@ function Stars({ rating }: { rating: number }) {
   );
 }
 
-export function Testimonials({ reviews }: { reviews?: any[] }) {
-  const displayReviews = FAKE_REVIEWS;
+export function Testimonials({ reviews }: { reviews?: HomeReview[] }) {
+  const displayReviews = reviews && reviews.length > 0 ? reviews : FAKE_REVIEWS;
 
   return (
     <section className="px-6 py-16 lg:px-8 lg:py-24 bg-gradient-to-br from-[var(--ivory)]/40 via-white to-[var(--ivory)]/30 relative overflow-hidden">
