@@ -45,7 +45,7 @@ export function ProductSection({
 
   return (
     <section className="px-5 py-6 lg:px-8 lg:py-12">
-      <div className="mx-auto max-w-5xl">
+      <div className="mx-auto max-w-7xl">
         {/* En-tête */}
         <motion.div
           variants={fadeUp}
@@ -58,7 +58,7 @@ export function ProductSection({
             <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--gold-dark)]">
               {eyebrow}
             </p>
-            <h2 className="mt-0.5 text-xl font-bold tracking-tight text-[var(--text-dark)] lg:text-2xl">
+            <h2 className="mt-0.5 text-xl font-bold tracking-tight text-[var(--text-dark)] lg:text-3xl">
               {title}
             </h2>
           </div>
@@ -81,8 +81,8 @@ export function ProductSection({
           viewport={viewportOnce}
           className={
             mobileLayout === "carousel"
-              ? "scrollbar-none -mx-5 flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-2 lg:mx-0 lg:grid lg:grid-cols-4 lg:gap-6 lg:overflow-visible lg:px-0"
-              : "grid grid-cols-2 gap-4 lg:grid-cols-4 lg:gap-6"
+              ? "scrollbar-none -mx-5 flex snap-x snap-mandatory gap-5 overflow-x-auto px-5 pb-4 lg:mx-0 lg:grid lg:grid-cols-4 lg:gap-6 lg:overflow-visible lg:px-0"
+              : "grid grid-cols-2 gap-5 lg:grid-cols-4 lg:gap-6"
           }
         >
           {products.map((product) => (
@@ -91,7 +91,7 @@ export function ProductSection({
               variants={fadeUp}
               className={
                 mobileLayout === "carousel"
-                  ? "w-[46%] shrink-0 snap-start lg:w-auto"
+                  ? "w-[65%] sm:w-[48%] shrink-0 snap-start lg:w-auto"
                   : ""
               }
             >

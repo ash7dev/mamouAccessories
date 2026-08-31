@@ -32,10 +32,9 @@ export function ProductImage({
   const [imgSrc, setImgSrc] = useState(src);
 
   // Si pas de src ou erreur, utiliser le placeholder
-  const finalSrc = !imgSrc || error ? "/placeholder-product.jpg" : imgSrc;
+  const finalSrc = !imgSrc || error ? "/placeholder-product.svg" : imgSrc;
 
   const handleError = () => {
-    console.warn(`Failed to load image: ${imgSrc}`);
     setError(true);
   };
 

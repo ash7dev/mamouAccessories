@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import type { HomeCategory } from '@/components/home/CategoryRail';
 import type { PublicProductCard } from '@/components/home/ProductCard';
 import type { HomeReview } from '@/components/home/Testimonials';
+import type { Collection } from '@/components/boutique/CollectionCards';
 
 function buildCloudinaryImageUrl(publicId: string) {
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'utngoden';
@@ -11,15 +12,97 @@ function buildCloudinaryImageUrl(publicId: string) {
     return null;
   }
 
-  // Simple URL sans transformations pour éviter les 404
+  // URL simple sans transformations complexes pour éviter les erreurs
   const url = `https://res.cloudinary.com/${cloudName}/image/upload/${publicId}`;
-  console.log('Building simple image URL:', url);
   return url;
 }
 
 /**
- * Récupère les catégories pour la page d'accueil
+ * Récupère les collections pour la page d'accueil
  */
+export async function getHomeCollections(): Promise<Collection[]> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from('categories')
+    .select('id, name, slug')
+    .eq('is_active', true)
+    .order('position', { ascending: true });
+
+  if (error) {
+    console.error('Error fetching collections:', error);
+    return [];
+  }
+
+  // Mapping des catégories aux images dans le dossier public
+  const collectionImageMap: Record<string, string> = {
+    'ensembles': '/ensemble.jpg',
+    'bracelets': '/bracelets.jpg',
+    'chaines': '/chaines.jpg',
+    'boucles d\'oreilles': '/boucleoreille.jpg',
+    'oreilles': '/boucleoreille.jpg',
+    'bague': '/bracelets.jpg',
+    'bagues': '/bracelets.jpg',
+    'montres': '/montres.jpg',
+    'collier': '/chaines.jpg',
+    'colliers': '/chaines.jpg',
+  };
+
+  const getImageForCollection = (name: string): string => {
+    const normalizedName = name.toLowerCase();
+    for (const [key, image] of Object.entries(collectionImageMap)) {
+      if (normalizedName.includes(key) || key.includes(normalizedName)) {
+        return image;
+      }
+    }
+    return '/ensemble.jpg';
+  };
+
+  const descriptions: Record<string, string> = {
+    'ensembles': 'Des ensembles complets pour sublimer votre style',
+    'bracelets': 'Bracelets élégants pour tous les goûts',
+    'chaines': 'Chaînes raffinées pour un look unique',
+    'boucles d\'oreilles': 'Boucles d\'oreilles délicates et tendance',
+    'oreilles': 'Boucles d\'oreilles délicates et tendance',
+    'bague': 'Bagues sophistiquées pour vos mains',
+    'bagues': 'Bagues sophistiquées pour vos mains',
+    'montres': 'Montres de luxe pour élégance intemporelle',
+    'collier': 'Colliers précieux pour briller',
+    'colliers': 'Colliers précieux pour briller',
+  };
+
+  const getDescriptionForCollection = (name: string): string => {
+    const normalizedName = name.toLowerCase();
+    for (const [key, description] of Object.entries(descriptions)) {
+      if (normalizedName.includes(key) || key.includes(normalizedName)) {
+        return description;
+      }
+    }
+    return 'Découvrez notre sélection exclusive';
+  };
+
+  // Get product counts for each category
+  const collectionsWithCounts = await Promise.all(
+    (data || []).map(async (cat) => {
+      const { count } = await supabase
+        .from('products')
+        .select('*', { count: 'exact', head: true })
+        .eq('category_id', cat.id)
+        .eq('is_active', true);
+
+      return {
+        id: cat.id,
+        name: cat.name,
+        slug: cat.slug,
+        description: getDescriptionForCollection(cat.name),
+        image: getImageForCollection(cat.name),
+        productCount: count || 0,
+      };
+    })
+  );
+
+  return collectionsWithCounts;
+}
 export async function getHomeCategories(): Promise<HomeCategory[]> {
   const supabase = await createClient();
 

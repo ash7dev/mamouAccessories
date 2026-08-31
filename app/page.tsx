@@ -1,7 +1,7 @@
 import { Navbar } from "@/components/boutique/navbar";
 import { Hero } from "@/components/home/Hero";
 import { SearchBar } from "@/components/home/SearchBar";
-import { CategoryRail } from "@/components/home/CategoryRail";
+import { CollectionCards } from "@/components/boutique/CollectionCards";
 import { ProductSection } from "@/components/home/ProductSection";
 import { PromoBanner } from "@/components/home/PromoBanner";
 import { TrustBadges } from "@/components/home/TrustBadges";
@@ -10,7 +10,7 @@ import { NewsletterSection } from "@/components/NewsletterSection";
 import { Footer } from "@/components/footer";
 import { PWAInstallPrompt } from "@/components/ui/pwa-install-prompt";
 import {
-  getHomeCategories,
+  getHomeCollections,
   getFeaturedProducts,
   getNewArrivals,
   getApprovedReviews,
@@ -31,8 +31,8 @@ export const revalidate = 600;
 
 export default async function HomePage() {
   // Requêtes Supabase parallèles pour optimiser le chargement
-  const [categories, featured, newArrivals, reviews, activePromo, recommended] = await Promise.all([
-    getHomeCategories(),
+  const [collections, featured, newArrivals, reviews, activePromo, recommended] = await Promise.all([
+    getHomeCollections(),
     getFeaturedProducts(),      // is_featured = true, is_active = true
     getNewArrivals(),           // order by created_at desc, limit 8
     getApprovedReviews(6),      // is_approved = true
@@ -48,7 +48,7 @@ export default async function HomePage() {
 
       <Hero heroImage="/hero.jpg" />
 
-      <CategoryRail categories={categories} />
+      <CollectionCards collections={collections} />
 
       <ProductSection
         eyebrow="Nos préférés"

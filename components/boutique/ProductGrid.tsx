@@ -18,9 +18,9 @@ const formatFCFA = (n: number) => new Intl.NumberFormat("fr-FR").format(n);
 export function ProductGrid({ products, isLoading, viewMode = "grid" }: ProductGridProps) {
   if (isLoading) {
     return (
-      <div className={viewMode === "grid" ? "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6" : "space-y-4"}>
-        {[...Array(8)].map((_, i) => (
-          <div key={i} className={viewMode === "grid" ? "aspect-[3/4] rounded-2xl bg-[var(--ivory)]/50 animate-pulse" : "h-32 rounded-2xl bg-[var(--ivory)]/50 animate-pulse"} />
+      <div className={viewMode === "grid" ? "grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8" : "space-y-4"}>
+        {[...Array(6)].map((_, i) => (
+          <div key={i} className={viewMode === "grid" ? "aspect-[3/4] rounded-3xl bg-[var(--ivory)]/50 animate-pulse" : "h-36 rounded-3xl bg-[var(--ivory)]/50 animate-pulse"} />
         ))}
       </div>
     );
@@ -31,7 +31,7 @@ export function ProductGrid({ products, isLoading, viewMode = "grid" }: ProductG
     return (
       <motion.div
         layout
-        className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6"
+        className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8"
       >
         {products.map((product, index) => (
           <motion.div
