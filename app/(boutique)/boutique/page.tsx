@@ -10,7 +10,8 @@ import { ViewToggle, type ViewMode } from "@/components/boutique/ViewToggle";
 import { EmptyState } from "@/components/boutique/EmptyState";
 import { NewsletterSection } from "@/components/NewsletterSection";
 import type { PublicProductCard } from "@/components/home/ProductCard";
-import { Search, SlidersHorizontal, ArrowUpDown, X, Sparkles, ChevronDown, Check } from "lucide-react";
+import { ProductImage } from "@/components/ui/product-image";
+import { Search, SlidersHorizontal, ArrowUpDown, X, Sparkles, ChevronDown, Check, ShieldCheck, Truck, Headphones } from "lucide-react";
 
 type SortOption = "recent" | "price-asc" | "price-desc";
 
@@ -30,6 +31,7 @@ function BoutiquePageContent() {
   const [activeCategorySlug, setActiveCategorySlug] = useState<string | null>(searchParams?.get("categorie") || null);
   const [isCategoryMenuOpen, setIsCategoryMenuOpen] = useState(false);
   const [isSortMenuOpen, setIsSortMenuOpen] = useState(false);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
 
   // Charger les données (catégories & produits)
   useEffect(() => {
@@ -90,16 +92,15 @@ function BoutiquePageContent() {
         result = result.filter(
           (p) =>
             p.name.toLowerCase().includes(q) ||
-            p.categoryName.toLowerCase().includes(q)
+            p.categoryName?.toLowerCase().includes(q)
         );
       }
 
       // 2. Filtre par Catégorie
-      if (activeCategorySlug && categories.length > 0) {
-        const selectedCat = categories.find((c) => c.slug === activeCategorySlug);
-        if (selectedCat) {
-          result = result.filter((p) => p.categoryName.toLowerCase() === selectedCat.name.toLowerCase());
-        }
+      if (activeCategorySlug) {
+        result = result.filter(
+          (p) => p.categoryName?.toLowerCase() === activeCategorySlug.toLowerCase()
+        );
       }
 
       // 3. Tri
@@ -107,17 +108,18 @@ function BoutiquePageContent() {
         result.sort((a, b) => a.price - b.price);
       } else if (sortBy === "price-desc") {
         result.sort((a, b) => b.price - a.price);
+      } else {
+        // recent (defaut)
+        result.sort((a, b) => (b.id > a.id ? 1 : -1));
       }
 
       setFilteredProducts(result);
     },
-    [searchQuery, activeCategorySlug, categories, sortBy]
+    [searchQuery, activeCategorySlug, sortBy]
   );
 
   useEffect(() => {
-    if (allProducts.length > 0) {
-      applyFiltersAndSort(allProducts);
-    }
+    applyFiltersAndSort(allProducts);
   }, [allProducts, applyFiltersAndSort]);
 
   // Synchronisation des paramètres d'URL
@@ -148,14 +150,11 @@ function BoutiquePageContent() {
     let result = [...allProducts];
 
     if (filters.category) {
-      const selectedCat = categories.find((c) => c.id === filters.category);
-      if (selectedCat) {
-        result = result.filter((p) => p.categoryName === selectedCat.name);
-      }
-    } else if (activeCategorySlug) {
-      const selectedCat = categories.find((c) => c.slug === activeCategorySlug);
-      if (selectedCat) {
-        result = result.filter((p) => p.categoryName.toLowerCase() === selectedCat.name.toLowerCase());
+      const catObj = categories.find((c) => c.id === filters.category);
+      if (catObj) {
+        result = result.filter(
+          (p) => p.categoryName?.toLowerCase() === catObj.name.toLowerCase()
+        );
       }
     }
 
@@ -169,7 +168,9 @@ function BoutiquePageContent() {
     }
 
     if (filters.featured) {
-      result = result.filter((p) => p.compareAtPrice && p.compareAtPrice > p.price);
+      result = result.filter(
+        (p) => p.compareAtPrice && p.compareAtPrice > p.price
+      );
     }
 
     setFilteredProducts(result);
@@ -200,7 +201,7 @@ function BoutiquePageContent() {
             <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-3 mb-2">
               <div>
                 <span className="text-[11px] font-bold uppercase tracking-[0.25em] text-[var(--laiton,#B9793E)] block mb-1">
-                  BOUTIQUE
+                  BOUTIQUE MAMOU&apos;S
                 </span>
                 <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-[var(--obsidienne,#0E0B09)]">
                   {selectedCategoryName ? selectedCategoryName : "Toutes les pièces"}
@@ -214,6 +215,19 @@ function BoutiquePageContent() {
               </div>
             </div>
 
+            {/* Bandeau de Réassurance Haute-Couture */}
+            <div className="mt-3 flex flex-wrap items-center gap-2 text-[10px] sm:text-xs font-semibold text-[var(--obsidienne)]/75">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/80 border border-[var(--laiton)]/15 px-3 py-1 shadow-xs">
+                <ShieldCheck className="h-3.5 w-3.5 text-[var(--laiton)]" /> Satisfait ou Échangé 7J
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/80 border border-[var(--laiton)]/15 px-3 py-1 shadow-xs">
+                <Truck className="h-3.5 w-3.5 text-[var(--laiton)]" /> Livraison Express 24-48H
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/80 border border-[var(--laiton)]/15 px-3 py-1 shadow-xs">
+                <Headphones className="h-3.5 w-3.5 text-emerald-600" /> Support WhatsApp 24/7
+              </span>
+            </div>
+
             {/* ================= BARRE / CARTE DES FILTRES UNIFIÉE — MOBILE ================= */}
             <div className="lg:hidden mt-5 rounded-[2rem] bg-white p-3.5 shadow-[0_4px_20px_-4px_rgba(14,11,9,0.06)] border border-[var(--laiton)]/15 space-y-3">
               {/* Ligne 1 : Recherche + Bouton filtre rond noir */}
@@ -223,6 +237,8 @@ function BoutiquePageContent() {
                   <input
                     type="text"
                     value={searchQuery}
+                    onFocus={() => setIsSearchFocused(true)}
+                    onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Rechercher une pièce..."
                     className="w-full rounded-full border border-neutral-200 bg-white pl-10 pr-8 py-2.5 text-xs text-[var(--obsidienne)] placeholder-neutral-400 focus:border-[var(--laiton)] focus:outline-none transition-all"
@@ -234,6 +250,38 @@ function BoutiquePageContent() {
                     >
                       <X className="h-3.5 w-3.5" />
                     </button>
+                  )}
+
+                  {/* Dropdown de recherche instantanée mobile */}
+                  {isSearchFocused && searchQuery.trim().length > 0 && (
+                    <div className="absolute top-full left-0 right-0 mt-2 z-50 overflow-hidden rounded-2xl bg-white p-2 shadow-[0_12px_40px_rgba(14,11,9,0.18)] border border-[var(--laiton)]/20 animate-in fade-in zoom-in-95 duration-150">
+                      <div className="px-3 py-1.5 flex items-center justify-between border-b border-neutral-100">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--laiton)]">Résultats instantanés</span>
+                        <span className="text-[10px] text-neutral-400 font-mono">{filteredProducts.length} trouvé{filteredProducts.length > 1 ? 's' : ''}</span>
+                      </div>
+                      <div className="max-h-60 overflow-y-auto divide-y divide-neutral-100">
+                        {filteredProducts.slice(0, 5).map((p) => (
+                          <a
+                            key={p.id}
+                            href={`/produit/${p.slug}`}
+                            className="flex items-center gap-3 p-2.5 hover:bg-neutral-50 rounded-xl transition-colors group"
+                          >
+                            <div className="relative h-10 w-10 shrink-0 rounded-lg overflow-hidden bg-[var(--porcelaine)]">
+                              <ProductImage src={p.imageUrl} alt={p.name} fill className="object-cover" />
+                            </div>
+                            <div className="flex-1 min-w-0 text-left">
+                              <h4 className="text-xs font-bold text-[var(--obsidienne)] group-hover:text-[var(--laiton)] truncate">
+                                {p.name}
+                              </h4>
+                              <span className="text-[10px] text-neutral-400 uppercase tracking-wider">{p.categoryName}</span>
+                            </div>
+                            <div className="text-right shrink-0">
+                              <span className="text-xs font-extrabold text-[var(--obsidienne)] tabular-nums">{new Intl.NumberFormat("fr-FR").format(p.price)} FCFA</span>
+                            </div>
+                          </a>
+                        ))}
+                      </div>
+                    </div>
                   )}
                 </div>
 
@@ -247,8 +295,30 @@ function BoutiquePageContent() {
                 </button>
               </div>
 
-              {/* Ligne 2 : Pilules de catégories défilantes (TOUTES, ENSEMBLES, CHAÎNES, etc.) */}
-              <div className="scrollbar-none -mx-3.5 flex items-center gap-2 overflow-x-auto px-3.5 pb-1">
+              {/* Ligne 2 : Pilules de tri 1-clic mobile */}
+              <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-1 pt-1 border-t border-neutral-100">
+                <span className="text-[9px] font-bold text-neutral-400 uppercase shrink-0 mr-1">TRI :</span>
+                {[
+                  { id: "recent", label: "Nouveautés" },
+                  { id: "price-asc", label: "Prix ↑" },
+                  { id: "price-desc", label: "Prix ↓" },
+                ].map((opt) => (
+                  <button
+                    key={opt.id}
+                    onClick={() => setSortBy(opt.id as SortOption)}
+                    className={`shrink-0 rounded-full px-3 py-1 text-[9px] font-bold uppercase tracking-wider transition-all ${
+                      sortBy === opt.id
+                        ? "bg-[var(--laiton,#B9793E)] text-white shadow-xs"
+                        : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Ligne 3 : Pilules de catégories défilantes */}
+              <div className="scrollbar-none -mx-3.5 flex items-center gap-2 overflow-x-auto px-3.5 pb-1 border-t border-neutral-100 pt-2">
                 <button
                   onClick={() => handleSelectCategory(null)}
                   className={`shrink-0 rounded-full px-4 py-2 text-[10px] font-bold uppercase tracking-wider transition-all ${
@@ -284,6 +354,8 @@ function BoutiquePageContent() {
                 <input
                   type="text"
                   value={searchQuery}
+                  onFocus={() => setIsSearchFocused(true)}
+                  onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Rechercher une pièce..."
                   className="w-full rounded-full border-0 bg-transparent pl-11 pr-8 py-2 text-xs font-medium text-[var(--obsidienne)] placeholder-neutral-400 focus:outline-none"
@@ -292,6 +364,38 @@ function BoutiquePageContent() {
                   <button onClick={() => setSearchQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-700">
                     <X className="h-3.5 w-3.5" />
                   </button>
+                )}
+
+                {/* Dropdown de recherche instantanée desktop */}
+                {isSearchFocused && searchQuery.trim().length > 0 && (
+                  <div className="absolute top-full left-0 right-0 mt-3 z-50 overflow-hidden rounded-2xl bg-white p-2.5 shadow-[0_16px_50px_rgba(14,11,9,0.18)] border border-[var(--laiton)]/20 animate-in fade-in zoom-in-95 duration-150">
+                    <div className="px-3 py-1.5 flex items-center justify-between border-b border-neutral-100">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--laiton)]">Résultats instantanés</span>
+                      <span className="text-[10px] text-neutral-400 font-mono">{filteredProducts.length} trouvé{filteredProducts.length > 1 ? 's' : ''}</span>
+                    </div>
+                    <div className="max-h-72 overflow-y-auto divide-y divide-neutral-100">
+                      {filteredProducts.slice(0, 5).map((p) => (
+                        <a
+                          key={p.id}
+                          href={`/produit/${p.slug}`}
+                          className="flex items-center gap-3 p-2.5 hover:bg-neutral-50 rounded-xl transition-colors group"
+                        >
+                          <div className="relative h-11 w-11 shrink-0 rounded-lg overflow-hidden bg-[var(--porcelaine)]">
+                            <ProductImage src={p.imageUrl} alt={p.name} fill className="object-cover" />
+                          </div>
+                          <div className="flex-1 min-w-0 text-left">
+                            <h4 className="text-xs font-bold text-[var(--obsidienne)] group-hover:text-[var(--laiton)] truncate">
+                              {p.name}
+                            </h4>
+                            <span className="text-[10px] text-neutral-400 uppercase tracking-wider">{p.categoryName}</span>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <span className="text-xs font-extrabold text-[var(--obsidienne)] tabular-nums">{new Intl.NumberFormat("fr-FR").format(p.price)} FCFA</span>
+                          </div>
+                        </a>
+                      ))}
+                    </div>
+                  </div>
                 )}
               </div>
 
