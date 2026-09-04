@@ -28,6 +28,11 @@ export function AdminOrderNotifier() {
     async function registerPush() {
       if (typeof window === "undefined" || !("serviceWorker" in navigator) || !("PushManager" in window)) return;
       try {
+        let registration = await navigator.serviceWorker.getRegistration();
+        if (!registration) {
+          registration = await navigator.serviceWorker.register("/sw.js");
+        }
+
         if (Notification.permission === "default") {
           const permission = await Notification.requestPermission();
           if (permission !== "granted") return;
@@ -35,7 +40,6 @@ export function AdminOrderNotifier() {
           return;
         }
 
-        const registration = await navigator.serviceWorker.ready;
         let subscription = await registration.pushManager.getSubscription();
 
         if (!subscription) {
@@ -44,7 +48,7 @@ export function AdminOrderNotifier() {
           const publicKey =
             keyData?.publicKey ||
             process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ||
-            "BAW4Ln6fItQzCGRFFxhPu3SuyLy8h2-F3H3u0PhYB4CaT9Q_TnQLTuLAfio3Uh7YygTOfytXVlAoI3IZZ5haWTA";
+            "BOKrRK5r0u-vo2j8khtfJHE-aPDLMGP8_Kh45_wYL5wG1X1P6_-AbYwCIqA7hU3GBKhZmg7WpyAOPIGr2kevb8A";
 
           if (!publicKey) return;
 
