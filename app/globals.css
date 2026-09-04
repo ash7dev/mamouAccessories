@@ -54,10 +54,11 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-  /* Fonts moderne & épuré : Plus Jakarta Sans (UI) + Outfit (Titres) */
+  /* Fonts moderne & épuré : Plus Jakarta Sans (UI) + Outfit (Titres) + Cormorant (Luxe Serif) */
   --font-sans: var(--font-sans-custom), "Plus Jakarta Sans", "Inter", sans-serif;
   --font-mono: var(--font-geist-mono), monospace;
   --font-heading: var(--font-heading-custom), "Outfit", sans-serif;
+  --font-serif: var(--font-serif-custom), "Cormorant Garamond", "Playfair Display", Georgia, serif;
 
   /* Radius */
   --radius-sm: 2px;

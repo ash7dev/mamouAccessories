@@ -99,8 +99,8 @@ export function ProductCard({ product }: { product: PublicProductCard }) {
               {product.categoryName}
             </p>
 
-            {/* Titre avec hauteur minimale égale pour empêcher tout décalage */}
-            <h3 className="font-heading text-sm sm:text-base font-semibold text-[var(--obsidienne,#0E0B09)] line-clamp-2 min-h-[2.4rem] sm:min-h-[2.8rem] mb-2 leading-tight group-hover:text-[var(--laiton)] transition-colors">
+            {/* Titre avec typographie luxe Serif (style boutique haute joaillerie) */}
+            <h3 className="font-serif text-base sm:text-lg md:text-xl font-medium sm:font-semibold text-[var(--obsidienne,#0E0B09)] line-clamp-2 min-h-[2.5rem] sm:min-h-[2.9rem] mb-2 leading-snug group-hover:text-[var(--laiton)] transition-colors tracking-tight">
               {product.name}
             </h3>
           </div>
