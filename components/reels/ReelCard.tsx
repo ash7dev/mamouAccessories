@@ -41,11 +41,11 @@ export function ReelCard({
         // Fallback for browsers that restrict video playback
       });
 
-      // Auto-collapse product card after 2.5s to let the user enjoy full video
+      // Auto-collapse product card after 1.5s to let the user enjoy full video
       setIsExpanded(true);
       const timer = setTimeout(() => {
         setIsExpanded(false);
-      }, 2500);
+      }, 1500);
 
       return () => clearTimeout(timer);
     } else {
