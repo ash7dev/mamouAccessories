@@ -1,5 +1,4 @@
 import { notFound } from 'next/navigation';
-import { CommandeHeader } from '@/components/admin/orders/orders-header';
 import { CommandeDetail } from '@/components/admin/orders/orders-details';
 import { adaptOrderForDisplay } from '@/lib/adapters/order-adapter';
 import { createServiceRoleClient } from '@/lib/supabase/service-role';
@@ -86,9 +85,6 @@ export default async function OrderDetailPage({ params }: PageProps) {
 
   return (
     <div className="p-6 lg:p-8">
-      {/* Orders Header */}
-      <CommandeHeader />
-      
       {/* Order Detail */}
       <CommandeDetail order={displayOrder} />
     </div>

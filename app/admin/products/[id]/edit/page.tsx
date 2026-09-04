@@ -1,16 +1,17 @@
 import { ProductForm } from "@/components/admin/products/product-form";
-import { buildImageUrl } from '@/lib/cloudinary';
-import { createServiceRoleClient } from '@/lib/supabase/service-role';
+import { resolveProductImageUrl } from "@/lib/utils/image-helpers";
+import { createServiceRoleClient } from "@/lib/supabase/service-role";
+import { notFound } from "next/navigation";
 
-// Force dynamic rendering
-export const dynamic = 'force-dynamic';
-export const revalidate = 30;
+// Force dynamic rendering & zero cache for edit page
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 async function getProductById(id: string) {
   const supabase = createServiceRoleClient();
 
   const { data: product, error } = await supabase
-    .from('products')
+    .from("products")
     .select(`
       id,
       name,
@@ -29,12 +30,12 @@ async function getProductById(id: string) {
         position
       )
     `)
-    .eq('id', id)
+    .eq("id", id)
     .single();
 
-  if (error) {
-    console.error('Error fetching product:', error);
-    throw new Error('Product not found');
+  if (error || !product) {
+    console.error("Error fetching product for edit:", error);
+    notFound();
   }
 
   return product;
@@ -54,17 +55,17 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
           categoryId: product.category_id ?? "",
           description: product.description ?? "",
           price: Number(product.price ?? 0),
-          compareAtPrice: product.compare_at_price ?? null,
+          compareAtPrice: product.compare_at_price ? Number(product.compare_at_price) : null,
           stock: Number(product.stock ?? 0),
-          imageOrientation: product.image_orientation ?? "portrait",
+          imageOrientation: (product.image_orientation ?? "portrait") as "portrait" | "landscape",
           isFeatured: Boolean(product.is_featured),
           isActive: Boolean(product.is_active),
           images: (product.product_images ?? [])
-            .sort((a: any, b: any) => a.position - b.position)
+            .sort((a: any, b: any) => (a.position ?? 0) - (b.position ?? 0))
             .map((image: any) => ({
               id: image.id,
-              url: buildImageUrl(image.cloudinary_public_id) ?? "/placeholder-product.svg",
-              cloudinaryPublicId: image.cloudinary_public_id,
+              url: resolveProductImageUrl(image.cloudinary_public_id),
+              cloudinaryPublicId: image.cloudinary_public_id ?? "",
             })),
         }}
       />

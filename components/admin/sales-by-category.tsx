@@ -14,7 +14,6 @@ interface SalesByCategoryProps {
 }
 
 export function SalesByCategory({ isEmpty = true }: SalesByCategoryProps) {
-  // Mock data
   const categories: CategorySales[] = isEmpty
     ? []
     : [
@@ -24,31 +23,31 @@ export function SalesByCategory({ isEmpty = true }: SalesByCategoryProps) {
           sales: 45,
           revenue: 1250000,
           percentage: 35,
-          color: "bg-[var(--gold)]",
+          color: "bg-[var(--emeraude,#2F5233)]",
         },
         {
           id: "2",
-          name: "Boucles d'oreilles",
+          name: "Bagues",
           sales: 38,
           revenue: 980000,
           percentage: 28,
-          color: "bg-blue-500",
+          color: "bg-[var(--grenat,#7A2E32)]",
         },
         {
           id: "3",
-          name: "Bracelets",
+          name: "Bracelets & Boucles",
           sales: 32,
           revenue: 850000,
           percentage: 24,
-          color: "bg-purple-500",
+          color: "bg-[var(--saphir,#24425F)]",
         },
         {
           id: "4",
-          name: "Bagues",
+          name: "Ensembles",
           sales: 18,
           revenue: 450000,
           percentage: 13,
-          color: "bg-green-500",
+          color: "bg-[var(--laiton,#B9793E)]",
         },
       ];
 
@@ -62,61 +61,53 @@ export function SalesByCategory({ isEmpty = true }: SalesByCategoryProps) {
   const totalRevenue = categories.reduce((sum, cat) => sum + cat.revenue, 0);
 
   return (
-    <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm h-full flex flex-col">
+    <div className="bg-white rounded-3xl p-6 border border-[var(--laiton,#B9793E)]/20 shadow-[0_4px_20px_-4px_rgba(14,11,9,0.06)] h-full flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-5">
         <div>
-          <h2 className="text-base font-semibold text-[var(--text-dark)]">
+          <p className="text-[10px] font-sans font-bold uppercase tracking-[0.2em] text-[var(--laiton,#B9793E)] mb-0.5">
+            Répartition
+          </p>
+          <h2 className="font-serif text-lg font-semibold text-[var(--obsidienne,#0E0B09)]">
             Ventes par catégorie
           </h2>
-          <p className="text-xs text-gray-500 mt-0.5">
-            {isEmpty ? "Aucune vente" : `${formatRevenue(totalRevenue)} au total`}
-          </p>
+          {!isEmpty && (
+            <p className="text-xs font-sans text-[var(--obsidienne,#0E0B09)]/60 mt-0.5">
+              Total : <span className="font-mono font-bold text-[var(--laiton,#B9793E)] tabular-nums">{formatRevenue(totalRevenue)}</span>
+            </p>
+          )}
         </div>
 
         {!isEmpty && (
           <Link
             href="/admin/categories"
-            className="text-xs font-medium text-[var(--gold-dark)] hover:text-[var(--gold)] transition-colors"
+            className="text-xs font-sans font-bold text-[var(--laiton,#B9793E)] hover:text-[var(--laiton-clair,#D9AE78)] transition-colors"
           >
-            Voir tout
+            Gérer
           </Link>
         )}
       </div>
 
       {/* Content */}
-      <div className="flex-1">
+      <div className="flex-1 flex items-center justify-center">
         {isEmpty ? (
-          <div className="flex items-center justify-center h-full py-8">
-            <div className="text-center">
-              {/* Empty state icon */}
-              <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--ivory)]">
-                <svg
-                  className="h-6 w-6 text-[var(--gold-dark)]"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                  />
-                </svg>
-              </div>
-
-              {/* Empty state text */}
-              <h3 className="text-sm font-semibold text-[var(--text-dark)] mb-1">
-                Pas encore de ventes
-              </h3>
-              <p className="text-xs text-gray-500 max-w-xs mx-auto">
-                Les statistiques par catégorie apparaîtront après les premières ventes
-              </p>
+          <div className="text-center py-8">
+            <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--porcelaine,#F1ECE3)]/60 text-[var(--laiton,#B9793E)] border border-[var(--laiton)]/20">
+              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10.5 6a7.5 7.5 0 107.5 7.5h-7.5V6z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13.5 10.5H21A7.5 7.5 0 0013.5 3v7.5z" />
+              </svg>
             </div>
+
+            <h3 className="font-serif text-sm font-medium text-[var(--obsidienne,#0E0B09)] mb-1">
+              Statistiques à venir
+            </h3>
+            <p className="text-xs font-sans text-[var(--obsidienne,#0E0B09)]/50 max-w-xs mx-auto">
+              La répartition par catégorie de produit s&apos;affichera au fil des commandes.
+            </p>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="w-full space-y-3.5">
             {categories.map((category) => (
               <Link
                 key={category.id}
@@ -125,29 +116,28 @@ export function SalesByCategory({ isEmpty = true }: SalesByCategoryProps) {
               >
                 <div className="flex items-center justify-between mb-1.5">
                   <div className="flex items-center gap-2 flex-1 min-w-0">
-                    <div className={`h-3 w-3 rounded-full ${category.color} shrink-0`} />
-                    <span className="text-sm font-semibold text-[var(--text-dark)] group-hover:text-[var(--gold-dark)] transition-colors truncate">
+                    <div className={`h-2.5 w-2.5 rounded-full ${category.color} shrink-0`} />
+                    <span className="font-serif text-xs font-medium text-[var(--obsidienne,#0E0B09)] group-hover:text-[var(--laiton,#B9793E)] transition-colors truncate">
                       {category.name}
                     </span>
                   </div>
-                  <span className="text-xs font-medium text-gray-600 ml-2">
+                  <span className="font-mono text-xs font-bold text-[var(--obsidienne,#0E0B09)] ml-2 tabular-nums">
                     {category.percentage}%
                   </span>
                 </div>
 
-                {/* Progress bar */}
-                <div className="h-2 bg-gray-100 rounded-full overflow-hidden mb-1">
+                <div className="h-2 bg-[var(--porcelaine,#F1ECE3)] rounded-full overflow-hidden mb-1">
                   <div
-                    className={`h-full ${category.color} transition-all group-hover:opacity-80`}
+                    className={`h-full ${category.color} transition-all group-hover:opacity-90`}
                     style={{ width: `${category.percentage}%` }}
                   />
                 </div>
 
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-gray-500">
+                <div className="flex items-center justify-between text-[11px]">
+                  <span className="font-sans text-[var(--obsidienne,#0E0B09)]/50">
                     {category.sales} vente{category.sales > 1 ? "s" : ""}
                   </span>
-                  <span className="font-medium text-[var(--gold-dark)]">
+                  <span className="font-mono font-bold text-[var(--laiton,#B9793E)] tabular-nums">
                     {formatRevenue(category.revenue)}
                   </span>
                 </div>

@@ -50,12 +50,18 @@ export function CategoryRail({ categories }: { categories: HomeCategory[] }) {
           className="scrollbar-none -mx-5 flex gap-6 overflow-x-auto px-5 pb-4 lg:mx-0 lg:flex-wrap lg:justify-center lg:px-0"
         >
           {categories.map((cat) => (
-            <motion.div key={cat.id} variants={fadeUp}>
+            <motion.div
+              key={cat.id}
+              variants={fadeUp}
+              whileHover={{ scale: 1.06, y: -4 }}
+              whileTap={{ scale: 0.94 }}
+              transition={{ type: "spring", stiffness: 400, damping: 25 }}
+            >
               <Link
                 href={`/boutique?categorie=${cat.slug}`}
                 className="group flex w-24 shrink-0 flex-col items-center gap-3 lg:w-28"
               >
-                <div className="relative aspect-square w-full overflow-hidden rounded-full border-2 border-white/30 bg-white/20 backdrop-blur-xl shadow-[0_8px_32px_-8px_rgba(185,138,68,0.3)] transition-all duration-500 group-hover:border-white/50 group-hover:shadow-[0_16px_48px_-8px_rgba(185,138,68,0.4)] group-hover:scale-110">
+                <div className="relative aspect-square w-full overflow-hidden rounded-full border-2 border-white/30 bg-white/20 backdrop-blur-xl shadow-[0_8px_32px_-8px_rgba(185,138,68,0.3)] transition-all duration-500 group-hover:border-white/50 group-hover:shadow-[0_16px_48px_-8px_rgba(185,138,68,0.4)]">
                   {cat.imageUrl ? (
                     <img
                       src={cat.imageUrl}

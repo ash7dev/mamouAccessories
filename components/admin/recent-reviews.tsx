@@ -14,7 +14,6 @@ interface RecentReviewsProps {
 }
 
 export function RecentReviews({ isEmpty = true }: RecentReviewsProps) {
-  // Mock data
   const reviews: Review[] = isEmpty
     ? []
     : [
@@ -31,16 +30,8 @@ export function RecentReviews({ isEmpty = true }: RecentReviewsProps) {
           customerName: "Khady Sarr",
           productName: "Boucles d'oreilles",
           rating: 4,
-          comment: "Très beau produit, livraison rapide. Juste un peu petit.",
+          comment: "Très beau produit, livraison rapide. Fini très élégant.",
           createdAt: "Il y a 3 heures",
-        },
-        {
-          id: "3",
-          customerName: "Mariama Fall",
-          productName: "Bracelet argent",
-          rating: 5,
-          comment: "Parfait pour un cadeau. Ma sœur a adoré !",
-          createdAt: "Hier",
         },
       ];
 
@@ -51,7 +42,7 @@ export function RecentReviews({ isEmpty = true }: RecentReviewsProps) {
           <svg
             key={star}
             className={`h-3.5 w-3.5 ${
-              star <= rating ? "text-[var(--gold)]" : "text-gray-300"
+              star <= rating ? "text-[var(--laiton,#B9793E)]" : "text-gray-200"
             }`}
             fill="currentColor"
             viewBox="0 0 20 20"
@@ -64,86 +55,72 @@ export function RecentReviews({ isEmpty = true }: RecentReviewsProps) {
   };
 
   return (
-    <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm h-full flex flex-col">
+    <div className="bg-white rounded-3xl p-6 border border-[var(--laiton,#B9793E)]/20 shadow-[0_4px_20px_-4px_rgba(14,11,9,0.06)] h-full flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-5">
         <div>
-          <h2 className="text-base font-semibold text-[var(--text-dark)]">
+          <p className="text-[10px] font-sans font-bold uppercase tracking-[0.2em] text-[var(--laiton,#B9793E)] mb-0.5">
+            Retours Clientes
+          </p>
+          <h2 className="font-serif text-lg font-semibold text-[var(--obsidienne,#0E0B09)]">
             Avis récents
           </h2>
-          <p className="text-xs text-gray-500 mt-0.5">
-            {isEmpty ? "Aucun avis" : `${reviews.length} dernier(s) avis`}
-          </p>
         </div>
 
         {!isEmpty && (
           <Link
             href="/admin/reviews"
-            className="text-xs font-medium text-[var(--gold-dark)] hover:text-[var(--gold)] transition-colors"
+            className="text-xs font-sans font-bold text-[var(--laiton,#B9793E)] hover:text-[var(--laiton-clair,#D9AE78)] transition-colors"
           >
-            Voir tout
+            Consulter
           </Link>
         )}
       </div>
 
       {/* Content */}
-      <div className="flex-1">
+      <div className="flex-1 flex items-center justify-center">
         {isEmpty ? (
-          <div className="flex items-center justify-center h-full py-8">
-            <div className="text-center">
-              {/* Empty state icon */}
-              <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--ivory)]">
-                <svg
-                  className="h-6 w-6 text-[var(--gold-dark)]"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
-                  />
-                </svg>
-              </div>
-
-              {/* Empty state text */}
-              <h3 className="text-sm font-semibold text-[var(--text-dark)] mb-1">
-                Aucun avis client
-              </h3>
-              <p className="text-xs text-gray-500 max-w-xs mx-auto">
-                Les avis clients apparaîtront ici après les premières ventes
-              </p>
+          <div className="text-center py-8">
+            <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--porcelaine,#F1ECE3)]/60 text-[var(--laiton,#B9793E)] border border-[var(--laiton)]/20">
+              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385c.116.486-.401.861-.83.637l-4.722-2.584a.563.563 0 00-.534 0l-4.722 2.584c-.428.224-.946-.151-.83-.637l1.285-5.385a.563.563 0 00-.182-.557l-4.204-3.602c-.38-.325-.178-.948.32-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+              </svg>
             </div>
+
+            <h3 className="font-serif text-sm font-medium text-[var(--obsidienne,#0E0B09)] mb-1">
+              Aucun avis disponible
+            </h3>
+            <p className="text-xs font-sans text-[var(--obsidienne,#0E0B09)]/50 max-w-xs mx-auto">
+              Les appréciations de vos clientes s&apos;afficheront ici.
+            </p>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="w-full space-y-2.5">
             {reviews.map((review) => (
               <Link
                 key={review.id}
                 href={`/admin/reviews/${review.id}`}
-                className="group block p-3 rounded-xl border border-gray-100 hover:border-[var(--gold)]/30 hover:bg-[var(--ivory)]/30 transition-all"
+                className="group block p-3.5 rounded-2xl border border-[var(--laiton,#B9793E)]/15 bg-[var(--porcelaine,#F1ECE3)]/30 hover:border-[var(--laiton)]/40 hover:bg-white transition-all"
               >
-                <div className="flex items-start gap-2 mb-2">
+                <div className="flex items-start gap-2 mb-1.5">
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="text-sm font-semibold text-[var(--text-dark)]">
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <h3 className="font-sans text-xs font-bold text-[var(--obsidienne,#0E0B09)]">
                         {review.customerName}
                       </h3>
                       {renderStars(review.rating)}
                     </div>
-                    <p className="text-xs text-gray-500 mb-1.5">
+                    <p className="text-[11px] font-serif font-medium text-[var(--laiton,#B9793E)] mb-1">
                       {review.productName}
                     </p>
                   </div>
                 </div>
 
-                <p className="text-xs text-gray-600 line-clamp-2 mb-1.5">
-                  "{review.comment}"
+                <p className="text-xs font-sans text-[var(--obsidienne,#0E0B09)]/70 italic line-clamp-2 mb-2">
+                  &ldquo;{review.comment}&rdquo;
                 </p>
 
-                <p className="text-[10px] text-gray-400">{review.createdAt}</p>
+                <p className="text-[10px] font-sans font-semibold text-[var(--obsidienne,#0E0B09)]/40">{review.createdAt}</p>
               </Link>
             ))}
           </div>

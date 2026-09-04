@@ -6,14 +6,12 @@ import Link from "next/link";
 type Period = "day" | "week" | "month" | "year";
 
 interface RevenuePoint {
-  label: string; // ex : "01 juil.", "S27", "Juil.", "2026"
-  value: number; // montant encaissé en FCFA
+  label: string;
+  value: number;
 }
 
 interface RevenueChartProps {
-  /** Points du graphique pour la période courante. Vide ou absent = état vide. */
   data?: RevenuePoint[];
-  /** Total encaissé sur la période affichée (FCFA). */
   currentTotal?: number;
   onPeriodChange?: (period: Period) => void;
 }
@@ -27,7 +25,6 @@ const periods: { key: Period; label: string }[] = [
 
 const formatFCFA = (n: number) => new Intl.NumberFormat("fr-FR").format(n);
 
-/** Construit un chemin SVG lissé (courbe monotone simple) à partir des points. */
 function buildPaths(data: RevenuePoint[], width: number, height: number, pad: number) {
   const max = Math.max(...data.map((d) => d.value), 1);
   const stepX = (width - pad * 2) / Math.max(data.length - 1, 1);
@@ -83,28 +80,28 @@ export function RevenueChart({ data = [], currentTotal = 0, onPeriodChange }: Re
     period === "day" ? "Aujourd'hui" : period === "week" ? "Cette semaine" : period === "month" ? "Ce mois" : "Cette année";
 
   return (
-    <section className="flex h-full flex-col rounded-3xl border border-[var(--gold)]/15 bg-white p-6 shadow-[0_1px_2px_rgba(43,33,24,0.04),0_8px_24px_-12px_rgba(43,33,24,0.12)]">
+    <section className="flex h-full flex-col rounded-3xl border border-[var(--laiton,#B9793E)]/20 bg-white p-6 shadow-[0_4px_20px_-4px_rgba(14,11,9,0.06)]">
       {/* En-tête */}
       <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--gold-dark)]">
-            Revenus
+          <p className="text-[10px] font-sans font-bold uppercase tracking-[0.2em] text-[var(--laiton,#B9793E)]">
+            Performance Ventes
           </p>
-          <h2 className="mt-0.5 text-lg font-bold tracking-tight text-[var(--text-dark)]">
+          <h2 className="font-serif mt-0.5 text-lg font-semibold tracking-tight text-[var(--obsidienne,#0E0B09)]">
             Évolution des encaissements
           </h2>
         </div>
 
-        {/* Segmented control en pilule */}
-        <div className="flex items-center gap-0.5 rounded-full bg-[var(--ivory)] p-1">
+        {/* Pilules de filtres */}
+        <div className="flex items-center gap-1 rounded-full bg-[var(--porcelaine,#F1ECE3)]/80 p-1 border border-[var(--laiton)]/15">
           {periods.map((tab) => (
             <button
               key={tab.key}
               onClick={() => handlePeriod(tab.key)}
-              className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors ${
+              className={`rounded-full px-3.5 py-1.5 font-sans text-xs font-semibold tracking-wide transition-all ${
                 period === tab.key
-                  ? "bg-[var(--text-dark)] text-white shadow-sm"
-                  : "text-[var(--text-dark)]/60 hover:text-[var(--text-dark)]"
+                  ? "bg-[var(--obsidienne,#0E0B09)] text-[var(--porcelaine,#F1ECE3)] shadow-xs"
+                  : "text-[var(--obsidienne,#0E0B09)]/60 hover:text-[var(--obsidienne)]"
               }`}
             >
               {tab.label}
@@ -115,10 +112,10 @@ export function RevenueChart({ data = [], currentTotal = 0, onPeriodChange }: Re
 
       {/* Total de la période */}
       <div className="mb-5 flex items-baseline gap-2">
-        <span className="text-3xl font-bold tracking-tight text-[var(--text-dark)] tabular-nums">
+        <span className="font-mono text-3xl lg:text-4xl font-bold tracking-tight text-[var(--obsidienne,#0E0B09)] tabular-nums">
           {formatFCFA(currentTotal)}
         </span>
-        <span className="text-sm font-medium text-[var(--text-dark)]/40">
+        <span className="text-xs font-sans font-bold text-[var(--laiton,#B9793E)] uppercase tracking-wider">
           FCFA · {periodLabel}
         </span>
       </div>
@@ -126,42 +123,39 @@ export function RevenueChart({ data = [], currentTotal = 0, onPeriodChange }: Re
       {/* Zone graphique */}
       <div className="flex flex-1 items-center justify-center">
         {isEmpty ? (
-          /* État vide : panneau ivoire doux, pas de pointillés */
-          <div className="flex w-full flex-col items-center rounded-2xl bg-[var(--ivory)]/60 px-6 py-10 text-center">
+          <div className="flex w-full flex-col items-center rounded-2xl bg-[var(--porcelaine,#F1ECE3)]/50 border border-[var(--laiton)]/15 px-6 py-10 text-center">
             <div className="relative mb-4">
-              <div className="absolute -inset-2 rounded-full border border-[var(--gold)]/20" aria-hidden />
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white text-[var(--gold-dark)] ring-1 ring-inset ring-[var(--gold)]/25">
+              <div className="absolute -inset-2 rounded-full border border-[var(--laiton,#B9793E)]/20" aria-hidden />
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-[var(--laiton,#B9793E)] border border-[var(--laiton)]/20 shadow-xs">
                 <ChartIcon />
               </div>
             </div>
 
-            <h3 className="mb-1 text-sm font-semibold text-[var(--text-dark)]">
-              Aucun encaissement pour l&apos;instant
+            <h3 className="font-serif mb-1 text-sm font-medium text-[var(--obsidienne,#0E0B09)]">
+              Aucun encaissement pour cette période
             </h3>
-            <p className="mb-5 max-w-xs text-xs leading-relaxed text-[var(--text-dark)]/50">
-              La courbe apparaîtra dès votre première commande payée.
+            <p className="mb-5 max-w-xs text-xs font-sans leading-relaxed text-[var(--obsidienne,#0E0B09)]/50">
+              La courbe d&apos;évolution s&apos;affichera automatiquement dès enregistrement de vos premières ventes.
             </p>
 
             <Link
               href="/admin/products/new"
-              className="inline-flex items-center gap-2 rounded-full bg-[var(--text-dark)] px-5 py-2.5 text-xs font-semibold text-white shadow-lg transition-transform hover:bg-[var(--text-dark)]/90 active:scale-95"
+              className="inline-flex items-center gap-2 rounded-full bg-[var(--obsidienne,#0E0B09)] px-5 py-2.5 text-xs font-sans font-bold tracking-wider uppercase text-[var(--porcelaine,#F1ECE3)] shadow-md transition-transform hover:bg-[var(--obsidienne)]/90 active:scale-95"
             >
               <PlusIcon />
               Ajouter un produit
             </Link>
           </div>
         ) : (
-          /* Graphique en aire, dégradé doré */
           <div className="w-full">
             <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img" aria-label="Courbe des revenus encaissés">
               <defs>
-                <linearGradient id="revenue-fill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="var(--gold)" stopOpacity="0.35" />
-                  <stop offset="100%" stopColor="var(--gold)" stopOpacity="0.02" />
+                <linearGradient id="revenue-fill-laiton" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="var(--laiton,#B9793E)" stopOpacity="0.35" />
+                  <stop offset="100%" stopColor="var(--laiton,#B9793E)" stopOpacity="0.02" />
                 </linearGradient>
               </defs>
 
-              {/* Lignes de repère horizontales */}
               {[0.25, 0.5, 0.75].map((f) => (
                 <line
                   key={f}
@@ -169,22 +163,20 @@ export function RevenueChart({ data = [], currentTotal = 0, onPeriodChange }: Re
                   x2={W - PAD}
                   y1={PAD + f * (H - PAD * 2)}
                   y2={PAD + f * (H - PAD * 2)}
-                  stroke="#2B2118"
-                  strokeOpacity="0.06"
+                  stroke="var(--laiton,#B9793E)"
+                  strokeOpacity="0.12"
                   strokeDasharray="2 6"
                 />
               ))}
 
-              <path d={paths!.area} fill="url(#revenue-fill)" />
-              <path d={paths!.line} fill="none" stroke="var(--gold-dark)" strokeWidth="2.5" strokeLinecap="round" />
+              <path d={paths!.area} fill="url(#revenue-fill-laiton)" />
+              <path d={paths!.line} fill="none" stroke="var(--laiton,#B9793E)" strokeWidth="2.5" strokeLinecap="round" />
 
-              {/* Dernier point mis en valeur */}
-              <circle cx={paths!.last.x} cy={paths!.last.y} r="8" fill="var(--gold)" fillOpacity="0.25" />
-              <circle cx={paths!.last.x} cy={paths!.last.y} r="4" fill="var(--gold-dark)" stroke="white" strokeWidth="2" />
+              <circle cx={paths!.last.x} cy={paths!.last.y} r="8" fill="var(--laiton,#B9793E)" fillOpacity="0.25" />
+              <circle cx={paths!.last.x} cy={paths!.last.y} r="4" fill="var(--laiton,#B9793E)" stroke="white" strokeWidth="2" />
             </svg>
 
-            {/* Libellés des extrémités */}
-            <div className="mt-2 flex justify-between px-1 text-[10px] font-medium uppercase tracking-wider text-[var(--text-dark)]/35">
+            <div className="mt-2 flex justify-between px-1 text-[10px] font-bold uppercase tracking-wider text-[var(--obsidienne,#0E0B09)]/40">
               <span>{data[0].label}</span>
               <span>{data[data.length - 1].label}</span>
             </div>

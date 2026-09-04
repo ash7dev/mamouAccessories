@@ -15,20 +15,20 @@ export function MaisonMamouExperience() {
       {/* Background Soft Glow Effects */}
       <div
         aria-hidden
-        className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[300px] w-full max-w-7xl -translate-x-1/2 bg-[radial-gradient(ellipse_at_top,rgba(185,121,62,0.08),transparent_70%)]"
+        className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[300px] w-full max-w-7xl -translate-x-1/2 bg-[radial-gradient(ellipse_at_top,rgba(185,121,62,0.06),transparent_70%)]"
       />
 
       <div className="mx-auto max-w-7xl">
-        {/* Floating Concierge Banner */}
+        {/* Floating Concierge Banner - White Luxe Card */}
         <motion.div
           variants={fadeUp}
           initial="hidden"
           whileInView="show"
           viewport={viewportOnce}
-          className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-r from-[#0E0B09] via-[#1E1712] to-[#0E0B09] p-8 lg:p-12 text-white shadow-2xl border border-[var(--laiton)]/30"
+          className="relative overflow-hidden rounded-[2.5rem] bg-white p-8 lg:p-12 text-[var(--obsidienne,#0E0B09)] shadow-[0_20px_50px_rgba(0,0,0,0.05)] border border-amber-900/10"
         >
           {/* Subtle Decorative Circles */}
-          <div aria-hidden className="pointer-events-none absolute -right-16 -top-16 opacity-30">
+          <div aria-hidden className="pointer-events-none absolute -right-16 -top-16 opacity-15">
             <div className="h-64 w-64 rounded-full border border-[var(--laiton)]" />
             <div className="absolute inset-8 rounded-full border border-[var(--laiton)]" />
           </div>
@@ -38,10 +38,10 @@ export function MaisonMamouExperience() {
               <span className="inline-block text-[11px] font-bold uppercase tracking-[0.3em] text-[var(--laiton)] mb-2">
                 Assistance Personnalisée
               </span>
-              <h3 className="font-heading text-2xl sm:text-3xl font-bold text-white leading-tight">
+              <h3 className="font-heading text-2xl sm:text-3xl font-bold text-[var(--obsidienne,#0E0B09)] leading-tight">
                 Un coup de cœur ou une question sur un bijou ?
               </h3>
-              <p className="mt-3 text-sm sm:text-base text-neutral-300 leading-relaxed">
+              <p className="mt-3 text-sm sm:text-base text-stone-600 leading-relaxed">
                 Contactez directement notre équipe sur WhatsApp pour réserver votre pièce ou demander un aperçu vidéo en direct avant votre achat.
               </p>
             </div>
@@ -51,7 +51,7 @@ export function MaisonMamouExperience() {
                 href="https://wa.me/221779878666?text=Bonjour%20Mamou%20Jewelry,%20je%20souhaite%20un%20conseil%20sur%20vos%20bijoux"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group flex items-center justify-center gap-3 rounded-full bg-gradient-to-r from-[var(--laiton)] to-[#9A622E] px-7 py-4 text-xs sm:text-sm font-bold uppercase tracking-wider text-white shadow-[0_8px_25px_rgba(185,121,62,0.4)] transition-all hover:scale-105 hover:shadow-[0_12px_35px_rgba(185,121,62,0.6)] active:scale-95"
+                className="group flex items-center justify-center gap-3 rounded-full bg-gradient-to-r from-[var(--laiton)] to-[#9A622E] px-7 py-4 text-xs sm:text-sm font-bold uppercase tracking-wider text-white shadow-[0_8px_25px_rgba(185,121,62,0.35)] transition-all hover:scale-105 hover:shadow-[0_12px_35px_rgba(185,121,62,0.5)] active:scale-95"
               >
                 <MessageCircle className="h-5 w-5" />
                 <span>Conseil WhatsApp</span>
@@ -60,7 +60,7 @@ export function MaisonMamouExperience() {
 
               <Link
                 href="/boutique"
-                className="flex items-center justify-center gap-2 rounded-full border border-white/20 bg-white/10 px-7 py-4 text-xs sm:text-sm font-bold uppercase tracking-wider text-white backdrop-blur-md transition-all hover:bg-white/20 hover:border-white/40 active:scale-95"
+                className="flex items-center justify-center gap-2 rounded-full border border-neutral-900/20 bg-neutral-50 px-7 py-4 text-xs sm:text-sm font-bold uppercase tracking-wider text-neutral-900 transition-all hover:bg-neutral-900 hover:text-white hover:border-neutral-900 active:scale-95"
               >
                 Voir la boutique
               </Link>

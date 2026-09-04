@@ -174,22 +174,6 @@ export function ProductFilters({
   // Version Mobile
   return (
     <>
-      {/* Mobile Toggle Button - Only visible on mobile */}
-      {onToggle && (
-        <button
-          onClick={onToggle}
-          className="lg:hidden fixed bottom-24 right-6 z-[100] flex items-center gap-2.5 rounded-full bg-gradient-to-r from-[var(--espresso)] to-[var(--espresso)]/90 pl-5 pr-5 py-3.5 text-white shadow-[0_8px_32px_rgba(36,27,20,0.4)] hover:shadow-[0_12px_40px_rgba(36,27,20,0.5)] hover:scale-105 active:scale-95 transition-all backdrop-blur-sm"
-        >
-          <SlidersHorizontal className="h-5 w-5" />
-          <span className="text-sm font-semibold">Filtres</span>
-          {hasActiveFilters && (
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[var(--gold)] text-xs font-bold text-[var(--espresso)] shadow-[0_4px_16px_rgba(185,138,68,0.3)]">
-              {activeFiltersCount}
-            </span>
-          )}
-        </button>
-      )}
-
       {/* Mobile Drawer */}
       <AnimatePresence>
         {isOpen && (

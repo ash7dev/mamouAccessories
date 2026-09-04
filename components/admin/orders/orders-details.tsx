@@ -4,23 +4,43 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { resolveProductImageUrl } from "@/lib/utils/image-helpers";
 import {
   updateOrderStatus,
   markPaymentVerified,
   markPaymentNotReceived,
   saveAdminNote,
+  updatePaymentStatus,
 } from "@/app/admin/orders/[id]/actions";
+import {
+  ArrowLeft,
+  CheckCircle2,
+  Phone,
+  MessageCircle,
+  Clock,
+  ShieldCheck,
+  Truck,
+  PackageCheck,
+  AlertTriangle,
+  XCircle,
+  ExternalLink,
+  MapPin,
+  User,
+  ShoppingBag,
+  FileText,
+  Sparkles,
+  ChevronRight,
+  Copy,
+  Printer,
+  Share2,
+  Check,
+  Send,
+  CreditCard,
+  History,
+} from "lucide-react";
 
 /* ============================================================
-   Fiche commande — /admin/orders/[id]
-
-   L'écran le plus important de l'admin : c'est ici que se joue
-   toute la logique métier (vérification Wave, transitions de
-   statut, règles de stock, annulation motivée).
-
-   Usage :
-     const order = await getOrderDetail(params.id);
-     <CommandeDetail order={order} />
+   Fiche commande Haute Joaillerie — /admin/orders/[id]
    ============================================================ */
 
 export type OrderStatus = "pending" | "confirmed" | "shipped" | "delivered" | "cancelled";
@@ -44,6 +64,8 @@ export interface OrderDetailData {
   total: number;
   adminNote: string | null;
   cancelReason: string | null;
+  customerOrdersCount?: number;
+  customerTotalSpent?: number;
   items: {
     id: string;
     productId: string | null;
@@ -64,76 +86,99 @@ const cancelReasons = [
   "Autre",
 ];
 
-/* ---------- Icônes ---------- */
-
-function ChevronLeftIcon({ className = "w-4 h-4" }: { className?: string }) {
-  return (
-    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.75 19.5L8.25 12l7.5-7.5" />
-    </svg>
-  );
-}
-
-function CheckIcon({ className = "w-4 h-4" }: { className?: string }) {
-  return (
-    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4.5 12.75l6 6 9-13.5" />
-    </svg>
-  );
-}
-
-function PhoneIcon({ className = "w-4 h-4" }: { className?: string }) {
-  return (
-    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
-    </svg>
-  );
-}
-
-function WhatsAppIcon({ className = "w-4 h-4" }: { className?: string }) {
-  return (
-    <svg className={className} fill="currentColor" viewBox="0 0 24 24">
-      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-    </svg>
-  );
-}
-
-/* ---------- Sous-composants ---------- */
+/* ---------- Sub-components ---------- */
 
 function Card({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
     <section
-      className={`rounded-3xl border border-[var(--gold)]/15 bg-white p-6 shadow-[0_1px_2px_rgba(43,33,24,0.04),0_8px_24px_-12px_rgba(43,33,24,0.12)] ${className}`}
+      className={`rounded-3xl border border-[var(--laiton,#B9793E)]/20 bg-white p-5 sm:p-7 shadow-[0_4px_24px_-4px_rgba(14,11,9,0.06)] transition-all hover:border-[var(--laiton,#B9793E)]/35 ${className}`}
     >
       {children}
     </section>
   );
 }
 
-function Eyebrow({ children }: { children: React.ReactNode }) {
+function Eyebrow({ children, icon: Icon }: { children: React.ReactNode; icon?: any }) {
   return (
-    <p className="mb-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--gold-dark)]">
-      {children}
-    </p>
+    <div className="mb-4 flex items-center justify-between">
+      <div className="flex items-center gap-2">
+        {Icon && <Icon className="h-4 w-4 text-[var(--laiton,#B9793E)] stroke-[2]" />}
+        <p className="text-[10px] font-sans font-bold uppercase tracking-[0.2em] text-[var(--laiton,#B9793E)]">
+          {children}
+        </p>
+      </div>
+    </div>
   );
 }
 
-/** Stepper horizontal : pending → confirmed → shipped → delivered */
+/** Badges de Statut Luxe */
+const statusBadgeConfig: Record<OrderStatus, { label: string; bg: string; text: string; border: string; dot: string }> = {
+  pending: { label: "À Traiter", bg: "bg-amber-500/10", text: "text-amber-800 dark:text-amber-300", border: "border-amber-500/30", dot: "bg-amber-500" },
+  confirmed: { label: "Confirmée", bg: "bg-emerald-500/10", text: "text-emerald-800 dark:text-emerald-300", border: "border-emerald-500/30", dot: "bg-emerald-500" },
+  shipped: { label: "Expédiée", bg: "bg-sky-500/10", text: "text-sky-800 dark:text-sky-300", border: "border-sky-500/30", dot: "bg-sky-500" },
+  delivered: { label: "Livrée avec Succès", bg: "bg-[var(--porcelaine,#F1ECE3)]", text: "text-[var(--obsidienne,#0E0B09)]", border: "border-[var(--laiton,#B9793E)]/30", dot: "bg-[var(--laiton,#B9793E)]" },
+  cancelled: { label: "Annulée", bg: "bg-rose-500/10", text: "text-rose-700 dark:text-rose-300", border: "border-rose-500/30", dot: "bg-rose-500" },
+};
+
+function StatusBadge({ status }: { status: OrderStatus }) {
+  const cfg = statusBadgeConfig[status] || statusBadgeConfig.pending;
+  return (
+    <span className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ${cfg.bg} ${cfg.text} border ${cfg.border} shadow-2xs`}>
+      <span className={`h-2 w-2 rounded-full ${cfg.dot} animate-pulse`} />
+      {cfg.label}
+    </span>
+  );
+}
+
+function PaymentStatusBadge({ order }: { order: OrderDetailData }) {
+  if (order.paymentStatus === "pending_verification") {
+    return (
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-800 border border-amber-500/30 shadow-2xs">
+        <ShieldCheck className="h-3.5 w-3.5 text-amber-600 animate-bounce" />
+        Wave · Preuve à Vérifier
+      </span>
+    );
+  }
+  if (order.paymentStatus === "paid") {
+    return (
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-800 border border-emerald-500/30 shadow-2xs">
+        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+        Payé ({order.paymentMethod === "wave" ? "Wave" : "Espèces"})
+      </span>
+    );
+  }
+  if (order.paymentStatus === "refunded") {
+    return (
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-neutral-100 px-3 py-1 text-xs font-semibold text-neutral-600 border border-neutral-300 shadow-2xs">
+        Remboursé
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--porcelaine,#F1ECE3)] px-3 py-1 text-xs font-semibold text-[var(--obsidienne,#0E0B09)]/70 border border-[var(--laiton,#B9793E)]/20 shadow-2xs">
+      <CreditCard className="h-3.5 w-3.5 text-[var(--laiton,#B9793E)]" />
+      {order.paymentMethod === "wave" ? "Wave · Non payé" : "Paiement à la livraison"}
+    </span>
+  );
+}
+
+/** Stepper Simple & Épuré Haute Joaillerie */
 function StatusStepper({ status }: { status: OrderStatus }) {
-  const steps: { key: OrderStatus; label: string }[] = [
-    { key: "pending", label: "Reçue" },
-    { key: "confirmed", label: "Confirmée" },
-    { key: "shipped", label: "Expédiée" },
-    { key: "delivered", label: "Livrée" },
+  const steps: { key: OrderStatus; label: string; icon: any }[] = [
+    { key: "pending", label: "Reçue", icon: Clock },
+    { key: "confirmed", label: "Confirmée", icon: CheckCircle2 },
+    { key: "shipped", label: "Expédiée", icon: Truck },
+    { key: "delivered", label: "Livrée", icon: PackageCheck },
   ];
 
   if (status === "cancelled") {
     return (
-      <div className="flex items-center gap-3 rounded-2xl bg-red-600/8 px-4 py-3">
-        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-red-600/15 text-red-600">
-          ✕
-        </span>
-        <p className="text-sm font-semibold text-red-600">Commande annulée</p>
+      <div className="flex items-center gap-3 rounded-2xl bg-rose-50 p-4 border border-rose-200 text-xs">
+        <XCircle className="h-5 w-5 text-rose-600 shrink-0" />
+        <div>
+          <span className="font-bold text-rose-900">Commande Annulée</span>
+          <span className="text-rose-700 ml-2">— Cette commande est archivée.</span>
+        </div>
       </div>
     );
   }
@@ -141,42 +186,46 @@ function StatusStepper({ status }: { status: OrderStatus }) {
   const currentIndex = steps.findIndex((s) => s.key === status);
 
   return (
-    <div className="flex items-center">
-      {steps.map((step, i) => {
-        const done = i < currentIndex;
-        const current = i === currentIndex;
-        return (
-          <div key={step.key} className={`flex items-center ${i > 0 ? "flex-1" : ""}`}>
-            {i > 0 && (
+    <div className="w-full font-sans">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+        {steps.map((step, i) => {
+          const done = i < currentIndex;
+          const current = i === currentIndex;
+          const StepIcon = step.icon;
+
+          return (
+            <div
+              key={step.key}
+              className={`flex items-center gap-3 rounded-2xl p-3 sm:p-3.5 border transition-all ${
+                current
+                  ? "bg-[var(--obsidienne,#0E0B09)] text-[var(--porcelaine,#F1ECE3)] border-[var(--laiton,#B9793E)] shadow-md ring-1 ring-[var(--laiton,#B9793E)]/30"
+                  : done
+                  ? "bg-[var(--porcelaine,#F1ECE3)] text-[var(--obsidienne,#0E0B09)] border-[var(--laiton,#B9793E)]/25"
+                  : "bg-white text-neutral-400 border-neutral-200"
+              }`}
+            >
               <div
-                className={`mx-2 h-0.5 flex-1 rounded-full ${
-                  done || current ? "bg-[var(--gold)]" : "bg-[var(--text-dark)]/10"
-                }`}
-              />
-            )}
-            <div className="flex flex-col items-center gap-1.5">
-              <span
-                className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold transition-colors ${
-                  done
-                    ? "bg-[var(--gold)] text-[#241B14]"
-                    : current
-                      ? "bg-[var(--text-dark)] text-white ring-4 ring-[var(--gold)]/20"
-                      : "bg-[var(--text-dark)]/8 text-[var(--text-dark)]/35"
+                className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-xs font-bold transition-transform ${
+                  current
+                    ? "bg-[var(--laiton,#B9793E)] text-[var(--obsidienne,#0E0B09)] shadow-xs scale-105"
+                    : done
+                    ? "bg-emerald-500/15 text-emerald-700 border border-emerald-500/30"
+                    : "bg-neutral-100 text-neutral-400"
                 }`}
               >
-                {done ? <CheckIcon className="h-4 w-4" /> : i + 1}
-              </span>
-              <span
-                className={`text-[10px] font-semibold uppercase tracking-wider ${
-                  current ? "text-[var(--text-dark)]" : "text-[var(--text-dark)]/40"
-                }`}
-              >
-                {step.label}
-              </span>
+                {done ? "✓" : <StepIcon className="h-4.5 w-4.5" />}
+              </div>
+
+              <div className="min-w-0">
+                <p className="text-xs font-bold truncate leading-tight">{step.label}</p>
+                <p className="text-[10px] font-sans opacity-70 truncate mt-0.5">
+                  {done ? "Complété" : current ? "En cours" : "À venir"}
+                </p>
+              </div>
             </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -190,11 +239,45 @@ export function CommandeDetail({ order: initialOrder }: { order: OrderDetailData
   const [cancelReason, setCancelReason] = useState<string | null>(null);
   const [adminNote, setAdminNote] = useState(order.adminNote ?? "");
   const [busy, setBusy] = useState(false);
+  const [proofModalOpen, setProofModalOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [activeWaTemplate, setActiveWaTemplate] = useState<string | null>(null);
 
   const phone = order.customerPhone.replace(/[^\d]/g, "");
-  const waMessage = encodeURIComponent(
-    `Bonjour ${order.customerName} 🌸 Au sujet de votre commande ${order.orderNumber} :`
-  );
+
+  /* --- Templates de message WhatsApp pré-remplis --- */
+  const waTemplates = [
+    {
+      id: "confirm",
+      label: "🌸 Confirmation",
+      text: `Bonjour ${order.customerName} 🌸 Merci pour votre commande ${order.orderNumber} chez Mamou's Accessories ! Votre commande est bien confirmée et en cours de préparation.`,
+    },
+    {
+      id: "wave_verify",
+      label: "💳 Relance Wave",
+      text: `Bonjour ${order.customerName} 🌸 Nous avons bien reçu votre commande ${order.orderNumber}. Avez-vous pu effectuer le transfert Wave de ${formatFCFA(order.total)} FCFA afin d'expédier votre colis ?`,
+    },
+    {
+      id: "shipped",
+      label: "🚚 Expédition",
+      text: `Bonjour ${order.customerName} 🌸 Bonne nouvelle ! Votre commande ${order.orderNumber} a été remise au livreur. Elle vous sera livrée très prochainement à : ${order.deliveryAddress}.`,
+    },
+    {
+      id: "delivered",
+      label: "📦 Livraison",
+      text: `Bonjour ${order.customerName} 🌸 Votre commande ${order.orderNumber} a été livrée ! Merci infiniment pour votre confiance envers Mamou's Accessories ✨`,
+    },
+  ];
+
+  const handleCopyOrderNumber = () => {
+    navigator.clipboard.writeText(order.orderNumber);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handlePrint = () => {
+    window.print();
+  };
 
   /* --- Transitions avec Server Actions --- */
 
@@ -212,7 +295,6 @@ export function CommandeDetail({ order: initialOrder }: { order: OrderDetailData
         return;
       }
 
-      // Mise à jour optimiste de l'UI
       setOrder((o) => ({ ...o, status: next, ...extra }));
       router.refresh();
     } catch (error) {
@@ -250,6 +332,28 @@ export function CommandeDetail({ order: initialOrder }: { order: OrderDetailData
     }
   };
 
+  const changePaymentStatus = async (newStatus: PaymentStatus) => {
+    setBusy(true);
+    try {
+      const result = await updatePaymentStatus(order.id, newStatus);
+      if (!result.success) {
+        alert(result.error || "Erreur lors de la mise à jour du statut de paiement");
+        return;
+      }
+      setOrder((o) => ({
+        ...o,
+        paymentStatus: newStatus,
+        status: newStatus === "paid" && o.status === "pending" ? "confirmed" : o.status,
+      }));
+      router.refresh();
+    } catch (error) {
+      console.error("Error updating payment status:", error);
+      alert("Erreur inattendue");
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const confirmCancel = async () => {
     if (!cancelReason) return;
     await transition("cancelled", {
@@ -271,125 +375,181 @@ export function CommandeDetail({ order: initialOrder }: { order: OrderDetailData
   const needsPaymentCheck =
     order.paymentMethod === "wave" && order.paymentStatus === "pending_verification";
 
+  const customerInitials = order.customerName
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
   return (
-    <div className="min-h-screen">
-      {/* ===== Header compact ===== */}
-      <div className="sticky top-0 z-10 border-b border-[var(--gold)]/15 bg-white/95 backdrop-blur-sm">
-        <div className="mx-auto max-w-4xl px-4 py-3 lg:px-6">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3 min-w-0">
-              <Link
-                href="/admin/orders"
-                className="inline-flex items-center gap-1 text-sm font-medium text-[var(--text-dark)]/50 transition-colors hover:text-[var(--text-dark)] shrink-0"
+    <div className="-mx-6 -mt-6 lg:-mx-8 lg:-mt-8 pb-28 sm:pb-16 font-sans">
+      {/* ===================== HERO EXECUTIVE BANNER ===================== */}
+      <div className="relative overflow-hidden rounded-b-[2.5rem] sm:rounded-b-[3.5rem] bg-gradient-to-r from-[var(--obsidienne,#0E0B09)] via-[var(--obsidienne-soft,#17120D)] to-[var(--obsidienne,#0E0B09)] px-5 pb-8 pt-8 sm:px-10 sm:pb-12 sm:pt-10 shadow-2xl border-b border-[var(--laiton,#B9793E)]/35 text-[var(--porcelaine,#F1ECE3)]">
+        {/* Halos dorés d'ambiance */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-[var(--laiton,#B9793E)]/25 via-[#D9AE78]/10 to-transparent rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-80 h-80 bg-[var(--laiton,#B9793E)]/15 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="relative z-10 mx-auto max-w-6xl">
+          {/* Top Bar : Back Link + Action Pills */}
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+            <Link
+              href="/admin/orders"
+              className="inline-flex items-center gap-2 rounded-full border border-[var(--laiton,#B9793E)]/35 bg-white/10 px-4 py-2 text-xs font-sans font-semibold tracking-wider text-[var(--porcelaine,#F1ECE3)] backdrop-blur-md transition-all hover:bg-[var(--laiton,#B9793E)] hover:text-[var(--obsidienne,#0E0B09)] shadow-sm"
+            >
+              <ArrowLeft className="h-3.5 w-3.5 stroke-[2]" />
+              <span>Toutes les commandes</span>
+            </Link>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleCopyOrderNumber}
+                className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 text-xs font-medium text-white backdrop-blur-md transition-all hover:bg-white/20 active:scale-95"
+                title="Copier le numéro"
               >
-                <ChevronLeftIcon />
-                <span className="hidden sm:inline">Commandes</span>
-              </Link>
-              <div className="h-4 w-px bg-[var(--gold)]/20 shrink-0" />
-              <div className="min-w-0">
-                <h1 className="text-base font-bold text-[var(--text-dark)] lg:text-lg truncate">
-                  {order.orderNumber}
-                </h1>
+                {copied ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+                <span>{copied ? "Copié !" : "Copier N°"}</span>
+              </button>
+              <button
+                type="button"
+                onClick={handlePrint}
+                className="hidden sm:inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 text-xs font-medium text-white backdrop-blur-md transition-all hover:bg-white/20 active:scale-95"
+                title="Imprimer la fiche"
+              >
+                <Printer className="h-3.5 w-3.5" />
+                <span>Imprimer</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Heading Info */}
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-[var(--laiton,#B9793E)]/25">
+            <div>
+              <div className="mb-2 flex flex-wrap items-center gap-2">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--laiton,#B9793E)]/25 border border-[var(--laiton,#B9793E)]/40 px-3.5 py-1 text-[10px] font-sans font-bold uppercase tracking-widest text-[var(--laiton-clair,#D9AE78)] backdrop-blur-md">
+                  <Sparkles className="h-3 w-3 stroke-[2]" />
+                  Fiche Commande Éditoriale
+                </span>
+                <StatusBadge status={order.status} />
+                <PaymentStatusBadge order={order} />
               </div>
+
+              <h1 className="font-mono text-3xl sm:text-5xl font-bold tracking-tight text-[var(--porcelaine,#F1ECE3)] mt-2">
+                {order.orderNumber}
+              </h1>
+
+              <p className="mt-1.5 text-xs sm:text-sm text-[var(--porcelaine,#F1ECE3)]/70 font-sans">
+                Passée le {new Date(order.createdAt).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+              </p>
             </div>
 
-            <a
-              href={`https://wa.me/${phone}?text=${waMessage}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex h-9 items-center gap-2 rounded-full bg-emerald-500 px-4 text-xs font-bold text-white shadow-md transition-transform hover:brightness-105 active:scale-95 shrink-0 lg:h-10 lg:text-sm"
-            >
-              <WhatsAppIcon className="w-4 h-4" />
-              <span className="hidden sm:inline">WhatsApp</span>
-            </a>
+            {/* Quick Contact & Total Hero Block */}
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="px-5 py-3 rounded-2xl bg-white/10 border border-[var(--laiton,#B9793E)]/30 backdrop-blur-md">
+                <span className="text-[9px] uppercase tracking-widest text-[var(--laiton-clair,#D9AE78)] font-bold block">
+                  Montant Total
+                </span>
+                <span className="font-mono text-xl sm:text-2xl font-bold text-[var(--porcelaine,#F1ECE3)] tabular-nums mt-0.5 block">
+                  {formatFCFA(order.total)} <span className="text-xs font-sans font-normal opacity-75">FCFA</span>
+                </span>
+              </div>
+
+              <a
+                href={`https://wa.me/${phone}?text=${encodeURIComponent(waTemplates[0].text)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-6 py-4 text-xs font-bold text-white shadow-xl transition-all hover:bg-emerald-500 active:scale-95 uppercase tracking-wider shrink-0"
+              >
+                <MessageCircle className="h-4 w-4 stroke-[2]" />
+                <span>WhatsApp Client</span>
+              </a>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="mx-auto max-w-4xl space-y-4 px-4 py-4 lg:px-6 lg:py-6 lg:space-y-6">
-        {/* ===== Info rapide ===== */}
-        <div className="rounded-2xl bg-[var(--ivory)]/40 px-4 py-2 text-xs text-[var(--text-dark)]/60">
-          Passée le{" "}
-          {new Date(order.createdAt).toLocaleDateString("fr-FR", {
-            day: "numeric",
-            month: "long",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-          })}
-        </div>
-
-        {/* ===== Progression ===== */}
+      <div className="mx-auto max-w-6xl space-y-6 px-4 pt-6 sm:px-8 sm:pt-8">
+        {/* ===================== PROGRESSION STEPPER ===================== */}
         <Card>
-          <Eyebrow>Progression</Eyebrow>
+          <Eyebrow icon={Sparkles}>Traçabilité & Progression de la Commande</Eyebrow>
           <StatusStepper status={order.status} />
           {order.status === "cancelled" && order.cancelReason && (
-            <p className="mt-3 text-sm text-[var(--text-dark)]/50">
-              Motif : <span className="font-medium text-[var(--text-dark)]/70">{order.cancelReason}</span>
+            <p className="mt-4 text-xs sm:text-sm text-neutral-600 font-sans bg-rose-50 p-3 rounded-xl border border-rose-200">
+              Motif d&apos;annulation enregistré : <span className="font-bold text-rose-800">{order.cancelReason}</span>
             </p>
           )}
         </Card>
 
-        {/* ===== Vérification du paiement Wave — LE bloc prioritaire ===== */}
+        {/* ===================== BLOC VÉRIFICATION WAVE ===================== */}
         {needsPaymentCheck && (
-          <section className="overflow-hidden rounded-3xl border-2 border-[var(--gold)]/40 bg-white shadow-[0_1px_2px_rgba(43,33,24,0.04),0_8px_24px_-12px_rgba(43,33,24,0.18)]">
-            <div className="bg-[var(--gold)]/12 px-6 py-3">
-              <p className="flex items-center gap-2 text-sm font-bold text-[var(--gold-dark)]">
-                <span className="h-2 w-2 animate-pulse rounded-full bg-[var(--gold-dark)]" />
-                Paiement Wave à vérifier
-              </p>
+          <section className="overflow-hidden rounded-3xl border border-[var(--laiton,#B9793E)]/40 bg-gradient-to-b from-amber-500/10 via-white to-white shadow-xl">
+            <div className="bg-[var(--obsidienne,#0E0B09)] px-6 py-4 border-b border-[var(--laiton,#B9793E)]/30 flex items-center justify-between">
+              <div className="flex items-center gap-2 text-amber-300 font-semibold text-sm">
+                <ShieldCheck className="h-5 w-5 text-amber-400 animate-pulse" />
+                <span>Validation du Paiement Wave Requise</span>
+              </div>
+              <span className="rounded-full bg-amber-500/20 border border-amber-500/40 px-3 py-0.5 text-[10px] uppercase font-bold text-amber-300 tracking-wider">
+                Action Prioritaire
+              </span>
             </div>
 
-            <div className="grid gap-6 p-6 md:grid-cols-2">
+            <div className="grid gap-6 p-6 md:grid-cols-2 items-center">
               {/* Preuve de paiement */}
               <div>
-                <p className="mb-2 text-xs font-medium text-[var(--text-dark)]/50">
-                  Capture envoyée par la cliente :
+                <p className="mb-2.5 text-xs font-semibold uppercase tracking-wider text-[var(--obsidienne,#0E0B09)]/70">
+                  Reçu de transfert transmis par la cliente :
                 </p>
                 {order.paymentProofUrl ? (
-                  <a href={order.paymentProofUrl} target="_blank" rel="noopener noreferrer">
+                  <div className="relative group cursor-pointer" onClick={() => setProofModalOpen(true)}>
                     <img
-                      src={order.paymentProofUrl}
+                      src={resolveProductImageUrl(order.paymentProofUrl)}
                       alt="Preuve de paiement Wave"
-                      className="max-h-72 w-full rounded-2xl border border-[var(--gold)]/15 object-contain transition-opacity hover:opacity-90"
+                      className="max-h-72 w-full rounded-2xl border border-[var(--laiton,#B9793E)]/30 object-contain bg-neutral-900 p-1.5 shadow-md transition-transform group-hover:scale-[1.01]"
                     />
-                  </a>
+                    <div className="absolute inset-0 bg-black/40 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-semibold gap-2">
+                      <ExternalLink className="h-4 w-4" /> Cliquer pour agrandir
+                    </div>
+                  </div>
                 ) : (
-                  <div className="flex h-40 items-center justify-center rounded-2xl bg-[var(--ivory)]/60 text-sm text-[var(--text-dark)]/40">
-                    Aucune capture envoyée
+                  <div className="flex h-44 flex-col items-center justify-center rounded-2xl bg-[var(--porcelaine,#F1ECE3)] text-xs text-[var(--obsidienne,#0E0B09)]/60 border border-dashed border-[var(--laiton,#B9793E)]/30 p-4 text-center">
+                    <AlertTriangle className="h-6 w-6 text-amber-500 mb-2" />
+                    Aucune capture d&apos;écran transmise
                   </div>
                 )}
               </div>
 
-              {/* Instructions + actions */}
+              {/* Action buttons */}
               <div className="flex flex-col justify-between gap-4">
-                <div className="rounded-2xl bg-[var(--ivory)]/60 p-4">
-                  <p className="text-xs leading-relaxed text-[var(--text-dark)]/60">
-                    Ouvrez votre app Wave et vérifiez la réception de :
+                <div className="rounded-2xl bg-[var(--porcelaine,#F1ECE3)] p-5 border border-[var(--laiton,#B9793E)]/25">
+                  <p className="text-xs text-[var(--obsidienne,#0E0B09)]/70">
+                    Veuillez vérifier la réception exacte du paiement sur votre compte Wave :
                   </p>
-                  <p className="mt-2 text-2xl font-bold tracking-tight text-[var(--text-dark)] tabular-nums">
-                    {formatFCFA(order.total)} <span className="text-base font-medium text-[var(--text-dark)]/40">FCFA</span>
+                  <p className="mt-2 font-mono text-3xl font-bold text-[var(--obsidienne,#0E0B09)] tabular-nums">
+                    {formatFCFA(order.total)} <span className="text-xs font-sans font-normal text-[var(--obsidienne,#0E0B09)]/60">FCFA</span>
                   </p>
-                  <p className="mt-1 text-xs text-[var(--text-dark)]/45">
-                    de {order.customerName} · {order.customerPhone}
+                  <p className="mt-1.5 text-xs font-semibold text-[var(--laiton,#B9793E)]">
+                    Titulaire : {order.customerName} ({order.customerPhone})
                   </p>
                 </div>
 
-                <div className="flex flex-col gap-2.5">
+                <div className="flex flex-col gap-3">
                   <button
+                    type="button"
                     onClick={() => verifyPayment(true)}
                     disabled={busy}
-                    className="flex items-center justify-center gap-2 rounded-full bg-emerald-600 py-3.5 text-sm font-bold text-white shadow-lg transition-transform hover:brightness-105 active:scale-[0.98] disabled:opacity-50"
+                    className="flex items-center justify-center gap-2 rounded-2xl bg-emerald-600 py-4 text-xs font-bold text-white shadow-lg transition-all hover:bg-emerald-500 active:scale-[0.98] disabled:opacity-50 uppercase tracking-wider"
                   >
-                    <CheckIcon />
-                    Paiement reçu — confirmer la commande
+                    <CheckCircle2 className="h-4 w-4" />
+                    Paiement Reçu — Confirmer la Commande
                   </button>
                   <button
+                    type="button"
                     onClick={() => verifyPayment(false)}
                     disabled={busy}
-                    className="rounded-full border border-red-200 bg-red-50 py-3 text-sm font-semibold text-red-600 transition-colors hover:bg-red-100 disabled:opacity-50"
+                    className="rounded-2xl border border-rose-300 bg-rose-50 py-3 text-xs font-semibold text-rose-700 transition-colors hover:bg-rose-100 disabled:opacity-50"
                   >
-                    Paiement introuvable — repasser en non payé
+                    Paiement Introuvable — Repasser en non payé
                   </button>
                 </div>
               </div>
@@ -397,32 +557,168 @@ export function CommandeDetail({ order: initialOrder }: { order: OrderDetailData
           </section>
         )}
 
-        {/* ===== Actions contextuelles selon le statut ===== */}
+        {/* Modal pour agrandir la preuve de paiement */}
+        {proofModalOpen && order.paymentProofUrl && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
+            onClick={() => setProofModalOpen(false)}
+          >
+            <div className="relative max-w-3xl max-h-[90vh] bg-neutral-900 p-2 rounded-3xl overflow-hidden border border-[var(--laiton,#B9793E)]/40">
+              <img
+                src={resolveProductImageUrl(order.paymentProofUrl)}
+                alt="Preuve de paiement Wave grand format"
+                className="max-h-[85vh] w-auto object-contain rounded-2xl mx-auto"
+              />
+              <button
+                type="button"
+                onClick={() => setProofModalOpen(false)}
+                className="absolute top-4 right-4 h-9 w-9 rounded-full bg-white/20 text-white flex items-center justify-center font-bold text-sm backdrop-blur-md hover:bg-white/40"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ===================== GESTION STATUT DE PAIEMENT (HAUTE JOAILLERIE) ===================== */}
+        <Card className="bg-gradient-to-br from-white via-sky-50/20 to-[var(--porcelaine,#F1ECE3)]/40 border border-[var(--laiton,#B9793E)]/30 shadow-md font-sans">
+          <Eyebrow icon={CreditCard}>Statut & Contrôle du Paiement</Eyebrow>
+
+          <div className="grid gap-6 lg:grid-cols-12 items-center">
+            {/* Colonne gauche : Logo Wave + Statut Actuel */}
+            <div className="lg:col-span-6 flex items-start sm:items-center gap-4">
+              <div className="h-14 w-14 shrink-0 overflow-hidden rounded-2xl border-2 border-sky-200 bg-white p-1 shadow-md flex items-center justify-center">
+                {order.paymentMethod === "wave" ? (
+                  <img src="/wavelogo.jpeg" alt="Wave" className="h-full w-full object-contain rounded-xl" />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center rounded-xl bg-[var(--porcelaine,#F1ECE3)] text-[var(--laiton,#B9793E)] font-bold text-xl">
+                    💵
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-xs font-bold text-[var(--obsidienne,#0E0B09)]">Mode :</span>
+                  <span className="font-semibold text-xs text-[var(--obsidienne,#0E0B09)]">
+                    {order.paymentMethod === "wave" ? "Wave Sénégal" : "Espèces à la livraison"}
+                  </span>
+                  <PaymentStatusBadge order={order} />
+                </div>
+                
+                <p className="text-xs text-[var(--obsidienne,#0E0B09)]/70 leading-relaxed font-sans">
+                  {order.paymentStatus === "paid"
+                    ? "✓ Règlement de la commande encaissé et validé."
+                    : order.paymentStatus === "pending_verification"
+                    ? "⚠️ Capture d'écran transmise par la cliente. Veuillez vérifier votre solde."
+                    : order.paymentStatus === "refunded"
+                    ? "↩️ Le montant de cette commande a été remboursé."
+                    : "⏳ En attente du règlement par Wave ou à la livraison."}
+                </p>
+                
+                <div className="pt-1 flex items-center gap-3 text-[11px] text-[var(--obsidienne,#0E0B09)]/60 font-mono">
+                  <span>Montant : <strong className="text-[var(--obsidienne,#0E0B09)]">{formatFCFA(order.total)} FCFA</strong></span>
+                  <span>•</span>
+                  <span>Tél : <strong className="text-[var(--obsidienne,#0E0B09)]">{order.customerPhone}</strong></span>
+                </div>
+              </div>
+            </div>
+
+            {/* Colonne droite : Actions de changement de statut */}
+            <div className="lg:col-span-6 border-t lg:border-t-0 lg:border-l border-[var(--laiton,#B9793E)]/20 pt-4 lg:pt-0 lg:pl-6 space-y-2.5">
+              <span className="text-[10px] font-sans font-bold uppercase tracking-[0.2em] text-[var(--laiton,#B9793E)] block">
+                Actions Rapides Admin
+              </span>
+
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => changePaymentStatus("paid")}
+                  disabled={busy || order.paymentStatus === "paid"}
+                  className={`flex items-center justify-center gap-1.5 rounded-xl px-3.5 py-3 text-xs font-bold transition-all shadow-xs ${
+                    order.paymentStatus === "paid"
+                      ? "bg-emerald-600 text-white ring-2 ring-emerald-600/30 cursor-default"
+                      : "bg-emerald-500/10 text-emerald-800 border border-emerald-500/30 hover:bg-emerald-600 hover:text-white active:scale-95"
+                  }`}
+                >
+                  <CheckCircle2 className="h-4 w-4" />
+                  <span>Marquer Payé</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => changePaymentStatus("pending_verification")}
+                  disabled={busy || order.paymentStatus === "pending_verification"}
+                  className={`flex items-center justify-center gap-1.5 rounded-xl px-3.5 py-3 text-xs font-bold transition-all shadow-xs ${
+                    order.paymentStatus === "pending_verification"
+                      ? "bg-amber-500 text-white ring-2 ring-amber-500/30 cursor-default"
+                      : "bg-amber-500/10 text-amber-800 border border-amber-500/30 hover:bg-amber-500 hover:text-white active:scale-95"
+                  }`}
+                >
+                  <ShieldCheck className="h-4 w-4" />
+                  <span>Wave à Vérifier</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => changePaymentStatus("unpaid")}
+                  disabled={busy || order.paymentStatus === "unpaid"}
+                  className={`flex items-center justify-center gap-1.5 rounded-xl px-3.5 py-2.5 text-xs font-semibold transition-all ${
+                    order.paymentStatus === "unpaid"
+                      ? "bg-neutral-800 text-white cursor-default"
+                      : "bg-white text-neutral-700 border border-neutral-300 hover:bg-neutral-800 hover:text-white active:scale-95"
+                  }`}
+                >
+                  <span>Marquer Non Payé</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => changePaymentStatus("refunded")}
+                  disabled={busy || order.paymentStatus === "refunded"}
+                  className={`flex items-center justify-center gap-1.5 rounded-xl px-3.5 py-2.5 text-xs font-semibold transition-all ${
+                    order.paymentStatus === "refunded"
+                      ? "bg-rose-600 text-white cursor-default"
+                      : "bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-600 hover:text-white active:scale-95"
+                  }`}
+                >
+                  <span>Marquer Remboursé</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        {/* ===================== ACTIONS CONTEXTUELLES DESKTOP ===================== */}
         {!needsPaymentCheck && order.status !== "delivered" && order.status !== "cancelled" && (
-          <Card>
-            <Eyebrow>Action suivante</Eyebrow>
-            <div className="flex flex-wrap gap-3">
+          <Card className="hidden sm:block">
+            <Eyebrow icon={ChevronRight}>Action suivante recommandée</Eyebrow>
+            <div className="flex flex-wrap items-center gap-3">
               {order.status === "pending" && (
                 <button
+                  type="button"
                   onClick={() => transition("confirmed")}
                   disabled={busy}
-                  className="flex items-center gap-2 rounded-full bg-[var(--gold)] px-6 py-3 text-sm font-bold text-[#241B14] shadow-lg transition-transform hover:brightness-105 active:scale-95 disabled:opacity-50"
+                  className="flex items-center gap-2 rounded-2xl bg-[var(--obsidienne,#0E0B09)] text-[var(--porcelaine,#F1ECE3)] border border-[var(--laiton,#B9793E)] px-6 py-4 text-xs font-bold uppercase tracking-wider shadow-md transition-all hover:bg-[var(--laiton,#B9793E)] hover:text-[var(--obsidienne,#0E0B09)] active:scale-95 disabled:opacity-50"
                 >
-                  <CheckIcon />
+                  <CheckCircle2 className="h-4 w-4 text-[var(--laiton-clair,#D9AE78)]" />
                   Confirmer la commande
                 </button>
               )}
               {order.status === "confirmed" && (
                 <button
+                  type="button"
                   onClick={() => transition("shipped")}
                   disabled={busy}
-                  className="rounded-full bg-[var(--gold)] px-6 py-3 text-sm font-bold text-[#241B14] shadow-lg transition-transform hover:brightness-105 active:scale-95 disabled:opacity-50"
+                  className="flex items-center gap-2 rounded-2xl bg-[var(--obsidienne,#0E0B09)] text-[var(--porcelaine,#F1ECE3)] border border-[var(--laiton,#B9793E)] px-6 py-4 text-xs font-bold uppercase tracking-wider shadow-md transition-all hover:bg-[var(--laiton,#B9793E)] hover:text-[var(--obsidienne,#0E0B09)] active:scale-95 disabled:opacity-50"
                 >
+                  <Truck className="h-4 w-4 text-[var(--laiton-clair,#D9AE78)]" />
                   Marquer comme expédiée
                 </button>
               )}
               {order.status === "shipped" && (
                 <button
+                  type="button"
                   onClick={() =>
                     transition("delivered", {
                       paymentStatus:
@@ -430,129 +726,157 @@ export function CommandeDetail({ order: initialOrder }: { order: OrderDetailData
                     })
                   }
                   disabled={busy}
-                  className="rounded-full bg-[var(--gold)] px-6 py-3 text-sm font-bold text-[#241B14] shadow-lg transition-transform hover:brightness-105 active:scale-95 disabled:opacity-50"
+                  className="flex items-center gap-2 rounded-2xl bg-emerald-600 text-white px-6 py-4 text-xs font-bold uppercase tracking-wider shadow-md transition-all hover:bg-emerald-500 active:scale-95 disabled:opacity-50"
                 >
+                  <PackageCheck className="h-4 w-4" />
                   Marquer comme livrée{order.paymentMethod === "cash_on_delivery" ? " et payée" : ""}
                 </button>
               )}
             </div>
-
-            {order.status === "pending" && (
-              <p className="mt-3 text-xs text-[var(--text-dark)]/45">
-                La confirmation réserve le stock des articles. Pour une commande à la livraison,
-                appelez d&apos;abord la cliente pour confirmer.
-              </p>
-            )}
           </Card>
         )}
 
-        {/* ===== Grille : articles (2/3) + infos (1/3) ===== */}
+        {/* ===================== GRILLE PRODUITS & INFOS ===================== */}
         <div className="grid gap-6 lg:grid-cols-3">
-          {/* Articles + totaux */}
-          <Card className="lg:col-span-2">
-            <Eyebrow>
-              Articles ({order.items.reduce((s, i) => s + i.quantity, 0)})
+          {/* Col 1 & 2 : Produits + Totaux */}
+          <Card className="lg:col-span-2 space-y-5">
+            <Eyebrow icon={ShoppingBag}>
+              Articles Commandés ({order.items.reduce((s, i) => s + i.quantity, 0)})
             </Eyebrow>
 
-            <div className="divide-y divide-[var(--gold)]/10">
+            <div className="divide-y divide-[var(--laiton,#B9793E)]/15">
               {order.items.map((item) => (
-                <div key={item.id} className="flex items-center gap-4 py-3.5 first:pt-0">
-                  <div className="h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-[var(--ivory)]/70">
+                <div key={item.id} className="flex items-center gap-4 py-4 first:pt-0">
+                  <div className="h-16 w-16 shrink-0 overflow-hidden rounded-2xl bg-[var(--porcelaine,#F1ECE3)] border border-[var(--laiton,#B9793E)]/25 shadow-2xs">
                     {item.imageUrl ? (
-                      <img src={item.imageUrl} alt={item.productName} className="h-full w-full object-cover" />
+                      <img
+                        src={resolveProductImageUrl(item.imageUrl)}
+                        alt={item.productName}
+                        className="h-full w-full object-cover"
+                      />
                     ) : (
-                      <div className="flex h-full items-center justify-center text-lg text-[var(--gold)]/40">
-                        ◆
+                      <div className="flex h-full items-center justify-center text-xl text-[var(--laiton,#B9793E)]">
+                        💎
                       </div>
                     )}
                   </div>
+
                   <div className="min-w-0 flex-1">
                     {item.productId ? (
                       <Link
                         href={`/admin/products/${item.productId}`}
-                        className="truncate text-sm font-semibold text-[var(--text-dark)] underline-offset-2 hover:underline"
+                        className="truncate text-sm font-semibold text-[var(--obsidienne,#0E0B09)] hover:text-[var(--laiton,#B9793E)] transition-colors block"
                       >
                         {item.productName}
                       </Link>
                     ) : (
-                      <p className="truncate text-sm font-semibold text-[var(--text-dark)]/70">
+                      <p className="truncate text-sm font-semibold text-[var(--obsidienne,#0E0B09)]/60">
                         {item.productName}
-                        <span className="ml-1.5 text-xs font-normal text-[var(--text-dark)]/40">(supprimé)</span>
+                        <span className="ml-1 text-xs font-normal text-neutral-400">(produit archivé)</span>
                       </p>
                     )}
-                    <p className="text-xs text-[var(--text-dark)]/45 tabular-nums">
-                      {item.quantity} × {formatFCFA(item.unitPrice)} F
+                    <p className="text-xs font-mono text-[var(--obsidienne,#0E0B09)]/60 tabular-nums mt-1">
+                      {item.quantity} × {formatFCFA(item.unitPrice)} FCFA
                     </p>
                   </div>
-                  <span className="text-sm font-bold text-[var(--text-dark)] tabular-nums">
-                    {formatFCFA(item.quantity * item.unitPrice)} F
-                  </span>
+
+                  <div className="text-right">
+                    <span className="font-mono text-base font-bold text-[var(--obsidienne,#0E0B09)] tabular-nums">
+                      {formatFCFA(item.quantity * item.unitPrice)}{" "}
+                      <span className="text-[10px] font-sans font-normal text-[var(--obsidienne,#0E0B09)]/60">FCFA</span>
+                    </span>
+                  </div>
                 </div>
               ))}
             </div>
 
-            {/* Totaux */}
-            <div className="mt-4 space-y-2 border-t border-[var(--gold)]/15 pt-4">
-              <div className="flex justify-between text-sm text-[var(--text-dark)]/55">
-                <span>Sous-total</span>
-                <span className="tabular-nums">{formatFCFA(order.subtotal)} F</span>
+            {/* Totaux financier */}
+            <div className="rounded-2xl bg-[var(--porcelaine,#F1ECE3)]/60 p-5 border border-[var(--laiton,#B9793E)]/20 space-y-2.5">
+              <div className="flex justify-between text-xs font-sans text-[var(--obsidienne,#0E0B09)]/70">
+                <span>Sous-total articles</span>
+                <span className="font-mono font-medium tabular-nums">{formatFCFA(order.subtotal)} FCFA</span>
               </div>
-              <div className="flex justify-between text-sm text-[var(--text-dark)]/55">
-                <span>Livraison</span>
-                <span className="tabular-nums">
-                  {order.deliveryFee > 0 ? `${formatFCFA(order.deliveryFee)} F` : "Offerte"}
+              <div className="flex justify-between text-xs font-sans text-[var(--obsidienne,#0E0B09)]/70">
+                <span>Frais de livraison</span>
+                <span className="font-mono font-medium tabular-nums">
+                  {order.deliveryFee > 0 ? `${formatFCFA(order.deliveryFee)} FCFA` : "Offerts"}
                 </span>
               </div>
-              <div className="flex items-baseline justify-between pt-1">
-                <span className="text-sm font-bold text-[var(--text-dark)]">Total</span>
-                <span className="text-xl font-bold tracking-tight text-[var(--text-dark)] tabular-nums">
-                  {formatFCFA(order.total)} FCFA
+              <div className="flex items-baseline justify-between pt-2 border-t border-[var(--laiton,#B9793E)]/25">
+                <span className="text-sm font-bold text-[var(--obsidienne,#0E0B09)]">Total de la commande</span>
+                <span className="font-mono text-xl font-bold tracking-tight text-[var(--obsidienne,#0E0B09)] tabular-nums">
+                  {formatFCFA(order.total)} <span className="text-xs font-sans font-normal text-[var(--obsidienne,#0E0B09)]/70">FCFA</span>
                 </span>
               </div>
             </div>
           </Card>
 
-          {/* Colonne infos */}
+          {/* Col 3 : Client & Livraison */}
           <div className="space-y-6">
-            {/* Cliente */}
+            {/* Infos client */}
             <Card>
-              <Eyebrow>Cliente</Eyebrow>
-              <p className="text-sm font-semibold text-[var(--text-dark)]">{order.customerName}</p>
-              <p className="mt-0.5 text-sm text-[var(--text-dark)]/55 tabular-nums">
-                {order.customerPhone}
-              </p>
-              {order.customerEmail && (
-                <p className="mt-0.5 truncate text-sm text-[var(--text-dark)]/55">{order.customerEmail}</p>
+              <Eyebrow icon={User}>Fiche Cliente VIP</Eyebrow>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[var(--obsidienne,#0E0B09)] text-[var(--laiton-clair,#D9AE78)] font-serif font-bold text-base border border-[var(--laiton,#B9793E)]/30 shadow-md">
+                  {customerInitials}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-base font-bold text-[var(--obsidienne,#0E0B09)] truncate">{order.customerName}</p>
+                  <p className="text-xs font-mono text-[var(--obsidienne,#0E0B09)]/65 tabular-nums">
+                    {order.customerPhone}
+                  </p>
+                </div>
+              </div>
+
+              {order.customerOrdersCount && order.customerOrdersCount > 1 && (
+                <div className="mb-4 rounded-xl bg-[var(--laiton,#B9793E)]/10 border border-[var(--laiton,#B9793E)]/25 p-2.5 text-center">
+                  <span className="text-[11px] font-sans font-bold text-[var(--laiton,#B9793E)]">
+                    ★ Cliente Fidèle ({order.customerOrdersCount} commandes · {formatFCFA(order.customerTotalSpent || 0)} FCFA)
+                  </span>
+                </div>
               )}
 
-              <div className="mt-4 flex gap-2">
+              <div className="grid grid-cols-2 gap-2">
                 <a
                   href={`tel:${order.customerPhone}`}
-                  className="flex flex-1 items-center justify-center gap-1.5 rounded-full border border-[var(--gold)]/25 py-2.5 text-xs font-semibold text-[var(--text-dark)]/70 transition-colors hover:bg-[var(--ivory)]/60"
+                  className="flex items-center justify-center gap-1.5 rounded-xl border border-[var(--laiton,#B9793E)]/30 bg-white py-2.5 text-xs font-semibold text-[var(--obsidienne,#0E0B09)] transition-colors hover:bg-[var(--porcelaine,#F1ECE3)] shadow-2xs"
                 >
-                  <PhoneIcon />
+                  <Phone className="h-3.5 w-3.5 text-[var(--laiton,#B9793E)]" />
                   Appeler
                 </a>
                 <a
-                  href={`https://wa.me/${phone}?text=${waMessage}`}
+                  href={`https://wa.me/${phone}?text=${encodeURIComponent(waTemplates[0].text)}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex flex-1 items-center justify-center gap-1.5 rounded-full bg-emerald-600/10 py-2.5 text-xs font-semibold text-emerald-700 transition-colors hover:bg-emerald-600 hover:text-white"
+                  className="flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600/10 border border-emerald-500/30 py-2.5 text-xs font-semibold text-emerald-700 transition-colors hover:bg-emerald-600 hover:text-white shadow-2xs"
                 >
-                  <WhatsAppIcon />
+                  <MessageCircle className="h-3.5 w-3.5" />
                   WhatsApp
                 </a>
               </div>
 
-              <div className="mt-4 border-t border-[var(--gold)]/10 pt-4">
-                <p className="text-xs font-medium uppercase tracking-wider text-[var(--text-dark)]/40">
-                  Livraison
-                </p>
-                <p className="mt-1.5 text-sm leading-relaxed text-[var(--text-dark)]/70">
+              <div className="mt-5 pt-4 border-t border-[var(--laiton,#B9793E)]/15">
+                <div className="flex items-center justify-between gap-1.5 mb-1.5">
+                  <div className="flex items-center gap-1.5">
+                    <MapPin className="h-3.5 w-3.5 text-[var(--laiton,#B9793E)]" />
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--laiton,#B9793E)]">
+                      Adresse de Livraison
+                    </p>
+                  </div>
+                  <a
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(order.deliveryAddress)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[10px] text-[var(--laiton,#B9793E)] font-semibold hover:underline flex items-center gap-1"
+                  >
+                    Google Maps <ExternalLink className="h-2.5 w-2.5" />
+                  </a>
+                </div>
+                <p className="text-xs leading-relaxed font-sans text-[var(--obsidienne,#0E0B09)] bg-[var(--porcelaine,#F1ECE3)]/60 p-3 rounded-xl border border-[var(--laiton,#B9793E)]/15">
                   {order.deliveryAddress}
                 </p>
                 {order.deliveryNote && (
-                  <p className="mt-2 rounded-xl bg-[var(--ivory)]/60 px-3 py-2 text-xs italic leading-relaxed text-[var(--text-dark)]/55">
+                  <p className="mt-2 text-xs italic text-[var(--obsidienne,#0E0B09)]/70 bg-amber-50 p-3 rounded-xl border border-amber-200">
                     « {order.deliveryNote} »
                   </p>
                 )}
@@ -561,74 +885,67 @@ export function CommandeDetail({ order: initialOrder }: { order: OrderDetailData
 
             {/* Note interne */}
             <Card>
-              <Eyebrow>Note interne</Eyebrow>
+              <Eyebrow icon={FileText}>Note interne privée</Eyebrow>
               <textarea
                 value={adminNote}
                 onChange={(e) => setAdminNote(e.target.value)}
                 onBlur={saveNote}
-                placeholder="Visible uniquement par vous..."
+                placeholder="Notes réservées à la gestion administrative..."
                 rows={3}
-                className="w-full resize-none rounded-2xl border border-[var(--gold)]/20 bg-[var(--ivory)]/40 px-4 py-3 text-sm text-[var(--text-dark)] placeholder:text-[var(--text-dark)]/30 focus:border-[var(--gold)] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--gold)]/25"
+                className="w-full resize-none rounded-2xl border border-[var(--laiton,#B9793E)]/25 bg-[var(--porcelaine,#F1ECE3)]/40 p-3.5 text-xs text-[var(--obsidienne,#0E0B09)] placeholder:text-[var(--obsidienne,#0E0B09)]/40 focus:border-[var(--laiton,#B9793E)] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--laiton,#B9793E)]/20"
               />
             </Card>
 
             {/* Annulation */}
             {canCancel && (
-              <Card className="border-red-100">
+              <Card className="border-rose-200 bg-rose-50/30">
                 {!cancelOpen ? (
                   <button
+                    type="button"
                     onClick={() => setCancelOpen(true)}
-                    className="w-full rounded-full border border-red-200 bg-red-50 py-3 text-sm font-semibold text-red-600 transition-colors hover:bg-red-100"
+                    className="w-full rounded-2xl border border-rose-300 bg-white py-3 text-xs font-semibold text-rose-700 transition-all hover:bg-rose-100 shadow-2xs"
                   >
                     Annuler la commande
                   </button>
                 ) : (
                   <div>
-                    <p className="mb-3 text-sm font-semibold text-[var(--text-dark)]">
+                    <p className="mb-2.5 text-xs font-semibold text-[var(--obsidienne,#0E0B09)]">
                       Motif de l&apos;annulation :
                     </p>
-                    <div className="mb-4 flex flex-wrap gap-2">
+                    <div className="mb-4 flex flex-wrap gap-1.5">
                       {cancelReasons.map((reason) => (
                         <button
                           key={reason}
+                          type="button"
                           onClick={() => setCancelReason(reason)}
-                          className={`rounded-full px-4 py-2 text-xs font-medium transition-all ${
+                          className={`rounded-full px-3 py-1.5 text-[11px] font-semibold transition-all ${
                             cancelReason === reason
-                              ? "bg-red-600 text-white shadow-md"
-                              : "border border-red-200 bg-white text-red-600/70 hover:bg-red-50"
+                              ? "bg-rose-600 text-white shadow-xs"
+                              : "border border-rose-200 bg-white text-rose-700 hover:bg-rose-50"
                           }`}
                         >
                           {reason}
                         </button>
                       ))}
                     </div>
-                    {(order.status === "confirmed" || order.status === "shipped") && (
-                      <p className="mb-3 rounded-xl bg-amber-50 px-3 py-2 text-xs leading-relaxed text-amber-800">
-                        Le stock des articles sera automatiquement remis en vente.
-                      </p>
-                    )}
-                    {order.paymentStatus === "paid" && (
-                      <p className="mb-3 rounded-xl bg-amber-50 px-3 py-2 text-xs leading-relaxed text-amber-800">
-                        Cette commande est payée : pensez à rembourser {formatFCFA(order.total)} FCFA
-                        via Wave. Elle sera marquée « Remboursée ».
-                      </p>
-                    )}
                     <div className="flex gap-2">
                       <button
+                        type="button"
                         onClick={() => {
                           setCancelOpen(false);
                           setCancelReason(null);
                         }}
-                        className="flex-1 rounded-full border border-[var(--gold)]/25 py-2.5 text-xs font-semibold text-[var(--text-dark)]/60 transition-colors hover:bg-[var(--ivory)]/60"
+                        className="flex-1 rounded-xl border border-neutral-300 py-2.5 text-xs font-semibold text-neutral-600 hover:bg-white"
                       >
                         Retour
                       </button>
                       <button
+                        type="button"
                         onClick={confirmCancel}
                         disabled={!cancelReason || busy}
-                        className="flex-1 rounded-full bg-red-600 py-2.5 text-xs font-bold text-white transition-colors hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-40"
+                        className="flex-1 rounded-xl bg-rose-600 py-2.5 text-xs font-bold text-white transition-colors hover:bg-rose-700 disabled:opacity-40"
                       >
-                        Confirmer l&apos;annulation
+                        Confirmer
                       </button>
                     </div>
                   </div>
@@ -637,6 +954,101 @@ export function CommandeDetail({ order: initialOrder }: { order: OrderDetailData
             )}
           </div>
         </div>
+
+        {/* ===================== TEMPLATES WHATSAPP PRE-REMPLIS (FIN DE PAGE) ===================== */}
+        <Card className="bg-gradient-to-r from-emerald-950/5 via-white to-white">
+          <Eyebrow icon={Send}>Messages WhatsApp Pré-rédigés pour la Cliente</Eyebrow>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+            {waTemplates.map((tpl) => (
+              <a
+                key={tpl.id}
+                href={`https://wa.me/${phone}?text=${encodeURIComponent(tpl.text)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex flex-col justify-between rounded-2xl border border-emerald-500/25 bg-emerald-50/40 p-3.5 transition-all hover:bg-emerald-500 hover:text-white group shadow-2xs"
+              >
+                <div>
+                  <span className="font-sans text-xs font-bold text-emerald-950 group-hover:text-white block mb-1">
+                    {tpl.label}
+                  </span>
+                  <p className="text-[11px] font-sans text-emerald-900/70 group-hover:text-white/90 line-clamp-3 leading-relaxed">
+                    {tpl.text}
+                  </p>
+                </div>
+                <span className="mt-3 text-[10px] font-bold uppercase tracking-wider text-emerald-700 group-hover:text-white inline-flex items-center gap-1">
+                  Envoyer <ChevronRight className="h-3 w-3" />
+                </span>
+              </a>
+            ))}
+          </div>
+        </Card>
+      </div>
+
+      {/* ===================== FLOATING EXECUTIVE GLASS CAPSULE (MOBILE STICKY BAR) ===================== */}
+      <div className="sm:hidden fixed bottom-4 inset-x-3 z-50 rounded-[2rem] border border-[var(--laiton,#B9793E)]/40 bg-[var(--obsidienne,#0E0B09)]/95 backdrop-blur-2xl p-2.5 shadow-[0_20px_50px_rgba(0,0,0,0.7)] ring-1 ring-white/10 space-y-2">
+        {/* Contact direct cliente : Appeler & WhatsApp */}
+        <div className="flex items-center gap-2">
+          <a
+            href={`tel:${order.customerPhone}`}
+            className="flex-1 flex items-center justify-center gap-1.5 rounded-xl border border-[var(--laiton,#B9793E)]/35 bg-white/10 py-2.5 px-3 text-xs font-semibold text-[var(--porcelaine,#F1ECE3)] active:scale-95 transition-all backdrop-blur-md shadow-inner"
+          >
+            <Phone className="h-3.5 w-3.5 text-[var(--laiton-clair,#D9AE78)]" />
+            <span>Appeler</span>
+          </a>
+          <a
+            href={`https://wa.me/${phone}?text=${encodeURIComponent(waTemplates[0].text)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 py-2.5 px-3 text-xs font-bold text-white shadow-md active:scale-95 transition-all"
+          >
+            <MessageCircle className="h-3.5 w-3.5" />
+            <span>WhatsApp</span>
+          </a>
+        </div>
+
+        {/* Action statut principale (si applicable) */}
+        {!needsPaymentCheck && order.status !== "delivered" && order.status !== "cancelled" && (
+          <div>
+            {order.status === "pending" && (
+              <button
+                type="button"
+                onClick={() => transition("confirmed")}
+                disabled={busy}
+                className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[var(--laiton,#B9793E)] via-[#D9AE78] to-[var(--laiton,#B9793E)] text-[var(--obsidienne,#0E0B09)] py-3 text-xs font-extrabold uppercase tracking-wider shadow-lg active:scale-95 disabled:opacity-50"
+              >
+                <CheckCircle2 className="h-4 w-4 stroke-[2.5]" />
+                Confirmer la commande
+              </button>
+            )}
+            {order.status === "confirmed" && (
+              <button
+                type="button"
+                onClick={() => transition("shipped")}
+                disabled={busy}
+                className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[var(--laiton,#B9793E)] via-[#D9AE78] to-[var(--laiton,#B9793E)] text-[var(--obsidienne,#0E0B09)] py-3 text-xs font-extrabold uppercase tracking-wider shadow-lg active:scale-95 disabled:opacity-50"
+              >
+                <Truck className="h-4 w-4 stroke-[2.5]" />
+                Marquer comme expédiée
+              </button>
+            )}
+            {order.status === "shipped" && (
+              <button
+                type="button"
+                onClick={() =>
+                  transition("delivered", {
+                    paymentStatus:
+                      order.paymentMethod === "cash_on_delivery" ? "paid" : order.paymentStatus,
+                  })
+                }
+                disabled={busy}
+                className="w-full flex items-center justify-center gap-2 rounded-xl bg-emerald-500 text-white py-3 text-xs font-extrabold uppercase tracking-wider shadow-lg active:scale-95 disabled:opacity-50"
+              >
+                <PackageCheck className="h-4 w-4 stroke-[2.5]" />
+                Marquer comme livrée
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

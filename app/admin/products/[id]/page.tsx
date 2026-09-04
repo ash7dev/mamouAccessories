@@ -1,17 +1,16 @@
 import { ProductDetail } from "@/components/admin/products/product-detail";
-import type { ProductDetailData } from "@/components/admin/products/product-detail";
-import { buildImageUrl } from '@/lib/cloudinary';
-import { createServiceRoleClient } from '@/lib/supabase/service-role';
+import { resolveProductImageUrl } from "@/lib/utils/image-helpers";
+import { createServiceRoleClient } from "@/lib/supabase/service-role";
+import { notFound } from "next/navigation";
 
-// Force dynamic rendering
-export const dynamic = 'force-dynamic';
-export const revalidate = 30;
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
-async function getProductById(id: string) {
+async function getProductDetailData(id: string) {
   const supabase = createServiceRoleClient();
 
   const { data: product, error } = await supabase
-    .from('products')
+    .from("products")
     .select(`
       id,
       name,
@@ -34,40 +33,56 @@ async function getProductById(id: string) {
         position
       )
     `)
-    .eq('id', id)
+    .eq("id", id)
     .single();
 
-  if (error) {
-    console.error('Error fetching product:', error);
-    throw new Error('Product not found');
+  if (error || !product) {
+    console.error("Error fetching product:", error);
+    notFound();
   }
 
-  return product;
-}
+  // Real-time sales stats calculation from order_items
+  let unitsSold = 0;
+  let revenue = 0;
+  try {
+    const { data: items } = await supabase
+      .from("order_items")
+      .select("quantity, price")
+      .eq("product_id", id);
 
-function mapProductToDetail(product: any): ProductDetailData {
+    if (items && items.length > 0) {
+      unitsSold = items.reduce((acc, item) => acc + (Number(item.quantity) || 0), 0);
+      revenue = items.reduce(
+        (acc, item) => acc + (Number(item.quantity) || 0) * (Number(item.price) || 0),
+        0
+      );
+    }
+  } catch (err) {
+    console.error("Error fetching product sales stats:", err);
+  }
+
   return {
     id: product.id,
     name: product.name,
     slug: product.slug,
-    categoryName: product.categories?.name ?? "Sans catégorie",
+    categoryName: (product.categories as any)?.name ?? "Sans catégorie",
     description: product.description ?? "",
     price: Number(product.price ?? 0),
-    compareAtPrice: product.compare_at_price ?? null,
+    compareAtPrice: product.compare_at_price ? Number(product.compare_at_price) : null,
     stock: Number(product.stock ?? 0),
-    imageOrientation: product.image_orientation ?? "portrait",
+    imageOrientation: (product.image_orientation ?? "portrait") as "portrait" | "landscape",
     isFeatured: Boolean(product.is_featured),
     isActive: Boolean(product.is_active),
     createdAt: product.created_at,
     images: (product.product_images ?? [])
-      .sort((a: any, b: any) => a.position - b.position)
+      .sort((a: any, b: any) => (a.position ?? 0) - (b.position ?? 0))
       .map((image: any) => ({
         id: image.id,
-        url: buildImageUrl(image.cloudinary_public_id) ?? "/placeholder-product.svg",
+        url: resolveProductImageUrl(image.cloudinary_public_id),
       })),
     stats: {
-      unitsSold: 0,
-      revenue: 0,
+      unitsSold,
+      revenue,
       avgRating: null,
       reviewsCount: 0,
     },
@@ -76,11 +91,7 @@ function mapProductToDetail(product: any): ProductDetailData {
 
 export default async function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const product = await getProductById(id);
+  const productData = await getProductDetailData(id);
 
-  return (
-    <div className="p-6 lg:p-8">
-      <ProductDetail product={mapProductToDetail(product)} />
-    </div>
-  );
+  return <ProductDetail product={productData} />;
 }

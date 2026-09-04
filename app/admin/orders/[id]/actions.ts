@@ -220,3 +220,45 @@ export async function saveAdminNote(orderId: string, note: string) {
     return { success: false, error: 'Erreur inattendue' };
   }
 }
+
+/**
+ * Mettre à jour directement le statut de paiement d'une commande (paid, unpaid, pending_verification, refunded)
+ */
+export async function updatePaymentStatus(orderId: string, paymentStatus: PaymentStatus) {
+  const supabase = createServiceRoleClient();
+
+  try {
+    const updateData: any = { payment_status: paymentStatus };
+    
+    // Si marqué comme payé et que la commande est en pending, la confirmer automatiquement
+    if (paymentStatus === 'paid') {
+      const { data: order } = await supabase
+        .from('orders')
+        .select('status')
+        .eq('id', orderId)
+        .single();
+        
+      if (order && order.status === 'pending') {
+        updateData.status = 'confirmed';
+      }
+    }
+
+    const { error } = await supabase
+      .from('orders')
+      .update(updateData)
+      .eq('id', orderId);
+
+    if (error) {
+      console.error('Error updating payment status:', error);
+      return { success: false, error: 'Erreur lors de la mise à jour du statut de paiement' };
+    }
+
+    revalidatePath(`/admin/orders/${orderId}`);
+    revalidatePath('/admin/orders');
+
+    return { success: true };
+  } catch (error) {
+    console.error('Unexpected error:', error);
+    return { success: false, error: 'Erreur inattendue' };
+  }
+}

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Heart, Check, ShoppingBag } from "lucide-react";
+import { ArrowRight, Check } from "lucide-react";
 import { useCart } from "@/lib/cart-context";
 import { ProductImage } from "@/components/ui/product-image";
 
@@ -21,10 +21,9 @@ export interface PublicProductCard {
 
 const formatFCFA = (n: number) => new Intl.NumberFormat("fr-FR").format(n);
 
-export function ProductCard({ product }: { product: PublicProductCard }) {
+export function ProductCard({ product, priority = false }: { product: PublicProductCard; priority?: boolean }) {
   const { addItem } = useCart();
   const [justAdded, setJustAdded] = useState(false);
-  const [isFavorite, setIsFavorite] = useState(false);
   const isOut = product.stock === 0;
 
   const discount =
@@ -40,24 +39,20 @@ export function ProductCard({ product }: { product: PublicProductCard }) {
     setTimeout(() => setJustAdded(false), 1600);
   };
 
-  const handleFavorite = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsFavorite((v) => !v);
-  };
-
   return (
     <Link href={`/produit/${product.slug}`} className="group flex flex-col h-full w-full">
       <motion.div
-        whileHover={{ y: -5 }}
+        whileHover={{ y: -4 }}
         transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
-        className="flex flex-col justify-between h-full w-full rounded-[1.75rem] border border-[var(--laiton)]/15 bg-white shadow-[0_4px_20px_-4px_rgba(14,11,9,0.06)] hover:shadow-[0_20px_48px_-12px_rgba(185,121,62,0.22)] hover:border-[var(--laiton)]/40 transition-all duration-300 overflow-hidden"
+        className="flex flex-col justify-between h-full w-full rounded-[1.5rem] bg-white border border-neutral-200/60 hover:border-[var(--laiton)]/30 shadow-[0_2px_12px_-4px_rgba(14,11,9,0.05)] hover:shadow-[0_12px_40px_-8px_rgba(185,121,62,0.18)] transition-all duration-300 overflow-hidden"
       >
-        {/* ---------- Zone Image Pleine Largeur (Ratios 3:4, Sans Bordure Interne) ---------- */}
-        <div className="relative aspect-[3/4] w-full overflow-hidden rounded-t-[1.75rem] bg-[var(--porcelaine)] shrink-0">
+        {/* ---------- Zone Image ---------- */}
+        <div className="relative aspect-square sm:aspect-[1/1.15] w-full overflow-hidden bg-[var(--porcelaine)] shrink-0">
           <ProductImage
             src={product.imageUrl}
             alt={product.name}
             fill
+            priority={priority}
             className={`h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105 ${
               isOut ? "opacity-40 grayscale" : ""
             }`}
@@ -65,90 +60,84 @@ export function ProductCard({ product }: { product: PublicProductCard }) {
 
           {/* Badge Promo */}
           {discount && !isOut && (
-            <span className="absolute left-3 top-3 z-10 rounded-full bg-gradient-to-r from-[var(--laiton)] to-[#9A622E] px-2.5 py-1 text-[10px] font-bold text-white shadow-sm tracking-wider uppercase">
+            <span className="absolute left-2.5 top-2.5 sm:left-3 sm:top-3 z-10 rounded-full bg-gradient-to-r from-[var(--laiton)] to-[#9A622E] px-2 py-0.5 sm:px-2.5 sm:py-1 text-[9px] sm:text-[10px] font-bold text-white shadow-sm tracking-wider uppercase">
               −{discount}%
+            </span>
+          )}
+
+          {/* Badge Nouveau */}
+          {!discount && !isOut && (
+            <span className="absolute left-2.5 top-2.5 sm:left-3 sm:top-3 z-10 rounded-md bg-[var(--obsidienne)] px-2 py-0.5 sm:px-2.5 sm:py-1 text-[9px] sm:text-[10px] font-bold text-white tracking-wider uppercase">
+              NEW
             </span>
           )}
 
           {/* Badge Rupture */}
           {isOut && (
-            <span className="absolute left-3 top-3 z-10 rounded-full bg-[var(--obsidienne)]/90 backdrop-blur-md px-2.5 py-1 text-[10px] font-semibold tracking-wide text-white shadow">
-              Épuisé
+            <span className="absolute inset-0 z-10 flex items-center justify-center">
+              <span className="rounded-full bg-white/90 backdrop-blur-sm px-4 py-1.5 sm:px-5 sm:py-2 text-[10px] sm:text-xs font-bold uppercase tracking-widest text-[var(--obsidienne)] shadow-lg border border-neutral-200">
+                Rupture
+              </span>
             </span>
           )}
-
-          {/* Bouton Favori Flottant */}
-          <button
-            onClick={handleFavorite}
-            aria-label={isFavorite ? "Retirer des favoris" : "Ajouter aux favoris"}
-            className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white/70 backdrop-blur-md border border-white/50 shadow-sm transition-all hover:scale-110 active:scale-95"
-          >
-            <Heart
-              className={`h-4 w-4 transition-colors ${
-                isFavorite ? "fill-[var(--laiton)] text-[var(--laiton)]" : "text-[var(--obsidienne)]/60"
-              }`}
-            />
-          </button>
         </div>
 
-        {/* ---------- Informations Produit (Structure Flex Alignée) ---------- */}
-        <div className="flex-1 flex flex-col justify-between p-3.5 sm:p-5">
+        {/* ---------- Infos Produit — Style Jaguar ---------- */}
+        <div className="flex flex-col justify-between flex-1 px-3.5 pt-2.5 pb-3.5 sm:px-5 sm:pt-4 sm:pb-5">
+          {/* Catégorie */}
           <div>
-            {/* Catégorie */}
-            <p className="text-[10px] sm:text-[11px] font-bold tracking-wider uppercase text-[var(--laiton,#B9793E)] mb-1">
+            <p className="text-[9px] sm:text-[11px] font-bold tracking-[0.15em] uppercase text-[var(--laiton,#B9793E)] mb-0.5 sm:mb-1">
               {product.categoryName}
             </p>
 
-            {/* Titre avec typographie luxe Playfair Display (grande, lisible & audacieuse) */}
-            <h3 className="font-serif text-base sm:text-lg md:text-xl font-bold text-[var(--obsidienne,#0E0B09)] line-clamp-2 min-h-[2.6rem] sm:min-h-[3rem] mb-2 leading-snug group-hover:text-[var(--laiton)] transition-colors tracking-tight">
+            {/* Nom Produit — Format médium équilibré desktop & mobile */}
+            <h3 className="font-sans text-base sm:text-xl lg:text-2xl font-bold text-[var(--obsidienne,#0E0B09)] leading-snug line-clamp-2 min-h-[2.5rem] sm:min-h-[3.2rem] group-hover:text-[var(--laiton)] transition-colors capitalize tracking-tight">
               {product.name}
             </h3>
           </div>
 
-          {/* Bloc Bas : Prix + Bouton Panier */}
-          <div>
-            {/* Prix */}
-            <div className="flex items-baseline gap-1.5 mb-3 flex-wrap">
-              <span className="text-base sm:text-lg font-bold text-[var(--obsidienne)] tabular-nums tracking-tight">
-                {formatFCFA(product.price)}
-              </span>
-              <span className="text-[10px] sm:text-[11px] text-[var(--obsidienne)]/50 font-medium">FCFA</span>
-              {product.compareAtPrice && product.compareAtPrice > product.price && (
-                <span className="text-xs text-[var(--obsidienne)]/40 line-through tabular-nums ml-auto">
-                  {formatFCFA(product.compareAtPrice)}
-                </span>
-              )}
-            </div>
+          {/* Prix + Bouton Flèche — Grand & Très Lisible */}
+          <div className="flex items-center justify-between mt-3 sm:mt-4 pt-0">
+            <p className="font-sans text-lg sm:text-[1.5rem] font-black text-[var(--obsidienne,#0E0B09)] tracking-tight tabular-nums">
+              {formatFCFA(product.price)}{" "}
+              <span className="text-xs sm:text-sm font-bold tracking-wide uppercase opacity-75">FCFA</span>
+            </p>
 
-            {/* Bouton CTA Panier Toujours Alignés */}
+            {/* Bouton Flèche Rond */}
             {!isOut ? (
-              <button
+              <motion.button
+                whileTap={{ scale: 0.88 }}
                 onClick={handleAddToCart}
-                className={`w-full rounded-full py-2.5 px-3 text-xs font-bold uppercase tracking-wider transition-all duration-300 shadow flex items-center justify-center gap-1.5 active:scale-95 ${
+                aria-label="Ajouter au panier"
+                className={`flex h-8 w-8 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-full transition-all duration-300 ${
                   justAdded
-                    ? "bg-emerald-600 text-white"
-                    : "bg-[var(--obsidienne)] hover:bg-[var(--laiton)] text-white"
+                    ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/30"
+                    : "bg-[var(--obsidienne)] hover:bg-[var(--laiton)] text-white shadow-md hover:shadow-lg"
                 }`}
               >
                 {justAdded ? (
-                  <>
-                    <Check className="h-3.5 w-3.5" />
-                    <span>Ajouté</span>
-                  </>
+                  <motion.span
+                    key="check"
+                    initial={{ scale: 0, rotate: -45 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    transition={{ type: "spring", stiffness: 500, damping: 20 }}
+                  >
+                    <Check className="h-3.5 w-3.5 sm:h-5 sm:w-5" />
+                  </motion.span>
                 ) : (
-                  <>
-                    <ShoppingBag className="h-3.5 w-3.5" />
-                    <span>Ajouter</span>
-                  </>
+                  <motion.span
+                    key="arrow"
+                    initial={{ scale: 0.8 }}
+                    animate={{ scale: 1 }}
+                  >
+                    <ArrowRight className="h-3.5 w-3.5 sm:h-5 sm:w-5" />
+                  </motion.span>
                 )}
-              </button>
+              </motion.button>
             ) : (
-              <button
-                disabled
-                className="w-full rounded-full py-2.5 px-3 text-xs font-semibold uppercase tracking-wider bg-neutral-100 text-neutral-400 cursor-not-allowed text-center"
-              >
+              <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-neutral-400">
                 Indisponible
-              </button>
+              </span>
             )}
           </div>
         </div>

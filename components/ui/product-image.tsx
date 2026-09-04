@@ -28,13 +28,13 @@ export function ProductImage({
   width,
   height,
   priority = false,
-  sizes,
-  unoptimized = true,
-  quality,
+  sizes = "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw",
+  unoptimized = false,
+  quality = 85,
 }: ProductImageProps) {
   const resolvedSrc = resolveProductImageUrl(src, {
-    width: width || (fill ? undefined : 800),
-    height: height || (fill ? undefined : 800),
+    width: width || (fill ? 800 : width),
+    height: height || (fill ? 800 : height),
   });
 
   const [currentSrc, setCurrentSrc] = useState<string>(resolvedSrc);
@@ -44,8 +44,8 @@ export function ProductImage({
   // Synchronisation si la prop src change
   useEffect(() => {
     const updated = resolveProductImageUrl(src, {
-      width: width || (fill ? undefined : 800),
-      height: height || (fill ? undefined : 800),
+      width: width || (fill ? 800 : width),
+      height: height || (fill ? 800 : height),
     });
     setCurrentSrc(updated);
     setHasError(false);
@@ -65,10 +65,11 @@ export function ProductImage({
   };
 
   const finalSrc = hasError || !currentSrc ? PLACEHOLDER_IMAGE : currentSrc;
+  const isSvgOrData = finalSrc.endsWith('.svg') || finalSrc.startsWith('data:');
 
   if (fill) {
     return (
-      <div className={`relative h-full w-full overflow-hidden ${isLoading ? 'animate-pulse bg-neutral-100' : ''}`}>
+      <div className={`relative h-full w-full overflow-hidden ${isLoading ? 'animate-pulse bg-gradient-to-tr from-[var(--porcelaine,#F1ECE3)] via-neutral-100 to-[var(--porcelaine,#F1ECE3)]' : ''}`}>
         <Image
           src={finalSrc}
           alt={alt || "Image produit"}
@@ -78,7 +79,7 @@ export function ProductImage({
           onLoad={handleLoad}
           priority={priority}
           sizes={sizes}
-          unoptimized={unoptimized || finalSrc.endsWith('.svg') || finalSrc.startsWith('data:')}
+          unoptimized={unoptimized || isSvgOrData}
           quality={quality}
         />
       </div>
@@ -86,18 +87,20 @@ export function ProductImage({
   }
 
   return (
-    <Image
-      src={finalSrc}
-      alt={alt || "Image produit"}
-      width={width || 500}
-      height={height || 500}
-      className={`transition-opacity duration-300 ${isLoading ? 'opacity-0' : 'opacity-100'} ${className}`}
-      onError={handleError}
-      onLoad={handleLoad}
-      priority={priority}
-      sizes={sizes}
-      unoptimized={unoptimized || finalSrc.endsWith('.svg') || finalSrc.startsWith('data:')}
-      quality={quality}
-    />
+    <div className={`inline-block overflow-hidden ${isLoading ? 'animate-pulse bg-gradient-to-tr from-[var(--porcelaine,#F1ECE3)] via-neutral-100 to-[var(--porcelaine,#F1ECE3)]' : ''}`}>
+      <Image
+        src={finalSrc}
+        alt={alt || "Image produit"}
+        width={width || 500}
+        height={height || 500}
+        className={`transition-opacity duration-300 ${isLoading ? 'opacity-0' : 'opacity-100'} ${className}`}
+        onError={handleError}
+        onLoad={handleLoad}
+        priority={priority}
+        sizes={sizes}
+        unoptimized={unoptimized || isSvgOrData}
+        quality={quality}
+      />
+    </div>
   );
 }

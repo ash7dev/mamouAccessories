@@ -110,34 +110,40 @@ export async function PUT(
       );
     }
 
-    // Si de nouvelles images sont fournies, remplacer les anciennes
+    // Si de nouvelles images sont fournies, gérer la suppression des anciennes sur Cloudinary
     if (body.cloudinary_public_ids !== undefined) {
-      // Récupérer les anciennes images
+      // Récupérer les anciennes images enregistrées en BDD
       const { data: oldImages } = await supabase
         .from('product_images')
         .select('cloudinary_public_id')
         .eq('product_id', id);
 
-      // Supprimer les anciennes images de la BDD
-      await supabase
-        .from('product_images')
-        .delete()
-        .eq('product_id', id);
+      const newPublicIdSet = new Set(body.cloudinary_public_ids);
+      const removedPublicIds = (oldImages || [])
+        .map((img) => img.cloudinary_public_id)
+        .filter(
+          (pid) =>
+            pid &&
+            !newPublicIdSet.has(pid) &&
+            !pid.startsWith('http://') &&
+            !pid.startsWith('https://') &&
+            !pid.startsWith('/')
+        );
 
-      // Supprimer les anciennes images de Cloudinary (en arrière-plan)
-      if (oldImages && oldImages.length > 0) {
-        const publicIds = oldImages
-          .map((img) => img.cloudinary_public_id)
-          .filter((id) => id && !id.startsWith('http://') && !id.startsWith('https://') && !id.startsWith('/'));
+      // Supprimer les images retirées de la BDD
+      await supabase.from('product_images').delete().eq('product_id', id);
 
-        if (publicIds.length > 0) {
-          deleteImages(publicIds).catch((err) =>
-            console.error('Error deleting old images from Cloudinary:', err)
-          );
+      // Supprimer les visuels effectivement retirés sur Cloudinary
+      if (removedPublicIds.length > 0) {
+        try {
+          await deleteImages(removedPublicIds);
+          console.log(`Removed images deleted from Cloudinary: ${removedPublicIds.join(', ')}`);
+        } catch (err) {
+          console.error('Error deleting removed images from Cloudinary:', err);
         }
       }
 
-      // Ajouter les nouvelles images
+      // Ajouter la nouvelle liste d'images dans la BDD avec les positions
       if (body.cloudinary_public_ids.length > 0) {
         const images = body.cloudinary_public_ids.map((publicId, index) => ({
           product_id: id,
@@ -184,7 +190,7 @@ export async function PUT(
   }
 }
 
-// DELETE /api/products/[id] - Supprimer un produit
+// DELETE /api/products/[id] - Supprimer définitivement un produit et ses photos Cloudinary
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -193,32 +199,64 @@ export async function DELETE(
     const { id } = await params;
     const supabase = createServiceRoleClient();
 
-    // Récupérer les images du produit avant suppression
+    // 1. Récupérer les images associées au produit avant suppression
     const { data: images } = await supabase
       .from('product_images')
       .select('cloudinary_public_id')
       .eq('product_id', id);
 
-    // Supprimer le produit (les images seront supprimées en cascade)
+    // 2. Tenter de supprimer le produit dans la base Supabase
     const { error: deleteError } = await supabase
       .from('products')
       .delete()
       .eq('id', id);
 
     if (deleteError) {
-      console.error('Error deleting product:', deleteError);
+      console.error('Error deleting product from database:', deleteError);
+
+      // Si le produit est rattaché à des commandes (Erreur FK 23503), le désactiver
+      if (deleteError.code === '23503') {
+        await supabase
+          .from('products')
+          .update({ is_active: false })
+          .eq('id', id);
+
+        revalidatePath('/admin/products');
+        return NextResponse.json(
+          {
+            message: 'Le produit a été désactivé pour préserver l\'historique des ventes client.',
+            softDeleted: true,
+          },
+          { status: 200 }
+        );
+      }
+
       return NextResponse.json(
         { error: 'Erreur lors de la suppression du produit' },
         { status: 500 }
       );
     }
 
-    // Supprimer les images de Cloudinary (en arrière-plan)
+    // 3. Supprimer définitivement les photos sur les serveurs Cloudinary
     if (images && images.length > 0) {
-      const publicIds = images.map(img => img.cloudinary_public_id);
-      deleteImages(publicIds).catch(err =>
-        console.error('Error deleting images from Cloudinary:', err)
-      );
+      const publicIds = images
+        .map((img) => img.cloudinary_public_id)
+        .filter(
+          (pid) =>
+            pid &&
+            !pid.startsWith('http://') &&
+            !pid.startsWith('https://') &&
+            !pid.startsWith('/')
+        );
+
+      if (publicIds.length > 0) {
+        try {
+          await deleteImages(publicIds);
+          console.log(`Cloudinary images successfully deleted: ${publicIds.join(', ')}`);
+        } catch (cloudErr) {
+          console.error('Error purging images from Cloudinary:', cloudErr);
+        }
+      }
     }
 
     revalidatePath('/');
@@ -228,7 +266,7 @@ export async function DELETE(
     revalidatePath('/admin');
 
     return NextResponse.json(
-      { message: 'Produit supprimé avec succès' },
+      { message: 'Produit et photos Cloudinary supprimés avec succès' },
       { status: 200 }
     );
   } catch (error) {

@@ -64,14 +64,14 @@ export function AdminPageHeader({
           <div className={`flex items-center justify-between gap-4 ${searchPlaceholder ? "mb-5" : ""}`}>
             <div>
               <div className="flex items-center gap-2.5">
-                <h1 className="text-2xl font-bold text-[#F4EFE6]">{title}</h1>
+                <h1 className="font-serif text-2xl lg:text-3xl font-semibold tracking-tight text-[#F4EFE6]">{title}</h1>
                 {typeof count === "number" && (
-                  <span className="rounded-full bg-white/10 px-2.5 py-0.5 text-xs font-semibold text-[var(--gold)] tabular-nums">
+                  <span className="font-mono rounded-full bg-white/10 px-3 py-0.5 text-xs font-bold text-[var(--laiton-clair,#D9AE78)] border border-[var(--laiton,#B9793E)]/25 tabular-nums">
                     {count}
                   </span>
                 )}
               </div>
-              {subtitle && <p className="mt-0.5 text-sm text-[#F4EFE6]/50">{subtitle}</p>}
+              {subtitle && <p className="mt-1 text-xs lg:text-sm font-sans tracking-wide text-[#F4EFE6]/60">{subtitle}</p>}
             </div>
 
             {action}
@@ -85,7 +85,7 @@ export function AdminPageHeader({
                 placeholder={searchPlaceholder}
                 value={searchQuery}
                 onChange={(e) => handleSearch(e.target.value)}
-                className="w-full rounded-full border border-white/10 bg-white/5 py-3 pl-12 pr-4 text-sm text-[#F4EFE6] placeholder:text-[#F4EFE6]/35 transition-colors focus:border-[var(--gold)]/50 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-[var(--gold)]/25"
+                className="w-full rounded-full border border-white/10 bg-white/5 py-3 pl-12 pr-4 text-xs font-sans tracking-wide text-[#F4EFE6] placeholder:text-[#F4EFE6]/35 transition-colors focus:border-[var(--laiton)]/50 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-[var(--laiton)]/25"
               />
             </div>
           )}
@@ -116,7 +116,7 @@ export function FilterPill({
   tone?: "default" | "warning" | "danger";
 }) {
   const countColor = selected
-    ? "text-[var(--gold)]"
+    ? "text-[var(--laiton-clair,#D9AE78)]"
     : tone === "warning"
       ? "text-amber-600"
       : tone === "danger"
@@ -126,15 +126,15 @@ export function FilterPill({
   return (
     <button
       onClick={onClick}
-      className={`flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-all ${
+      className={`flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-xs font-sans font-semibold tracking-wider uppercase transition-all ${
         selected
-          ? "bg-[var(--text-dark)] text-white shadow-md"
-          : "border border-[var(--gold)]/25 bg-white text-[var(--text-dark)]/60 hover:border-[var(--gold)]/50 hover:text-[var(--text-dark)]"
+          ? "bg-[var(--obsidienne,#0E0B09)] text-[var(--porcelaine,#F1ECE3)] shadow-md"
+          : "border border-[var(--laiton)]/25 bg-white text-[var(--text-dark)]/70 hover:border-[var(--laiton)]/50 hover:text-[var(--text-dark)]"
       }`}
     >
       {label}
       {typeof count === "number" && (
-        <span className={`text-xs font-bold tabular-nums ${countColor}`}>{count}</span>
+        <span className={`font-mono text-xs font-bold tabular-nums ${countColor}`}>{count}</span>
       )}
     </button>
   );

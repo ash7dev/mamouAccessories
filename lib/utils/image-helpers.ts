@@ -63,11 +63,19 @@ export function resolveProductImageUrl(
 
   // 3. URLs HTTP/HTTPS complètes (Cloudinary, Supabase Storage, CDN externe)
   if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
-    if (options.bustCache) {
-      const separator = trimmed.includes('?') ? '&' : '?';
-      return `${trimmed}${separator}t=${Date.now()}`;
+    let finalUrl = trimmed;
+    // Si c'est une URL Cloudinary sans transformations, injecter f_auto,q_auto,w_800 pour diviser la taille par 50
+    if (trimmed.includes('res.cloudinary.com') && !trimmed.includes('/f_auto') && !trimmed.includes('/q_auto')) {
+      const targetWidth = options.width || 800;
+      const transform = `f_auto,q_auto,w_${targetWidth},c_limit`;
+      finalUrl = trimmed.replace('/upload/', `/upload/${transform}/`);
     }
-    return trimmed;
+
+    if (options.bustCache) {
+      const separator = finalUrl.includes('?') ? '&' : '?';
+      return `${finalUrl}${separator}t=${Date.now()}`;
+    }
+    return finalUrl;
   }
 
   // 4. Public ID Cloudinary brut

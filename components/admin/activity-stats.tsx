@@ -50,42 +50,42 @@ export function ActivityStats({
   };
 
   return (
-    <section className="relative mb-6 overflow-hidden rounded-3xl border border-[var(--gold)]/15 bg-white p-6 shadow-[0_1px_2px_rgba(43,33,24,0.04),0_8px_24px_-12px_rgba(43,33,24,0.12)] lg:hidden">
-      {/* Ornement décoratif : cercles concentriques dorés, coin supérieur droit */}
+    <section className="relative mb-6 overflow-hidden rounded-3xl border border-[var(--laiton,#B9793E)]/30 bg-white p-5 shadow-md lg:hidden font-sans">
+      {/* Halo décoratif doré */}
       <div aria-hidden className="pointer-events-none absolute -right-10 -top-10">
-        <div className="h-36 w-36 rounded-full border border-[var(--gold)]/15" />
-        <div className="absolute inset-5 rounded-full border border-[var(--gold)]/20" />
-        <div className="absolute inset-10 rounded-full border border-[var(--gold)]/25" />
-        <div className="absolute inset-[3.75rem] rounded-full bg-[var(--gold)]/10" />
+        <div className="h-36 w-36 rounded-full border border-[var(--laiton,#B9793E)]/15" />
+        <div className="absolute inset-5 rounded-full border border-[var(--laiton,#B9793E)]/20" />
+        <div className="absolute inset-10 rounded-full border border-[var(--laiton,#B9793E)]/25" />
+        <div className="absolute inset-[3.75rem] rounded-full bg-[var(--laiton,#B9793E)]/10" />
       </div>
 
       {/* En-tête */}
-      <div className="relative mb-6 flex items-center justify-between">
+      <div className="relative mb-4 flex items-center justify-between">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--gold-dark)]">
-            Boutique
-          </p>
-          <h2 className="mt-0.5 text-lg font-bold tracking-tight text-[var(--text-dark)]">
-            Activité
+          <span className="text-[10px] font-sans font-bold uppercase tracking-[0.2em] text-[var(--laiton,#B9793E)]">
+            Activité Boutique
+          </span>
+          <h2 className="mt-0.5 font-serif text-lg font-bold tracking-tight text-[var(--obsidienne,#0E0B09)]">
+            Indicateurs Clefs
           </h2>
         </div>
       </div>
 
-      {/* Statistiques : séparées par de fins filets, pas de boîtes */}
-      <div className="relative grid grid-cols-3 divide-x divide-[var(--gold)]/12">
+      {/* Statistiques : séparées par de fins filets dorés */}
+      <div className="relative grid grid-cols-3 divide-x divide-[var(--laiton,#B9793E)]/20">
         {stats.map(({ key, label, icon: Icon, href }) => (
           <Link
             key={key}
             href={href}
-            className="group flex flex-col items-center gap-2 px-2 py-1 transition-transform active:scale-[0.97]"
+            className="group flex flex-col items-center gap-1.5 px-2 py-1 transition-transform active:scale-[0.97]"
           >
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--ivory)] text-[var(--gold-dark)] ring-1 ring-inset ring-[var(--gold)]/20 transition-colors group-hover:bg-[var(--gold)]/15">
+            <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[var(--porcelaine,#F1ECE3)] text-[var(--laiton,#B9793E)] border border-[var(--laiton,#B9793E)]/25 transition-colors group-hover:bg-[var(--laiton,#B9793E)] group-hover:text-[var(--obsidienne,#0E0B09)] shadow-2xs">
               <Icon />
             </span>
-            <span className="text-3xl font-bold leading-none tracking-tight text-[var(--text-dark)] tabular-nums">
+            <span className="font-mono text-2xl font-bold tracking-tight text-[var(--obsidienne,#0E0B09)] tabular-nums">
               {new Intl.NumberFormat("fr-FR").format(values[key])}
             </span>
-            <span className="text-[11px] font-medium uppercase tracking-[0.12em] text-[var(--text-dark)]/45">
+            <span className="text-[10px] font-sans font-bold uppercase tracking-wider text-[var(--obsidienne,#0E0B09)]/60">
               {label}
             </span>
           </Link>

@@ -54,11 +54,11 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-  /* Fonts moderne & épuré : Plus Jakarta Sans (UI) + Outfit (Titres) + Cormorant (Luxe Serif) */
+  /* Fonts unifiées — Plus Jakarta Sans partout comme le portail Admin */
   --font-sans: var(--font-sans-custom), "Plus Jakarta Sans", "Inter", sans-serif;
-  --font-mono: var(--font-geist-mono), monospace;
-  --font-heading: var(--font-heading-custom), "Outfit", sans-serif;
-  --font-serif: var(--font-serif-custom), "Cormorant Garamond", "Playfair Display", Georgia, serif;
+  --font-mono: var(--font-mono-custom), "JetBrains Mono", ui-monospace, monospace;
+  --font-heading: var(--font-sans-custom), "Plus Jakarta Sans", sans-serif;
+  --font-serif: var(--font-sans-custom), "Plus Jakarta Sans", sans-serif;
 
   /* Radius */
   --radius-sm: 2px;
@@ -98,6 +98,12 @@
   /* Catégorie : bagues */
   --saphir: #24425F;
   /* Catégorie : boucles / bracelets */
+
+  /* Aliases de compatibilité boutique / cart */
+  --gold: #B9793E;
+  --gold-dark: #8C582B;
+  --ivory: #F1ECE3;
+  --text-dark: #0E0B09;
 
   /* ----- Système de design : par référence, thème clair (pages catalogue) ----- */
   --background: var(--porcelaine);
@@ -218,6 +224,22 @@
   .cadre-vitrine {
     border: 1px solid var(--laiton-clair);
     border-radius: var(--radius-image);
+  }
+
+  .font-serif {
+    font-family: var(--font-sans-custom), "Plus Jakarta Sans", sans-serif !important;
+  }
+
+  .font-heading {
+    font-family: var(--font-sans-custom), "Plus Jakarta Sans", sans-serif !important;
+  }
+
+  .font-mono {
+    font-family: var(--font-mono-custom), "JetBrains Mono", ui-monospace, monospace !important;
+  }
+
+  .font-sans {
+    font-family: var(--font-sans-custom), "Plus Jakarta Sans", "Inter", sans-serif !important;
   }
 }
 

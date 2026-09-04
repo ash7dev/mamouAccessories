@@ -22,41 +22,41 @@ export function KpiCard({
 }: KpiCardProps) {
   return (
     <div
-      className={`group relative overflow-hidden rounded-3xl border border-[var(--gold)]/15 bg-white p-6 shadow-[0_1px_2px_rgba(43,33,24,0.04),0_8px_24px_-12px_rgba(43,33,24,0.12)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[var(--gold)]/30 hover:shadow-[0_2px_4px_rgba(43,33,24,0.05),0_16px_32px_-12px_rgba(43,33,24,0.18)] ${className}`}
+      className={`group relative overflow-hidden rounded-3xl border border-[var(--laiton,#B9793E)]/20 bg-white p-6 shadow-[0_4px_20px_-4px_rgba(14,11,9,0.06)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[var(--laiton)]/40 hover:shadow-[0_10px_30px_-5px_rgba(185,121,62,0.15)] ${className}`}
     >
-      {/* Ornement : cercles concentriques qui se révèlent au survol */}
+      {/* Ornement d'angle laiton survol */}
       <div
         aria-hidden
         className="pointer-events-none absolute -right-8 -top-8 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
       >
-        <div className="h-28 w-28 rounded-full border border-[var(--gold)]/15" />
-        <div className="absolute inset-4 rounded-full border border-[var(--gold)]/20" />
-        <div className="absolute inset-8 rounded-full bg-[var(--gold)]/10" />
+        <div className="h-28 w-28 rounded-full border border-[var(--laiton,#B9793E)]/15" />
+        <div className="absolute inset-4 rounded-full border border-[var(--laiton,#B9793E)]/20" />
+        <div className="absolute inset-8 rounded-full bg-[var(--laiton,#B9793E)]/10" />
       </div>
 
-      <div className="relative">
-        {/* Ligne du haut : label en petites capitales + icône en pastille */}
+      <div className="relative z-10">
+        {/* Ligne du haut : label en petites capitales + icône laiton */}
         <div className="mb-5 flex items-start justify-between gap-3">
-          <p className="pt-1 text-[11px] font-semibold uppercase tracking-[0.15em] text-[var(--text-dark)]/45">
+          <p className="pt-1 text-[10px] font-sans font-bold uppercase tracking-[0.22em] text-[var(--laiton,#B9793E)]">
             {title}
           </p>
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--ivory)] text-[var(--gold-dark)] ring-1 ring-inset ring-[var(--gold)]/20 transition-colors group-hover:bg-[var(--gold)]/15 [&>svg]:h-5 [&>svg]:w-5">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[var(--laiton,#B9793E)]/10 text-[var(--laiton,#B9793E)] border border-[var(--laiton)]/20 transition-all group-hover:bg-[var(--laiton)] group-hover:text-white [&>svg]:h-5 [&>svg]:w-5">
             {icon}
           </span>
         </div>
 
-        {/* Valeur + tendance sur la même ligne de base */}
+        {/* Valeur + tendance */}
         <div className="flex flex-wrap items-baseline gap-2.5">
-          <p className="text-3xl font-bold leading-none tracking-tight text-[var(--text-dark)] tabular-nums">
+          <p className="font-heading text-3xl lg:text-4xl font-extrabold leading-none tracking-tight text-[var(--obsidienne,#0E0B09)] tabular-nums">
             {value}
           </p>
 
           {trend && (
             <span
-              className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold tabular-nums ${
+              className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 font-mono text-[11px] font-bold tabular-nums ${
                 trend.isPositive
-                  ? "bg-emerald-600/10 text-emerald-700"
-                  : "bg-red-600/10 text-red-600"
+                  ? "bg-emerald-500/10 text-emerald-700 border border-emerald-500/20"
+                  : "bg-rose-500/10 text-rose-700 border border-rose-500/20"
               }`}
             >
               <svg
@@ -74,8 +74,8 @@ export function KpiCard({
 
         {/* Sous-titre */}
         {subtitle && (
-          <p className="mt-3 flex items-center gap-1.5 text-xs text-[var(--text-dark)]/45">
-            <span className="inline-block h-1.5 w-1.5 rounded-full bg-[var(--gold)]" />
+          <p className="mt-3 flex items-center gap-1.5 text-xs text-[var(--obsidienne,#0E0B09)]/60 font-sans font-medium">
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-[var(--laiton,#B9793E)]" />
             {subtitle}
           </p>
         )}

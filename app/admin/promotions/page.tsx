@@ -83,8 +83,8 @@ export default function PromotionsPage() {
       <div className="p-6 lg:p-8">
         <div className="flex items-center justify-center py-20">
           <div className="text-center">
-            <div className="mb-4 inline-block h-8 w-8 animate-spin rounded-full border-4 border-[var(--gold)] border-t-transparent" />
-            <p className="text-sm text-[var(--text-dark)]/60">Chargement des promotions...</p>
+            <div className="mb-4 inline-block h-8 w-8 animate-spin rounded-full border-4 border-[var(--laiton,#B9793E)] border-t-transparent" />
+            <p className="text-sm text-[var(--obsidienne,#0E0B09)]/60">Chargement des promotions...</p>
           </div>
         </div>
       </div>

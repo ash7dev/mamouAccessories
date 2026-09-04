@@ -16,9 +16,9 @@ export function LowStockAlert({ products = [], isEmpty = false }: LowStockAlertP
   const actualProducts = isEmpty ? [] : products.slice(0, 5);
 
   const getStockStatusColor = (stock: number) => {
-    if (stock === 0) return "text-red-600 bg-red-50";
-    if (stock <= 2) return "text-orange-600 bg-orange-50";
-    return "text-yellow-600 bg-yellow-50";
+    if (stock === 0) return "text-rose-700 bg-rose-500/10 border-rose-500/20";
+    if (stock <= 2) return "text-amber-700 bg-amber-500/10 border-amber-500/20";
+    return "text-[var(--laiton,#B9793E)] bg-[var(--laiton)]/10 border-[var(--laiton)]/20";
   };
 
   const getStockStatusLabel = (stock: number) => {
@@ -28,90 +28,58 @@ export function LowStockAlert({ products = [], isEmpty = false }: LowStockAlertP
   };
 
   return (
-    <div className="bg-white rounded-3xl p-6 border border-[var(--gold)]/15 shadow-[0_1px_2px_rgba(43,33,24,0.04),0_8px_24px_-12px_rgba(43,33,24,0.12)] h-full flex flex-col">
+    <div className="bg-white rounded-3xl p-6 border border-[var(--laiton,#B9793E)]/20 shadow-[0_4px_20px_-4px_rgba(14,11,9,0.06)] h-full flex flex-col">
       {/* Header */}
       <div className="flex items-start justify-between mb-6">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--gold-dark)] mb-1">
-            Alerte stock
+          <p className="text-[10px] font-sans font-bold uppercase tracking-[0.2em] text-[var(--laiton,#B9793E)] mb-1">
+            Inventaire
           </p>
-          <h2 className="text-lg font-bold tracking-tight text-[var(--text-dark)]">
-            {isEmpty ? "Stock OK" : `${actualProducts.length} produit(s) en alerte`}
+          <h2 className="font-serif text-lg font-semibold tracking-tight text-[var(--obsidienne,#0E0B09)]">
+            {isEmpty ? "Stock conforme" : "Alertes de réapprovisionnement"}
           </h2>
         </div>
 
         {!isEmpty && actualProducts.length > 0 && (
           <Link
             href="/admin/products?filter=low-stock"
-            className="inline-flex items-center gap-1 text-xs font-semibold text-[var(--gold-dark)] hover:text-[var(--gold)] transition-colors group"
+            className="inline-flex items-center gap-1.5 text-xs font-sans font-bold text-[var(--laiton,#B9793E)] hover:text-[var(--laiton-clair,#D9AE78)] transition-colors group"
           >
-            <span>Gérer</span>
-            <svg className="w-3 h-3 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+            <span>Réassort</span>
+            <svg className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
             </svg>
           </Link>
         )}
       </div>
 
       {/* Content */}
-      <div className="flex-1">
+      <div className="flex-1 flex items-center justify-center">
         {isEmpty || actualProducts.length === 0 ? (
-          <div className="flex items-center justify-center h-full py-8">
-            <div className="text-center">
-              {/* Empty state icon */}
-              <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-green-50">
-                <svg
-                  className="h-6 w-6 text-green-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-              </div>
-
-              {/* Empty state text */}
-              <h3 className="text-sm font-semibold text-[var(--text-dark)] mb-1">
-                Tout va bien !
-              </h3>
-              <p className="text-xs text-[var(--text-dark)]/50 max-w-xs mx-auto">
-                Tous vos produits ont un stock suffisant
-              </p>
+          <div className="text-center py-8">
+            <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-700 border border-emerald-500/20">
+              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.5 12.75l6 6 9-13.5" />
+              </svg>
             </div>
+
+            <h3 className="font-serif text-sm font-medium text-[var(--obsidienne,#0E0B09)] mb-1">
+              Stocks optimaux
+            </h3>
+            <p className="text-xs font-sans text-[var(--obsidienne,#0E0B09)]/50 max-w-xs mx-auto">
+              Tous vos produits disposent d&apos;un niveau de stock suffisant.
+            </p>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="w-full space-y-2.5">
             {actualProducts.map((product) => (
               <Link
                 key={product.id}
                 href={`/admin/products/${product.id}`}
-                className="group block p-3 rounded-2xl border border-[var(--gold)]/10 hover:border-[var(--gold)]/30 hover:bg-[var(--ivory)]/30 transition-all"
+                className="group block p-3 rounded-2xl border border-[var(--laiton,#B9793E)]/15 bg-[var(--porcelaine,#F1ECE3)]/30 hover:border-[var(--laiton)]/40 hover:bg-white transition-all"
               >
                 <div className="flex items-center gap-3">
-                  {/* Alert icon */}
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-orange-50">
-                    <svg
-                      className="h-4 w-4 text-orange-600"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                      />
-                    </svg>
-                  </div>
-
-                  {/* Product image */}
-                  <div className="h-12 w-12 shrink-0 rounded-xl overflow-hidden bg-[var(--ivory)]/70 shadow-sm">
+                  <div className="h-10 w-10 shrink-0 rounded-xl overflow-hidden bg-[var(--porcelaine,#F1ECE3)] border border-[var(--laiton)]/20 shadow-xs">
                     {product.image ? (
                       <img
                         src={product.image}
@@ -119,56 +87,37 @@ export function LowStockAlert({ products = [], isEmpty = false }: LowStockAlertP
                         className="h-full w-full object-cover"
                       />
                     ) : (
-                      <div className="flex h-full w-full items-center justify-center">
-                        <svg
-                          className="h-6 w-6 text-[var(--gold)]/30"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-                          />
-                        </svg>
+                      <div className="flex h-full w-full items-center justify-center text-[var(--laiton,#B9793E)]/40">
+                        ◆
                       </div>
                     )}
                   </div>
 
-                  {/* Text */}
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-sm font-semibold text-[var(--text-dark)] group-hover:text-[var(--gold-dark)] transition-colors truncate">
+                    <h3 className="font-serif text-xs font-medium text-[var(--obsidienne,#0E0B09)] group-hover:text-[var(--laiton,#B9793E)] transition-colors truncate">
                       {product.name}
                     </h3>
                     <div className="flex items-center gap-2 mt-0.5">
                       <span
-                        className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${getStockStatusColor(
+                        className={`px-2 py-0.5 rounded-full font-sans text-[10px] font-bold border ${getStockStatusColor(
                           product.stock
                         )}`}
                       >
                         {getStockStatusLabel(product.stock)}
                       </span>
-                      <span className="text-xs text-[var(--text-dark)]/50">
-                        {product.stock} en stock
+                      <span className="font-mono text-[11px] font-bold text-[var(--obsidienne,#0E0B09)]/60 tabular-nums">
+                        {product.stock} pièce{product.stock > 1 ? "s" : ""}
                       </span>
                     </div>
                   </div>
 
-                  {/* Arrow */}
                   <svg
-                    className="h-4 w-4 shrink-0 text-[var(--text-dark)]/30 transition-all group-hover:text-[var(--gold-dark)] group-hover:translate-x-0.5"
+                    className="h-4 w-4 shrink-0 text-[var(--laiton,#B9793E)]/40 transition-all group-hover:text-[var(--laiton)] group-hover:translate-x-1"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 5l7 7-7 7"
-                    />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
                   </svg>
                 </div>
               </Link>

@@ -29,7 +29,7 @@ function TikTokIcon({ className = "w-4 h-4" }: { className?: string }) {
 const navigationLinks = [
   { href: "/", label: "Accueil" },
   { href: "/boutique", label: "Boutique" },
-  { href: "/a-propos", label: "À propos / Contact" },
+  { href: "/contact", label: "Contact" },
   { href: "/panier", label: "Panier" },
 ];
 

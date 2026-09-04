@@ -1,18 +1,11 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Eye, Sparkles, ChevronRight, ShoppingBag } from "lucide-react";
 
 /* ============================================================
    Liste des commandes — /admin/orders
-
-   S'affiche sous <CommandeHeader /> (le parent filtre selon
-   l'onglet actif et la recherche, puis passe `orders` ici).
-
-   - Mobile  : cartes empilées
-   - Desktop : rangées détaillées
-   - Toute la carte/rangée est cliquable → fiche commande
-   - Bouton WhatsApp direct sur chaque commande
    ============================================================ */
 
 export type OrderStatus = "pending" | "confirmed" | "shipped" | "delivered" | "cancelled";
@@ -20,20 +13,19 @@ export type PaymentStatus = "unpaid" | "pending_verification" | "paid" | "refund
 
 export interface OrderListItem {
   id: string;
-  orderNumber: string; // ex : CMD-2026-0042
+  orderNumber: string;
   customerName: string;
-  customerPhone: string; // +221XXXXXXXXX
+  customerPhone: string;
   itemsCount: number;
   total: number;
   status: OrderStatus;
   paymentMethod: "wave" | "cash_on_delivery";
   paymentStatus: PaymentStatus;
-  createdAt: string; // ISO
+  createdAt: string;
 }
 
 const formatFCFA = (n: number) => new Intl.NumberFormat("fr-FR").format(n);
 
-/** "il y a 5 min", "il y a 3 h", "hier", "il y a 4 j" */
 function timeAgo(iso: string) {
   const diffMs = Date.now() - new Date(iso).getTime();
   const mins = Math.floor(diffMs / 60000);
@@ -47,56 +39,55 @@ function timeAgo(iso: string) {
 }
 
 function isStale(order: OrderListItem) {
-  // Commande en attente depuis plus de 24 h → à relancer
   const hours = (Date.now() - new Date(order.createdAt).getTime()) / 3600000;
   return order.status === "pending" && hours >= 24;
 }
 
-/* ---------- Badges ---------- */
+/* ---------- Badges Haute Joaillerie ---------- */
 
-const statusConfig: Record<OrderStatus, { label: string; className: string }> = {
-  pending: { label: "À traiter", className: "bg-amber-500/10 text-amber-600" },
-  confirmed: { label: "Confirmée", className: "bg-emerald-600/10 text-emerald-700" },
-  shipped: { label: "Expédiée", className: "bg-sky-600/10 text-sky-700" },
-  delivered: { label: "Livrée", className: "bg-[var(--text-dark)]/8 text-[var(--text-dark)]/60" },
-  cancelled: { label: "Annulée", className: "bg-red-600/10 text-red-600" },
+const statusConfig: Record<OrderStatus, { label: string; className: string; dotColor: string }> = {
+  pending: { label: "À traiter", className: "bg-amber-500/10 text-amber-800 dark:text-amber-300 border border-amber-500/25", dotColor: "bg-amber-500" },
+  confirmed: { label: "Confirmée", className: "bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 border border-emerald-500/25", dotColor: "bg-emerald-500" },
+  shipped: { label: "Expédiée", className: "bg-sky-500/10 text-sky-800 dark:text-sky-300 border border-sky-500/25", dotColor: "bg-sky-500" },
+  delivered: { label: "Livrée", className: "bg-[var(--porcelaine,#F1ECE3)] text-[var(--obsidienne,#0E0B09)] border border-[var(--laiton,#B9793E)]/25", dotColor: "bg-[var(--laiton,#B9793E)]" },
+  cancelled: { label: "Annulée", className: "bg-rose-500/10 text-rose-700 dark:text-rose-300 border border-rose-500/20", dotColor: "bg-rose-500" },
 };
 
 function StatusBadge({ status }: { status: OrderStatus }) {
-  const c = statusConfig[status];
+  const c = statusConfig[status] || statusConfig.pending;
   return (
-    <span className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${c.className}`}>
+    <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-sans font-medium ${c.className}`}>
+      <span className={`h-1.5 w-1.5 rounded-full ${c.dotColor}`} />
       {c.label}
     </span>
   );
 }
 
 function PaymentBadge({ order }: { order: OrderListItem }) {
-  // Le paiement à vérifier est LA priorité : badge doré bien visible
   if (order.paymentStatus === "pending_verification") {
     return (
-      <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--gold)]/15 px-2.5 py-1 text-[11px] font-bold text-[var(--gold-dark)]">
-        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--gold-dark)]" />
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--laiton,#B9793E)]/15 px-2.5 py-0.5 text-[11px] font-sans font-medium text-[var(--laiton,#B9793E)] border border-[var(--laiton,#B9793E)]/35">
+        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--laiton,#B9793E)]" />
         Wave · à vérifier
       </span>
     );
   }
   if (order.paymentStatus === "paid") {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-600/10 px-2.5 py-1 text-[11px] font-semibold text-emerald-700">
+      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-sans font-medium text-emerald-800 border border-emerald-500/25">
         ✓ {order.paymentMethod === "wave" ? "Wave" : "Espèces"}
       </span>
     );
   }
   if (order.paymentStatus === "refunded") {
     return (
-      <span className="inline-flex rounded-full bg-[var(--text-dark)]/8 px-2.5 py-1 text-[11px] font-semibold text-[var(--text-dark)]/50">
+      <span className="inline-flex rounded-full bg-[var(--porcelaine,#F1ECE3)] px-2.5 py-0.5 text-[11px] font-sans font-medium text-[var(--obsidienne,#0E0B09)]/60 border border-[var(--laiton,#B9793E)]/20">
         Remboursée
       </span>
     );
   }
   return (
-    <span className="inline-flex rounded-full bg-[var(--text-dark)]/8 px-2.5 py-1 text-[11px] font-medium text-[var(--text-dark)]/55">
+    <span className="inline-flex rounded-full bg-neutral-100 px-2.5 py-0.5 text-[11px] font-sans font-medium text-neutral-600 border border-neutral-200">
       {order.paymentMethod === "wave" ? "Wave · non payé" : "À la livraison"}
     </span>
   );
@@ -104,13 +95,13 @@ function PaymentBadge({ order }: { order: OrderListItem }) {
 
 function StaleBadge() {
   return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-red-600/10 px-2 py-0.5 text-[10px] font-bold text-red-600">
+    <span className="inline-flex items-center gap-1 rounded-full bg-rose-500/10 px-2 py-0.5 text-[10px] font-sans font-semibold text-rose-700 border border-rose-500/25">
       ⏱ +24 h
     </span>
   );
 }
 
-/* ---------- Icônes ---------- */
+/* ---------- Icône WhatsApp ---------- */
 
 function WhatsAppIcon({ className = "w-4 h-4" }: { className?: string }) {
   return (
@@ -120,19 +111,8 @@ function WhatsAppIcon({ className = "w-4 h-4" }: { className?: string }) {
   );
 }
 
-function InboxIcon({ className = "w-7 h-7" }: { className?: string }) {
-  return (
-    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.25 13.5h3.86a2.25 2.25 0 012.012 1.244l.256.512a2.25 2.25 0 002.013 1.244h3.218a2.25 2.25 0 002.013-1.244l.256-.512a2.25 2.25 0 012.013-1.244h3.859m-19.5.338V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18v-4.162c0-.224-.034-.447-.1-.661L19.24 5.338a2.25 2.25 0 00-2.15-1.588H6.911a2.25 2.25 0 00-2.15 1.588L2.35 13.177a2.25 2.25 0 00-.1.661z" />
-    </svg>
-  );
-}
-
-/* ---------- WhatsApp : message pré-rempli selon le contexte ---------- */
-
 function whatsAppUrl(order: OrderListItem) {
   if (!order.customerPhone) return "#";
-
   const phone = order.customerPhone.replace(/[^\d]/g, "");
   let message: string;
 
@@ -147,35 +127,18 @@ function whatsAppUrl(order: OrderListItem) {
   return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
 }
 
-function WhatsAppButton({ order, className = "" }: { order: OrderListItem; className?: string }) {
-  return (
-    <a
-      href={whatsAppUrl(order)}
-      target="_blank"
-      rel="noopener noreferrer"
-      onClick={(e) => e.stopPropagation()}
-      className={`flex h-9 w-9 items-center justify-center rounded-full bg-emerald-600/10 text-emerald-700 transition-colors hover:bg-emerald-600 hover:text-white ${className}`}
-      title={`Écrire à ${order.customerName} sur WhatsApp`}
-    >
-      <WhatsAppIcon />
-    </a>
-  );
-}
-
-/* ---------- État vide ---------- */
+/* ---------- État vide Haute Joaillerie ---------- */
 
 function EmptyState() {
   return (
-    <div className="flex flex-col items-center rounded-3xl border border-[var(--gold)]/15 bg-white px-6 py-16 text-center shadow-[0_1px_2px_rgba(43,33,24,0.04),0_8px_24px_-12px_rgba(43,33,24,0.12)]">
-      <div className="relative mb-5">
-        <div aria-hidden className="absolute -inset-3 rounded-full border border-[var(--gold)]/15" />
-        <div aria-hidden className="absolute -inset-1.5 rounded-full border border-[var(--gold)]/25" />
-        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--ivory)] text-[var(--gold-dark)] ring-1 ring-inset ring-[var(--gold)]/25">
-          <InboxIcon />
-        </div>
+    <div className="flex flex-col items-center rounded-3xl border border-[var(--laiton,#B9793E)]/20 bg-white p-12 lg:p-16 text-center shadow-xs">
+      <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--porcelaine,#F1ECE3)] text-[var(--laiton,#B9793E)] border border-[var(--laiton)]/25 shadow-inner">
+        <Sparkles className="h-8 w-8 stroke-[1.5]" />
       </div>
-      <h3 className="mb-1 text-base font-bold text-[var(--text-dark)]">Aucune commande ici</h3>
-      <p className="max-w-sm text-sm leading-relaxed text-[var(--text-dark)]/50">
+      <h3 className="font-serif mb-2 text-xl font-normal text-[var(--obsidienne,#0E0B09)]">
+        Aucune commande trouvée
+      </h3>
+      <p className="max-w-sm text-xs font-sans leading-relaxed text-[var(--obsidienne,#0E0B09)]/60">
         Les commandes correspondant à ce filtre apparaîtront dans cette liste.
       </p>
     </div>
@@ -185,125 +148,167 @@ function EmptyState() {
 /* ---------- Composant principal ---------- */
 
 export function CommandesList({ orders }: { orders: OrderListItem[] }) {
+  const router = useRouter();
+
   if (orders.length === 0) return <EmptyState />;
 
+  const handleRowClick = (orderId: string) => {
+    router.push(`/admin/orders/${orderId}`);
+  };
+
   return (
-    <div className="mx-auto max-w-5xl">
-      {/* ===================== MOBILE : cartes ===================== */}
-      <div className="space-y-3 lg:hidden">
+    <div className="mx-auto max-w-7xl space-y-3">
+      {/* ===================== MOBILE : Cartes en Grille 2 Colonnes ===================== */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 lg:hidden">
         {orders.map((order) => (
           <div
             key={order.id}
-            onClick={() => window.location.href = `/admin/orders/${order.id}`}
-            className="cursor-pointer block rounded-3xl border border-[var(--gold)]/15 bg-white p-4 shadow-[0_1px_2px_rgba(43,33,24,0.04),0_8px_24px_-12px_rgba(43,33,24,0.12)] transition-transform active:scale-[0.99]"
+            onClick={() => handleRowClick(order.id)}
+            className="group relative overflow-hidden rounded-2xl border border-[var(--laiton,#B9793E)]/20 bg-white p-4 shadow-sm transition-all duration-300 hover:border-[var(--laiton,#B9793E)]/50 hover:shadow-md cursor-pointer active:scale-[0.99]"
           >
-            {/* Ligne 1 : n° + heure + urgence */}
+            {/* Direct Link Accent Glow */}
+            <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-[var(--laiton,#B9793E)]/10 to-transparent rounded-bl-full pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity" />
+
+            {/* Top row */}
             <div className="mb-2.5 flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-bold text-[var(--text-dark)]">
+              <div className="flex items-center gap-1.5">
+                <span className="font-mono text-base font-bold text-[var(--obsidienne,#0E0B09)] tracking-tight group-hover:text-[var(--laiton,#B9793E)] transition-colors">
                   {order.orderNumber}
                 </span>
                 {isStale(order) && <StaleBadge />}
               </div>
-              <span className="text-xs text-[var(--text-dark)]/40">{timeAgo(order.createdAt)}</span>
+              <span className="text-[11px] font-sans text-[var(--obsidienne,#0E0B09)]/45 shrink-0">{timeAgo(order.createdAt)}</span>
             </div>
 
-            {/* Ligne 2 : cliente + WhatsApp */}
-            <div className="mb-3 flex items-center justify-between gap-3">
-              <div className="min-w-0">
-                <p className="truncate text-sm font-medium text-[var(--text-dark)]">
+            {/* Customer details */}
+            <div className="mb-3 flex items-center justify-between gap-2.5">
+              <div className="min-w-0 flex-1">
+                <p className="font-sans text-sm font-semibold text-[var(--obsidienne,#0E0B09)] truncate">
                   {order.customerName}
                 </p>
-                <p className="text-xs text-[var(--text-dark)]/45 tabular-nums">
-                  {order.customerPhone} · {order.itemsCount} article{order.itemsCount > 1 ? "s" : ""}
+                <p className="text-xs font-mono text-[var(--obsidienne,#0E0B09)]/55 tabular-nums truncate">
+                  {order.customerPhone}
                 </p>
               </div>
-              <WhatsAppButton order={order} className="shrink-0" />
+
+              <a
+                href={whatsAppUrl(order)}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-700 transition-all hover:bg-emerald-600 hover:text-white shadow-2xs"
+                title="Contacter sur WhatsApp"
+              >
+                <WhatsAppIcon className="h-4 w-4" />
+              </a>
             </div>
 
-            {/* Ligne 3 : badges + total */}
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <div className="flex flex-wrap gap-1.5">
+            {/* Badges + Total */}
+            <div className="pt-3 border-t border-[var(--laiton,#B9793E)]/15 flex flex-col gap-2">
+              <div className="flex flex-wrap gap-1.5 items-center">
                 <StatusBadge status={order.status} />
                 <PaymentBadge order={order} />
               </div>
-              <span className="text-base font-bold text-[var(--text-dark)] tabular-nums">
-                {formatFCFA(order.total)} F
-              </span>
+              <div className="flex items-center justify-between pt-1">
+                <span className="inline-flex items-center gap-1 text-[11px] font-sans text-[var(--obsidienne,#0E0B09)]/60">
+                  <ShoppingBag className="h-3.5 w-3.5 text-[var(--laiton,#B9793E)]" />
+                  {order.itemsCount} article{order.itemsCount > 1 ? "s" : ""}
+                </span>
+                <span className="font-mono text-base font-bold text-[var(--obsidienne,#0E0B09)] tabular-nums">
+                  {formatFCFA(order.total)} <span className="text-[10px] font-sans font-normal text-[var(--obsidienne,#0E0B09)]/60">FCFA</span>
+                </span>
+              </div>
             </div>
           </div>
         ))}
       </div>
 
-      {/* ===================== DESKTOP : rangées ===================== */}
-      <div className="hidden overflow-hidden rounded-3xl border border-[var(--gold)]/15 bg-white shadow-[0_1px_2px_rgba(43,33,24,0.04),0_8px_24px_-12px_rgba(43,33,24,0.12)] lg:block">
-        <div className="grid grid-cols-[150px_1fr_90px_120px_170px_120px_56px] items-center gap-4 border-b border-[var(--gold)]/10 bg-[var(--ivory)]/40 px-6 py-3">
-          {["Commande", "Cliente", "Articles", "Total", "Paiement", "Statut", ""].map((h, i) => (
-            <span
-              key={i}
-              className={`text-[10px] font-semibold uppercase tracking-[0.15em] text-[var(--text-dark)]/40 ${
-                i === 2 || i === 3 ? "text-right" : ""
-              }`}
-            >
-              {h}
-            </span>
-          ))}
+      {/* ===================== DESKTOP : Liste Éditoriale Haute Joaillerie ===================== */}
+      <div className="hidden lg:block space-y-2.5">
+        {/* En-tête des colonnes */}
+        <div className="grid grid-cols-[150px_1fr_90px_140px_170px_130px_80px] items-center gap-4 px-6 py-2 text-[10px] font-sans font-bold uppercase tracking-[0.2em] text-[var(--laiton,#B9793E)]">
+          <span>Commande</span>
+          <span>Cliente</span>
+          <span>Produits</span>
+          <span>Total</span>
+          <span>Paiement</span>
+          <span>Statut</span>
+          <span className="text-right">Actions</span>
         </div>
 
-        <div className="divide-y divide-[var(--gold)]/8">
-          {orders.map((order) => (
-            <div
-              key={order.id}
-              onClick={() => window.location.href = `/admin/orders/${order.id}`}
-              className="group grid grid-cols-[150px_1fr_90px_120px_170px_120px_56px] items-center gap-4 px-6 py-3.5 transition-colors hover:bg-[var(--ivory)]/30 cursor-pointer"
-            >
-              {/* Commande */}
-              <div>
-                <div className="flex items-center gap-1.5">
-                  <span className="text-sm font-bold text-[var(--text-dark)]">
-                    {order.orderNumber}
-                  </span>
-                  {isStale(order) && <StaleBadge />}
-                </div>
-                <span className="text-xs text-[var(--text-dark)]/40">{timeAgo(order.createdAt)}</span>
+        {/* Lignes de commandes */}
+        {orders.map((order) => (
+          <div
+            key={order.id}
+            onClick={() => handleRowClick(order.id)}
+            className="group relative grid grid-cols-[150px_1fr_90px_140px_170px_130px_80px] items-center gap-4 rounded-2xl border border-[var(--laiton,#B9793E)]/15 bg-white px-6 py-4 shadow-2xs transition-all duration-200 hover:border-[var(--laiton,#B9793E)]/40 hover:shadow-md cursor-pointer"
+          >
+            {/* Commande */}
+            <div>
+              <div className="flex items-center gap-1.5">
+                <span className="font-mono text-sm font-bold text-[var(--obsidienne,#0E0B09)] tracking-tight group-hover:text-[var(--laiton,#B9793E)] transition-colors">
+                  {order.orderNumber}
+                </span>
+                {isStale(order) && <StaleBadge />}
               </div>
+              <span className="text-xs font-sans text-[var(--obsidienne,#0E0B09)]/45 block mt-0.5">{timeAgo(order.createdAt)}</span>
+            </div>
 
-              {/* Cliente */}
-              <div className="min-w-0">
-                <p className="truncate text-sm font-medium text-[var(--text-dark)]">
-                  {order.customerName}
-                </p>
-                <p className="text-xs text-[var(--text-dark)]/45 tabular-nums">{order.customerPhone}</p>
-              </div>
+            {/* Cliente */}
+            <div className="min-w-0">
+              <p className="truncate font-sans text-sm font-semibold text-[var(--obsidienne,#0E0B09)] group-hover:text-[var(--laiton,#B9793E)] transition-colors">
+                {order.customerName}
+              </p>
+              <p className="text-xs font-mono text-[var(--obsidienne,#0E0B09)]/50 tabular-nums">{order.customerPhone}</p>
+            </div>
 
-              {/* Articles */}
-              <span className="text-right text-sm text-[var(--text-dark)]/60 tabular-nums">
+            {/* Produits */}
+            <div>
+              <span className="font-mono text-xs font-bold text-[var(--obsidienne,#0E0B09)] tabular-nums bg-[var(--porcelaine,#F1ECE3)] px-3 py-1 rounded-full border border-[var(--laiton,#B9793E)]/20 shadow-2xs">
                 {order.itemsCount}
               </span>
-
-              {/* Total */}
-              <span className="text-right text-sm font-bold text-[var(--text-dark)] tabular-nums">
-                {formatFCFA(order.total)} F
-              </span>
-
-              {/* Paiement */}
-              <div>
-                <PaymentBadge order={order} />
-              </div>
-
-              {/* Statut */}
-              <div>
-                <StatusBadge status={order.status} />
-              </div>
-
-              {/* WhatsApp */}
-              <WhatsAppButton
-                order={order}
-                className="ml-auto opacity-0 transition-opacity group-hover:opacity-100"
-              />
             </div>
-          ))}
-        </div>
+
+            {/* Total */}
+            <div>
+              <span className="font-mono text-base font-bold text-[var(--obsidienne,#0E0B09)] tabular-nums">
+                {formatFCFA(order.total)} <span className="text-xs font-sans font-normal text-[var(--obsidienne,#0E0B09)]/60">FCFA</span>
+              </span>
+            </div>
+
+            {/* Paiement */}
+            <div>
+              <PaymentBadge order={order} />
+            </div>
+
+            {/* Statut */}
+            <div>
+              <StatusBadge status={order.status} />
+            </div>
+
+            {/* Actions */}
+            <div className="flex items-center justify-end gap-1.5">
+              <Link
+                href={`/admin/orders/${order.id}`}
+                className="flex h-8 w-8 items-center justify-center rounded-xl border border-[var(--laiton,#B9793E)]/25 bg-[var(--obsidienne,#0E0B09)] text-[var(--porcelaine,#F1ECE3)] transition-all hover:bg-[var(--laiton,#B9793E)] hover:scale-105 shadow-2xs"
+                title="Voir la fiche"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Eye className="h-3.5 w-3.5 stroke-[1.5]" />
+              </Link>
+              <a
+                href={whatsAppUrl(order)}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="flex h-8 w-8 items-center justify-center rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-700 transition-all hover:bg-emerald-600 hover:text-white hover:scale-105 shadow-2xs"
+                title="WhatsApp"
+              >
+                <WhatsAppIcon className="h-3.5 w-3.5" />
+              </a>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

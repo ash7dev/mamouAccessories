@@ -12,24 +12,24 @@ export async function GET(request: NextRequest) {
     const period = searchParams.get('period') || 'month'; // day, week, month, year
 
     // Calculer les dates pour la période
-    const now = new Date();
     let startDate: Date;
+    const today = new Date();
     
     switch (period) {
       case 'day':
-        startDate = new Date(now.setHours(0, 0, 0, 0));
+        startDate = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0, 0);
         break;
       case 'week':
-        startDate = new Date(now.setDate(now.getDate() - 7));
+        startDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
         break;
       case 'month':
-        startDate = new Date(now.setMonth(now.getMonth() - 1));
+        startDate = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
         break;
       case 'year':
-        startDate = new Date(now.setFullYear(now.getFullYear() - 1));
+        startDate = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate());
         break;
       default:
-        startDate = new Date(now.setMonth(now.getMonth() - 1));
+        startDate = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
     }
 
     // 1. KPIs
@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
         .from('orders')
         .select('total')
         .gte('created_at', startDate.toISOString())
-        .neq('status', 'cancelled')
+        .eq('payment_status', 'paid')
     ]);
 
     // Compter les clients uniques
@@ -55,12 +55,12 @@ export async function GET(request: NextRequest) {
 
     const totalRevenue = revenueData?.reduce((sum, order) => sum + order.total, 0) || 0;
 
-    // 2. Revenue chart data (groupé par jour/semaine/mois selon la période)
+    // 2. Revenue chart data (groupé par jour/semaine/mois selon la période - uniquement commandes payées)
     const { data: revenueChart } = await supabase
       .from('orders')
       .select('created_at, total')
       .gte('created_at', startDate.toISOString())
-      .neq('status', 'cancelled')
+      .eq('payment_status', 'paid')
       .order('created_at', { ascending: true });
 
     // Formatter les données pour le graphique
@@ -108,17 +108,55 @@ export async function GET(request: NextRequest) {
       productSales[item.product_id].revenue += item.quantity * (item.unit_price || 0);
     });
 
-    const topProducts = Object.entries(productSales)
-      .map(([id, data], index) => ({
+    let topProducts = Object.entries(productSales)
+      .map(([id, data]) => ({
         id,
         name: data.name,
         sales: data.sales,
         revenue: data.revenue,
         image: productImages[id] || null,
-        rank: index + 1
+        rank: 1
       }))
       .sort((a, b) => b.sales - a.sales)
-      .slice(0, 5); // Top 5
+      .slice(0, 5)
+      .map((item, idx) => ({ ...item, rank: idx + 1 }));
+
+    // Fallback : si aucune vente enregistrée dans order_items, afficher les 5 premiers bijoux actifs du catalogue
+    if (topProducts.length === 0) {
+      const { data: catalogProducts } = await supabase
+        .from('products')
+        .select(`
+          id,
+          name,
+          price,
+          product_images (
+            cloudinary_public_id,
+            position
+          )
+        `)
+        .eq('is_active', true)
+        .order('price', { ascending: false })
+        .limit(5);
+
+      if (catalogProducts) {
+        const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'utngoden';
+        topProducts = catalogProducts.map((p, idx) => {
+          const mainImg = p.product_images?.find((img: any) => img.position === 0) || p.product_images?.[0];
+          const imageUrl = mainImg?.cloudinary_public_id
+            ? `https://res.cloudinary.com/${cloudName}/image/upload/${mainImg.cloudinary_public_id}`
+            : null;
+
+          return {
+            id: p.id,
+            name: p.name,
+            sales: 0,
+            revenue: p.price,
+            image: imageUrl,
+            rank: idx + 1,
+          };
+        });
+      }
+    }
 
     // 4. Commandes récentes
     const { data: recentOrders } = await supabase

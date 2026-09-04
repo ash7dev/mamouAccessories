@@ -36,25 +36,39 @@ export default function ConfirmationPage() {
   const orderNumber = params.orderNumber as string;
 
   const [order, setOrder] = useState<Order | null>(null);
+  const [waveLink, setWaveLink] = useState<string>("https://pay.wave.com/m/M_sn_wi1Bfmu7HgWY/c/sn/");
+  const [whatsappNumber, setWhatsappNumber] = useState<string>("+221770000000");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    async function fetchOrder() {
+    async function fetchData() {
       try {
-        const response = await fetch(`/api/orders?order_number=${orderNumber}`);
-        if (!response.ok) {
+        const [orderRes, settingsRes] = await Promise.all([
+          fetch(`/api/orders?order_number=${orderNumber}`),
+          fetch('/api/admin/settings').catch(() => null)
+        ]);
+
+        if (!orderRes.ok) {
           throw new Error("Commande introuvable");
         }
 
-        const { orders } = await response.json();
+        const { orders } = await orderRes.json();
         if (!orders || orders.length === 0) {
           throw new Error("Commande introuvable");
         }
 
         setOrder(orders[0]);
+
+        if (settingsRes && settingsRes.ok) {
+          const settingsData = await settingsRes.json();
+          if (settingsData.settings) {
+            if (settingsData.settings.wave_link) setWaveLink(settingsData.settings.wave_link);
+            if (settingsData.settings.whatsapp_number) setWhatsappNumber(settingsData.settings.whatsapp_number);
+          }
+        }
       } catch (err) {
-        console.error("Error fetching order:", err);
+        console.error("Error fetching data:", err);
         setError(err instanceof Error ? err.message : "Une erreur est survenue");
       } finally {
         setLoading(false);
@@ -62,7 +76,7 @@ export default function ConfirmationPage() {
     }
 
     if (orderNumber) {
-      fetchOrder();
+      fetchData();
     }
   }, [orderNumber]);
 
@@ -187,12 +201,51 @@ export default function ConfirmationPage() {
               Mode de paiement
             </p>
             {order.payment_method === "wave" ? (
-              <div>
-                <p className="text-[var(--text-dark)] font-medium mb-2">Paiement Wave</p>
-                <p className="text-sm text-[var(--text-dark)]/60 leading-relaxed">
-                  Nous vous enverrons un lien de paiement Wave sur WhatsApp au{" "}
-                  <span className="font-medium">{order.customer_phone}</span>. Veuillez effectuer
-                  le paiement et envoyer la preuve de paiement.
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 overflow-hidden rounded-xl border border-sky-200 bg-white p-0.5 shadow-xs flex items-center justify-center shrink-0">
+                    <img src="/wavelogo.jpeg" alt="Wave" className="h-full w-full object-contain rounded-lg" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-[var(--text-dark)]">Paiement Instantané via Wave</p>
+                    <p className="text-xs text-[var(--text-dark)]/60">Cliquez ci-dessous pour ouvrir votre application Wave avec le montant pré-rempli.</p>
+                  </div>
+                </div>
+
+                {(() => {
+                  const cleanWaveLink = waveLink.includes('?') 
+                    ? `${waveLink}&amount=${order.total}` 
+                    : `${waveLink.replace(/\/$/, '')}/?amount=${order.total}`;
+                  const cleanWhatsapp = whatsappNumber.replace(/[^\d]/g, '') || "221770000000";
+
+                  return (
+                    <div className="grid gap-3 sm:grid-cols-2 pt-2">
+                      <a
+                        href={cleanWaveLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center gap-2.5 rounded-2xl bg-[#1DC3EF] px-5 py-3.5 text-xs font-bold text-white shadow-md hover:bg-[#19b2db] active:scale-95 transition-all"
+                      >
+                        <img src="/wavelogo.jpeg" alt="Wave" className="h-5 w-5 rounded-full object-cover border border-white/40" />
+                        <span>Payer {formatFCFA(order.total)} FCFA sur Wave</span>
+                      </a>
+
+                      <a
+                        href={`https://wa.me/${cleanWhatsapp}?text=${encodeURIComponent(
+                          `Bonjour Mamou Jewelry, je viens d'effectuer le paiement de ${formatFCFA(order.total)} FCFA par Wave pour ma commande N° ${order.order_number}.`
+                        )}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center gap-2.5 rounded-2xl bg-emerald-600 px-5 py-3.5 text-xs font-bold text-white shadow-md hover:bg-emerald-700 active:scale-95 transition-all"
+                      >
+                        <span>Envoyer la preuve sur WhatsApp</span>
+                      </a>
+                    </div>
+                  );
+                })()}
+
+                <p className="text-[11px] text-[var(--text-dark)]/50 italic text-center pt-1">
+                  Sur mobile, appuyer sur le bouton bleu ouvre directement l'application Wave avec le montant exact.
                 </p>
               </div>
             ) : (

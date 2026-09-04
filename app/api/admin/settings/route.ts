@@ -15,9 +15,14 @@ export async function GET() {
     }
 
     // Convertir le format clé-valeur en objet
-    const settingsObj: Record<string, string> = {};
+    const settingsObj: Record<string, string> = {
+      wave_link: 'https://pay.wave.com/m/M_sn_wi1Bfmu7HgWY/c/sn/',
+      delivery_fee: '1500',
+      whatsapp_number: '+221770000000',
+      store_name: 'Mamou Jewelry',
+    };
     settings?.forEach(({ key, value }) => {
-      settingsObj[key] = value;
+      if (value) settingsObj[key] = value;
     });
 
     return NextResponse.json({ settings: settingsObj });

@@ -1,6 +1,5 @@
 import { Navbar } from "@/components/boutique/navbar";
 import { Hero } from "@/components/home/Hero";
-import { SearchBar } from "@/components/home/SearchBar";
 import { CollectionCards } from "@/components/boutique/CollectionCards";
 import { ProductSection } from "@/components/home/ProductSection";
 import { PromoBanner } from "@/components/home/PromoBanner";
@@ -41,37 +40,59 @@ export default async function HomePage() {
     <>
       <Navbar />
 
-      <SearchBar />
-
-      <Hero heroImage="/hero.jpg" />
+      <Hero products={featured.length >= 3 ? featured.slice(0, 3) : (newArrivals.length >= 3 ? newArrivals.slice(0, 3) : recommended.slice(0, 3))} />
 
       <CollectionCards collections={collections} />
 
-      <ProductSection
-        eyebrow="Nos préférés"
-        title="Coups de cœur"
-        products={featured}
-        viewAllHref="/boutique"
-        mobileLayout="carousel"
-      />
+      {/* ================= VERSION MOBILE : 2 Sections Produits (1 Grille + 1 Carrousel Horizontale) ================= */}
+      <div className="lg:hidden space-y-2">
+        <ProductSection
+          eyebrow="Nos préférés"
+          title="Coups de cœur"
+          products={featured.length >= 4 ? featured.slice(0, 4) : (recommended.length >= 4 ? recommended.slice(0, 4) : newArrivals.slice(0, 4))}
+          viewAllHref="/boutique"
+          mobileLayout="grid"
+        />
 
-      <ProductSection
-        eyebrow="Pour vous"
-        title="Recommandés"
-        products={recommended}
-        viewAllHref="/boutique"
-        mobileLayout="carousel"
-      />
+        {activePromo && <PromoBanner promo={activePromo} />}
 
-      {activePromo && <PromoBanner promo={activePromo} />}
+        <ProductSection
+          eyebrow="Fraîchement arrivés"
+          title="Nouveautés"
+          products={newArrivals}
+          viewAllHref="/boutique?tri=recent"
+          mobileLayout="carousel"
+        />
+      </div>
 
-      <ProductSection
-        eyebrow="Fraîchement arrivés"
-        title="Nouveautés"
-        products={newArrivals}
-        viewAllHref="/boutique?tri=recent"
-        mobileLayout="grid"
-      />
+      {/* ================= VERSION DESKTOP : Expérience Complète Boutique ================= */}
+      <div className="hidden lg:block space-y-4">
+        <ProductSection
+          eyebrow="Nos préférés"
+          title="Coups de cœur"
+          products={featured}
+          viewAllHref="/boutique"
+          mobileLayout="grid"
+        />
+
+        <ProductSection
+          eyebrow="Pour vous"
+          title="Recommandés"
+          products={recommended}
+          viewAllHref="/boutique"
+          mobileLayout="grid"
+        />
+
+        {activePromo && <PromoBanner promo={activePromo} />}
+
+        <ProductSection
+          eyebrow="Fraîchement arrivés"
+          title="Nouveautés"
+          products={newArrivals}
+          viewAllHref="/boutique?tri=recent"
+          mobileLayout="grid"
+        />
+      </div>
 
       <MaisonMamouExperience />
 

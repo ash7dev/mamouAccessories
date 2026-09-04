@@ -70,88 +70,104 @@ export function AdminHeaderMobile({
   const [hidden, setHidden] = useState(false);
 
   return (
-    <div className="lg:hidden -mx-4 -mt-4 mb-6 rounded-b-[2.5rem] bg-gradient-to-b from-[#4A3728] to-[#3D2C1F] px-5 pb-8 pt-6 shadow-2xl">
+    <div className="lg:hidden -mx-4 -mt-4 mb-6 relative overflow-hidden rounded-b-[2.5rem] bg-gradient-to-b from-[var(--obsidienne,#0E0B09)] via-[var(--obsidienne-soft,#17120D)] to-[var(--obsidienne,#0E0B09)] px-5 pb-8 pt-7 shadow-2xl border-b border-[var(--laiton,#B9793E)]/35 text-[var(--porcelaine,#F1ECE3)] font-sans">
+      {/* Background Subtle Radial Glow */}
+      <div className="absolute top-0 right-0 w-80 h-80 bg-gradient-to-br from-[var(--laiton,#B9793E)]/25 via-[#D9AE78]/10 to-transparent rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-60 h-60 bg-[var(--laiton,#B9793E)]/15 rounded-full blur-2xl pointer-events-none" />
+
       {/* Barre du haut : avatar + salutation + cloche */}
-      <div className="mb-6 flex items-center justify-between">
+      <div className="relative z-10 mb-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[var(--gold)]/90 text-xl font-bold text-[#241B14]">
-            {userName.charAt(0).toUpperCase()}
+          <div className="relative">
+            <div className="flex h-13 w-13 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--laiton,#B9793E)] via-[#D9AE78] to-[var(--laiton,#B9793E)] text-xl font-serif font-bold text-[var(--obsidienne,#0E0B09)] shadow-md border border-white/20">
+              {userName.charAt(0).toUpperCase()}
+            </div>
+            <span className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 ring-2 ring-[var(--obsidienne,#0E0B09)] text-[8px] text-white">✓</span>
           </div>
           <div className="leading-tight">
-            <p className="text-sm text-[#F4EFE6]/60">Bonjour 👋</p>
-            <h1 className="text-xl font-bold text-[#F4EFE6]">{userName}</h1>
+            <span className="inline-flex items-center gap-1 rounded-full border border-[var(--laiton,#B9793E)]/30 bg-[var(--laiton,#B9793E)]/15 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-[var(--laiton-clair,#D9AE78)] mb-1">
+              ✦ Admin VIP
+            </span>
+            <h1 className="text-xl font-bold text-[var(--porcelaine,#F1ECE3)] flex items-center gap-1.5 font-serif">
+              Bonjour, {userName} <span className="animate-pulse">👋</span>
+            </h1>
           </div>
         </div>
 
         <button
-          className="flex h-12 w-12 items-center justify-center rounded-full bg-white/5 text-[#F4EFE6]/80 transition-colors hover:bg-white/10"
+          className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[var(--laiton,#B9793E)]/30 bg-white/10 text-[var(--porcelaine,#F1ECE3)] shadow-inner backdrop-blur-md transition-all active:scale-95"
           aria-label="Notifications"
         >
-          <BellIcon />
+          <BellIcon className="w-5 h-5 text-[var(--laiton-clair,#D9AE78)]" />
         </button>
       </div>
 
-      {/* Carte revenus */}
-      <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-5">
-        <div className="mb-5 flex items-center justify-between">
-          <p className="text-sm text-[#F4EFE6]/60">Encaissé · {month}</p>
+      {/* Carte revenus Haute Joaillerie */}
+      <div className="relative z-10 rounded-3xl border border-[var(--laiton,#B9793E)]/35 bg-white/10 p-5 backdrop-blur-xl shadow-xl">
+        <div className="mb-4 flex items-center justify-between">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--laiton-clair,#D9AE78)]">
+              Chiffre d&apos;Affaires Encaissé
+            </p>
+            <p className="text-xs text-[var(--porcelaine,#F1ECE3)]/60 font-medium">Mois de {month}</p>
+          </div>
 
           <div className="flex items-center gap-2">
-            <span className="rounded-full bg-[var(--gold)] px-3 py-1 text-xs font-semibold text-[#241B14]">
+            <span className="rounded-full bg-gradient-to-r from-[var(--laiton,#B9793E)] to-[#D9AE78] px-3 py-1 text-[10px] font-extrabold uppercase tracking-wider text-[var(--obsidienne,#0E0B09)] shadow-xs">
               FCFA
             </span>
             <button
               onClick={() => setHidden((v) => !v)}
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-white/5 text-[#F4EFE6]/70 transition-colors hover:bg-white/10"
+              className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/20 bg-white/10 text-[var(--porcelaine,#F1ECE3)]/80 backdrop-blur-md transition-all active:scale-95"
               aria-label={hidden ? "Afficher les montants" : "Masquer les montants"}
             >
-              {hidden ? <EyeOffIcon /> : <EyeIcon />}
+              {hidden ? <EyeOffIcon className="w-4 h-4" /> : <EyeIcon className="w-4 h-4" />}
             </button>
           </div>
         </div>
 
         {/* Montant du mois */}
-        <div className="mb-5 flex items-baseline gap-2">
-          <span className="text-5xl font-bold tracking-tight text-white">
-            {hidden ? "••••" : formatFCFA(monthRevenue)}
+        <div className="mb-4 flex items-baseline gap-2">
+          <span className="font-mono text-4xl font-bold tracking-tight text-[var(--porcelaine,#F1ECE3)] tabular-nums">
+            {hidden ? "••••••" : formatFCFA(monthRevenue)}
           </span>
-          <span className="text-xl font-medium text-[#F4EFE6]/50">FCFA</span>
+          <span className="text-sm font-sans font-medium text-[var(--laiton-clair,#D9AE78)] opacity-90">FCFA</span>
         </div>
 
-        <div className="mb-4 border-t border-white/10" />
+        <div className="mb-4 border-t border-[var(--laiton,#B9793E)]/25" />
 
         {/* Total cumulé */}
-        <div className="flex items-center justify-between">
-          <p className="text-xs uppercase tracking-[0.15em] text-[#F4EFE6]/40">
-            Total cumulé
-          </p>
-          <p className="text-base font-bold text-[var(--gold)]">
+        <div className="flex items-center justify-between text-xs">
+          <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-[var(--porcelaine,#F1ECE3)]/50">
+            Total Encaissé Cumulé
+          </span>
+          <span className="font-mono font-bold text-[var(--laiton-clair,#D9AE78)] tabular-nums">
             {hidden ? "•••• FCFA" : `${formatFCFA(totalRevenue)} FCFA`}
-          </p>
+          </span>
         </div>
       </div>
 
       {/* Actions rapides : 1 pilule dorée + 2 pilules sombres */}
-      <div className="mt-6 grid grid-cols-3 gap-3">
+      <div className="relative z-10 mt-5 grid grid-cols-3 gap-2.5">
         <Link
           href="/admin/products/new"
-          className="flex items-center justify-center gap-1.5 rounded-full bg-[var(--gold)] py-3.5 text-sm font-bold text-[#241B14] shadow-lg transition-transform active:scale-95"
+          className="flex items-center justify-center gap-1.5 rounded-2xl bg-gradient-to-r from-[var(--laiton,#B9793E)] via-[#D9AE78] to-[var(--laiton,#B9793E)] py-3 px-2 text-xs font-extrabold uppercase tracking-wider text-[var(--obsidienne,#0E0B09)] shadow-lg transition-transform active:scale-95 border border-white/20"
         >
-          <PlusIcon className="h-4 w-4" />
+          <PlusIcon className="h-4 w-4 stroke-[2.5]" />
           <span>Produit</span>
         </Link>
 
         <Link
           href="/admin/orders"
-          className="flex items-center justify-center gap-1.5 rounded-full border border-white/10 bg-white/5 py-3.5 text-sm font-semibold text-[#F4EFE6] transition-colors hover:bg-white/10 active:scale-95"
+          className="flex items-center justify-center gap-1.5 rounded-2xl border border-[var(--laiton,#B9793E)]/35 bg-white/10 py-3 px-2 text-xs font-bold uppercase tracking-wider text-[var(--porcelaine,#F1ECE3)] backdrop-blur-md transition-colors hover:bg-white/20 active:scale-95 shadow-sm"
         >
           <OrderIcon className="h-4 w-4" />
-          <span>Commandes</span>
+          <span>Ventes</span>
         </Link>
 
         <Link
           href="/admin/reviews"
-          className="flex items-center justify-center gap-1.5 rounded-full border border-white/10 bg-white/5 py-3.5 text-sm font-semibold text-[#F4EFE6] transition-colors hover:bg-white/10 active:scale-95"
+          className="flex items-center justify-center gap-1.5 rounded-2xl border border-[var(--laiton,#B9793E)]/35 bg-white/10 py-3 px-2 text-xs font-bold uppercase tracking-wider text-[var(--porcelaine,#F1ECE3)] backdrop-blur-md transition-colors hover:bg-white/20 active:scale-95 shadow-sm"
         >
           <ReviewIcon className="h-4 w-4" />
           <span>Avis</span>

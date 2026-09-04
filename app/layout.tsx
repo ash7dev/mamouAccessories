@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Plus_Jakarta_Sans, Outfit, Playfair_Display } from "next/font/google";
+import { Plus_Jakarta_Sans, Outfit, Playfair_Display, Cormorant_Garamond, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 import { PageTransition } from "@/components/ui/page-transition";
@@ -24,6 +24,20 @@ const playfair = Playfair_Display({
   variable: "--font-serif-custom",
   display: "swap",
   weight: ["400", "500", "600", "700", "800"],
+});
+
+const cormorant = Cormorant_Garamond({
+  subsets: ["latin"],
+  variable: "--font-cormorant",
+  display: "swap",
+  weight: ["300", "400", "500", "600", "700"],
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono-custom",
+  display: "swap",
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -64,7 +78,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr" className={`h-full antialiased ${plusJakartaSans.variable} ${outfit.variable} ${playfair.variable}`}>
+    <html lang="fr" className={`h-full antialiased ${plusJakartaSans.variable} ${outfit.variable} ${playfair.variable} ${cormorant.variable} ${jetbrainsMono.variable}`}>
       <body className="min-h-full flex flex-col font-sans" suppressHydrationWarning>
         <CartProvider>
           <PageTransition>

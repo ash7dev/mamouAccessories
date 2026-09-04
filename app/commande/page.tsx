@@ -48,7 +48,18 @@ export default function CommandePage() {
           .filter(r => r.product)
           .map(r => {
             const product = r.product;
-            const mainImage = product.images?.[0]?.cloudinary_public_id;
+            const firstImgObj = Array.isArray(product.images) && product.images.length > 0 ? product.images[0] : null;
+            const rawImage =
+              typeof firstImgObj === 'string'
+                ? firstImgObj
+                : firstImgObj?.cloudinary_public_id ||
+                  firstImgObj?.url ||
+                  firstImgObj?.image_url ||
+                  product.image_url ||
+                  product.imageUrl ||
+                  product.cloudinary_public_id ||
+                  null;
+
             const cartItem = items.find(i => i.productId === product.id);
 
             return {
@@ -56,7 +67,7 @@ export default function CommandePage() {
               name: product.name,
               price: product.price,
               stock: product.stock,
-              imageUrl: mainImage ? buildCloudinaryImageUrl(mainImage) : null,
+              imageUrl: rawImage,
               isActive: true,
               quantity: cartItem?.quantity || 1
             };
