@@ -47,24 +47,23 @@ export async function updateOrderStatus(
       updateData.cancel_reason = extra.cancelReason;
     }
 
-    // Si on annule une commande confirmée/expédiée, restaurer le stock
-    if (
-      newStatus === 'cancelled' &&
-      (currentOrder.status === 'confirmed' || currentOrder.status === 'shipped')
-    ) {
-      for (const item of currentOrder.items) {
-        if (item.product_id) {
-          const { data: product } = await supabase
-            .from('products')
-            .select('stock')
-            .eq('id', item.product_id)
-            .single();
-
-          if (product) {
-            await supabase
+    // Si on annule une commande (qui n'était pas déjà annulée), restaurer le stock
+    if (newStatus === 'cancelled' && currentOrder.status !== 'cancelled') {
+      if (Array.isArray(currentOrder.items)) {
+        for (const item of currentOrder.items) {
+          if (item.product_id) {
+            const { data: product } = await supabase
               .from('products')
-              .update({ stock: product.stock + item.quantity })
-              .eq('id', item.product_id);
+              .select('stock')
+              .eq('id', item.product_id)
+              .single();
+
+            if (product) {
+              await supabase
+                .from('products')
+                .update({ stock: product.stock + item.quantity })
+                .eq('id', item.product_id);
+            }
           }
         }
       }

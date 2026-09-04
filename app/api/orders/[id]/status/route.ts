@@ -43,6 +43,34 @@ export async function PATCH(
       );
     }
 
+    // Si la commande passe à annulée, restaurer le stock
+    if (body.status === 'cancelled' && existing.status !== 'cancelled') {
+      const { data: fullOrder } = await supabase
+        .from('orders')
+        .select('*, items:order_items(*)')
+        .eq('id', id)
+        .single();
+
+      if (fullOrder && Array.isArray(fullOrder.items)) {
+        for (const item of fullOrder.items) {
+          if (item.product_id) {
+            const { data: product } = await supabase
+              .from('products')
+              .select('stock')
+              .eq('id', item.product_id)
+              .single();
+
+            if (product) {
+              await supabase
+                .from('products')
+                .update({ stock: product.stock + item.quantity })
+                .eq('id', item.product_id);
+            }
+          }
+        }
+      }
+    }
+
     // Mettre à jour le statut
     const updateData: any = {
       status: body.status,
