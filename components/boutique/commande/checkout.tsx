@@ -145,7 +145,7 @@ export function Checkout({
       clear();
 
       if (payment === "wave") {
-        const waveUrl = "https://pay.wave.com/m/M_sn_wi1Bfmu7HgWY/c/sn/";
+        const waveUrl = `https://pay.wave.com/m/M_sn_wi1Bfmu7HgWY/c/sn/?amount=${total}`;
         // 1. Rediriger vers la page de confirmation en arrière-plan
         router.push(`/commande/confirmation/${order.order_number}`);
         // 2. Déclencher immédiatement l'ouverture de l'application Wave

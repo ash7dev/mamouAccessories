@@ -220,10 +220,13 @@ export default function ConfirmationPage() {
                 </div>
 
                 {(() => {
-                  let cleanWaveLink = (waveLink.trim() || "https://pay.wave.com/m/M_sn_wi1Bfmu7HgWY/c/sn/").trim();
-                  if (!cleanWaveLink.includes("M_") || cleanWaveLink === "https://pay.wave.com/m/") {
-                    cleanWaveLink = "https://pay.wave.com/m/M_sn_wi1Bfmu7HgWY/c/sn/";
+                  let baseWaveUrl = (waveLink.trim() || "https://pay.wave.com/m/M_sn_wi1Bfmu7HgWY/c/sn/").trim();
+                  if (!baseWaveUrl.includes("M_") || baseWaveUrl === "https://pay.wave.com/m/") {
+                    baseWaveUrl = "https://pay.wave.com/m/M_sn_wi1Bfmu7HgWY/c/sn/";
                   }
+                  const cleanWaveLink = baseWaveUrl.includes('?')
+                    ? `${baseWaveUrl}&amount=${order.total}`
+                    : `${baseWaveUrl.replace(/\/$/, '')}/?amount=${order.total}`;
                   const cleanWhatsapp = whatsappNumber.replace(/[^\d]/g, '') || "221774907955";
                   const formattedPhone = "+221 77 490 79 55";
 

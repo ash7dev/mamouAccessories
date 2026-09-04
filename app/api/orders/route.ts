@@ -3,10 +3,33 @@ import { createServiceRoleClient } from '@/lib/supabase/service-role';
 import type { CreateOrderInput, OrderFilters } from '@/lib/types/order';
 import { broadcastOrderPushNotification } from '@/lib/server/push-server';
 
-// GET /api/orders - Récupérer toutes les commandes
+// GET /api/orders - Récupérer toutes les commandes ou filtrer par order_number
 export async function GET(request: NextRequest) {
   try {
     const supabase = createServiceRoleClient();
+    const orderNumber = request.nextUrl.searchParams.get('order_number');
+
+    if (orderNumber) {
+      const { data: rawOrders, error } = await supabase
+        .from('orders')
+        .select(`
+          *,
+          items:order_items(
+            id,
+            product_name,
+            unit_price,
+            quantity
+          )
+        `)
+        .eq('order_number', orderNumber);
+
+      if (error) {
+        console.error('Error fetching order by order_number:', error);
+        return NextResponse.json({ error: 'Erreur lors de la récupération de la commande' }, { status: 500 });
+      }
+
+      return NextResponse.json({ orders: rawOrders || [] }, { status: 200 });
+    }
 
     const { data: rawOrders, error } = await supabase
       .from('orders')
