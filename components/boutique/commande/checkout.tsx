@@ -22,6 +22,7 @@ import {
   MapPin,
   FileText,
   CreditCard,
+  ChevronDown,
 } from "lucide-react";
 
 /* ============================================================
@@ -36,6 +37,46 @@ export interface CartProduct {
   imageUrl: string | null;
   isActive: boolean;
 }
+
+export interface DeliveryZoneOption {
+  id: string;
+  name: string;
+  subtext: string;
+  fee: number;
+}
+
+export const DELIVERY_ZONES: DeliveryZoneOption[] = [
+  {
+    id: "zone-1",
+    name: "Zone 1 - Dakar (2 000 Fcfa)",
+    subtext: "Plateau, Fann, Point E, Mermoz, Sacré-Cœur, Liberté, Ouakam, Ngor, Almadies, Yoff, Les Mamelles",
+    fee: 2000,
+  },
+  {
+    id: "zone-2",
+    name: "Zone 2 - Pikine Guediawaye (2 500 Fcfa)",
+    subtext: "Pikine, Guédiawaye, Parcelles Assainies, Grand Yoff, Cambérène",
+    fee: 2500,
+  },
+  {
+    id: "zone-3",
+    name: "Zone 3 - Thiaroye Yeumbeul - Mbao - Keur Massar - Keur Mbaye Fall (3 500 Fcfa)",
+    subtext: "Thiaroye, Yeumbeul, Mbao, Keur Massar, Keur Mbaye Fall, Fas Mbao",
+    fee: 3500,
+  },
+  {
+    id: "zone-4",
+    name: "Zone 4 : Rufisque - Malika - Tivaouane Peulh (3 500 Fcfa)",
+    subtext: "Rufisque, Malika, Tivaouane Peulh, Bargny, Diamniadio, Sangalkam",
+    fee: 3500,
+  },
+  {
+    id: "zone-5",
+    name: "Zone 5 : Regions (3 500 Fcfa)",
+    subtext: "Thiès, Mbour, Saly, Saint-Louis, Kaolack, Touba, Ziguinchor, Diourbel, etc.",
+    fee: 3500,
+  },
+];
 
 interface CheckoutProps {
   /** Produits du panier résolus côté serveur */
@@ -78,9 +119,14 @@ export function Checkout({
     note: "",
   });
   const [payment, setPayment] = useState<PaymentMethod>("wave"); // Wave par défaut
-  const [zone, setZone] = useState<DeliveryZone>("dakar");
+  const [selectedZoneId, setSelectedZoneId] = useState<string>("zone-1");
+  const [zoneDropdownOpen, setZoneDropdownOpen] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
+
+  const selectedZone = useMemo(() => {
+    return DELIVERY_ZONES.find((z) => z.id === selectedZoneId) || DELIVERY_ZONES[0];
+  }, [selectedZoneId]);
 
   // Fusion panier × produits résolus
   const lines = useMemo(() => {
@@ -95,7 +141,7 @@ export function Checkout({
   }, [items, cartProducts]);
 
   const subtotal = lines.reduce((s, l) => s + l.lineTotal, 0);
-  const deliveryFee = zone === "dakar" ? deliveryFeeDakar : deliveryFeeRegions;
+  const deliveryFee = selectedZone.fee;
   const total = subtotal + deliveryFee;
 
   const hasAdjustments = lines.some((l) => l.quantity < l.requested);
@@ -116,6 +162,7 @@ export function Checkout({
     setSubmitting(true);
     try {
       const phone = normalizePhone(form.phone)!;
+      const fullAddress = `[${selectedZone.name}] ${form.address.trim()}`;
 
       const response = await fetch('/api/orders', {
         method: 'POST',
@@ -124,7 +171,7 @@ export function Checkout({
           customer_name: form.name.trim(),
           customer_phone: phone,
           customer_email: form.email.trim() || undefined,
-          delivery_address: form.address.trim(),
+          delivery_address: fullAddress,
           delivery_note: form.note.trim() || undefined,
           delivery_fee: deliveryFee,
           payment_method: payment,
@@ -298,44 +345,55 @@ export function Checkout({
                 </h2>
               </div>
 
-              {/* Sélection Zone */}
-              <div className="mb-5 grid grid-cols-2 gap-3">
-                {(
-                  [
-                    { key: "dakar", label: "Dakar & Banlieue", desc: "Livraison express sous 24h", fee: deliveryFeeDakar },
-                    { key: "regions", label: "Régions du Sénégal", desc: "Livraison sécurisée sous 48h", fee: deliveryFeeRegions },
-                  ] as const
-                ).map((z) => {
-                  const selected = zone === z.key;
-                  return (
-                    <button
-                      key={z.key}
-                      type="button"
-                      onClick={() => setZone(z.key)}
-                      className={`rounded-2xl border-2 p-4 text-left transition-all ${
-                        selected
-                          ? "border-[var(--laiton,#B9793E)] bg-[var(--porcelaine,#F1ECE3)]/70 shadow-sm ring-1 ring-[var(--laiton,#B9793E)]/40"
-                          : "border-[var(--laiton,#B9793E)]/15 hover:border-[var(--laiton,#B9793E)]/40 bg-white"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-xs font-bold text-[var(--obsidienne,#0E0B09)]">
-                          {z.label}
-                        </span>
-                        {selected && <CheckCircle2 className="h-4 w-4 text-[var(--laiton,#B9793E)]" />}
-                      </div>
-                      <span className="text-[11px] text-[var(--obsidienne,#0E0B09)]/60 block mb-1">
-                        {z.desc}
-                      </span>
-                      <span className="font-mono text-sm font-bold text-[var(--obsidienne,#0E0B09)] tabular-nums">
-                        {formatFCFA(z.fee)} FCFA
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-
+              {/* Sélection Zone - Liste Fond Blanc Premium (Sans Select Natif) */}
               <div className="space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold text-[var(--obsidienne,#0E0B09)] mb-2.5">
+                    Sélectionner votre zone de livraison <span className="text-rose-600">*</span>
+                  </label>
+
+                  {/* Liste Visuelle des Items sur Fond Blanc (Cards Premium) */}
+                  <div className="space-y-2.5">
+                    {DELIVERY_ZONES.map((z) => {
+                      const isSelected = z.id === selectedZoneId;
+                      return (
+                        <button
+                          key={z.id}
+                          type="button"
+                          onClick={() => setSelectedZoneId(z.id)}
+                          className={`w-full flex items-start justify-between gap-3 rounded-2xl border-2 bg-white p-3.5 text-left transition-all duration-200 cursor-pointer ${
+                            isSelected
+                              ? "border-[var(--laiton,#B9793E)] shadow-md ring-2 ring-[var(--laiton,#B9793E)]/20"
+                              : "border-neutral-200/80 hover:border-[var(--laiton,#B9793E)]/40 hover:bg-neutral-50/50"
+                          }`}
+                        >
+                          <div className="flex items-start gap-3 min-w-0 flex-1">
+                            <div className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border transition-all ${
+                              isSelected
+                                ? "border-[var(--laiton,#B9793E)] bg-[var(--laiton,#B9793E)] text-white"
+                                : "border-neutral-300 bg-white"
+                            }`}>
+                              {isSelected && <CheckCircle2 className="h-4 w-4 text-white fill-[var(--laiton,#B9793E)]" />}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <span className="block text-xs font-bold text-[var(--obsidienne,#0E0B09)]">
+                                {z.name}
+                              </span>
+                              <span className="mt-1 block text-[11px] text-neutral-500 leading-relaxed">
+                                {z.subtext}
+                              </span>
+                            </div>
+                          </div>
+
+                          <span className="shrink-0 font-mono text-xs font-bold text-[var(--obsidienne,#0E0B09)] bg-neutral-100 px-2.5 py-1 rounded-xl border border-neutral-200/60 tabular-nums">
+                            {formatFCFA(z.fee)} F
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
                 <div>
                   <label className="block text-xs font-semibold text-[var(--obsidienne,#0E0B09)] mb-1.5">
                     Adresse exacte de livraison <span className="text-rose-600">*</span>
@@ -492,7 +550,7 @@ export function Checkout({
                   <span className="font-mono font-medium tabular-nums">{formatFCFA(subtotal)} FCFA</span>
                 </div>
                 <div className="flex justify-between text-[var(--obsidienne,#0E0B09)]/70">
-                  <span>Frais de livraison ({zone === "dakar" ? "Dakar" : "Régions"})</span>
+                  <span>Frais de livraison ({selectedZone.name.split('(')[0].replace(/^Zone \d+ - /, '').trim()})</span>
                   <span className="font-mono font-medium tabular-nums text-[var(--laiton,#B9793E)]">{formatFCFA(deliveryFee)} FCFA</span>
                 </div>
                 <div className="flex items-baseline justify-between pt-3 border-t border-[var(--laiton,#B9793E)]/25">
