@@ -28,25 +28,46 @@ export function AdminOrderNotifier() {
     async function registerPush() {
       if (typeof window === "undefined" || !("serviceWorker" in navigator) || !("PushManager" in window)) return;
       try {
+        if (Notification.permission === "default") {
+          const permission = await Notification.requestPermission();
+          if (permission !== "granted") return;
+        } else if (Notification.permission !== "granted") {
+          return;
+        }
+
         const registration = await navigator.serviceWorker.ready;
-        const permission = await Notification.requestPermission();
-        if (permission !== "granted") return;
+        let subscription = await registration.pushManager.getSubscription();
 
-        const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
-        if (!publicKey) return;
+        if (!subscription) {
+          const keyRes = await fetch("/api/admin/push/vapid-key").catch(() => null);
+          const keyData = keyRes && keyRes.ok ? await keyRes.json() : null;
+          const publicKey =
+            keyData?.publicKey ||
+            process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ||
+            "BAW4Ln6fItQzCGRFFxhPu3SuyLy8h2-F3H3u0PhYB4CaT9Q_TnQLTuLAfio3Uh7YygTOfytXVlAoI3IZZ5haWTA";
 
-        const subscription = await registration.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(publicKey) as unknown as BufferSource,
-        });
+          if (!publicKey) return;
 
-        await fetch("/api/admin/push/subscribe", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ subscription }),
-        });
+          const convertedKey = urlBase64ToUint8Array(publicKey) as unknown as BufferSource;
+
+          subscription = await registration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: convertedKey,
+          }).catch((subErr) => {
+            console.warn("Could not subscribe to Web Push Manager:", subErr);
+            return null;
+          });
+        }
+
+        if (subscription) {
+          await fetch("/api/admin/push/subscribe", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ subscription }),
+          }).catch(() => null);
+        }
       } catch (err) {
-        console.error("Error registering VAPID push:", err);
+        console.warn("VAPID Push registration handled:", err);
       }
     }
 
