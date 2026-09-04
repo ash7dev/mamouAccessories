@@ -84,10 +84,17 @@ export default function ConfirmationPage() {
     return (
       <div className="min-h-screen bg-background flex flex-col">
         <Navbar />
-        <main className="flex-1 flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--gold)] mx-auto mb-4"></div>
-            <p className="text-foreground">Chargement...</p>
+        <main className="flex-1 container max-w-3xl mx-auto px-4 py-10 md:py-16">
+          <div className="rounded-3xl border border-neutral-100 bg-white p-6 md:p-10 shadow-xs space-y-6 text-center">
+            <div className="h-16 w-16 bg-neutral-100 rounded-full mx-auto animate-pulse" />
+            <div className="h-7 w-64 bg-neutral-200 rounded-lg mx-auto animate-pulse" />
+            <div className="h-4 w-48 bg-neutral-100 rounded-md mx-auto animate-pulse" />
+
+            <div className="border-t border-neutral-100 pt-6 space-y-4 text-left">
+              <div className="h-5 w-40 bg-neutral-200 rounded-md animate-pulse" />
+              <div className="h-12 bg-neutral-100 rounded-2xl animate-pulse" />
+              <div className="h-24 bg-neutral-100 rounded-2xl animate-pulse" />
+            </div>
           </div>
         </main>
         <Footer />

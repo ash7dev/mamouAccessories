@@ -88,10 +88,83 @@ export default function CommandePage() {
     return (
       <div className="min-h-screen bg-background flex flex-col">
         <Navbar />
-        <main className="flex-1 flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--gold)] mx-auto mb-4"></div>
-            <p className="text-foreground">Chargement...</p>
+        <main className="flex-1 container max-w-6xl mx-auto px-4 py-8 md:py-12">
+          {/* Header Skeleton */}
+          <div className="mb-8 space-y-3">
+            <div className="h-4 w-36 bg-neutral-200 rounded-md animate-pulse" />
+            <div className="h-8 w-64 bg-neutral-200 rounded-lg animate-pulse" />
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            {/* Left Column: Form Skeleton */}
+            <div className="lg:col-span-7 space-y-6">
+              {/* Form Card Skeleton */}
+              <div className="rounded-3xl border border-neutral-100 bg-white p-6 space-y-4 shadow-xs">
+                <div className="h-6 w-48 bg-neutral-200 rounded-md animate-pulse mb-2" />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="h-12 bg-neutral-100 rounded-xl animate-pulse" />
+                  <div className="h-12 bg-neutral-100 rounded-xl animate-pulse" />
+                </div>
+                <div className="h-12 bg-neutral-100 rounded-xl animate-pulse" />
+                <div className="h-20 bg-neutral-100 rounded-xl animate-pulse" />
+              </div>
+
+              {/* Delivery Skeleton */}
+              <div className="rounded-3xl border border-neutral-100 bg-white p-6 space-y-4 shadow-xs">
+                <div className="h-6 w-40 bg-neutral-200 rounded-md animate-pulse" />
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="h-16 bg-neutral-100 rounded-2xl animate-pulse" />
+                  <div className="h-16 bg-neutral-100 rounded-2xl animate-pulse" />
+                </div>
+              </div>
+
+              {/* Payment Method Skeleton */}
+              <div className="rounded-3xl border border-neutral-100 bg-white p-6 space-y-4 shadow-xs">
+                <div className="h-6 w-44 bg-neutral-200 rounded-md animate-pulse" />
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="h-20 bg-neutral-100 rounded-2xl animate-pulse" />
+                  <div className="h-20 bg-neutral-100 rounded-2xl animate-pulse" />
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column: Order Summary Skeleton */}
+            <div className="lg:col-span-5 space-y-6">
+              <div className="rounded-3xl border border-neutral-100 bg-white p-6 space-y-5 shadow-xs sticky top-24">
+                <div className="h-6 w-40 bg-neutral-200 rounded-md animate-pulse" />
+
+                <div className="space-y-3">
+                  {[1, 2].map((i) => (
+                    <div key={i} className="flex items-center gap-3">
+                      <div className="h-14 w-14 rounded-xl bg-neutral-100 animate-pulse shrink-0" />
+                      <div className="flex-1 space-y-2">
+                        <div className="h-4 w-3/4 bg-neutral-100 rounded-md animate-pulse" />
+                        <div className="h-3 w-1/2 bg-neutral-100 rounded-md animate-pulse" />
+                      </div>
+                      <div className="h-4 w-16 bg-neutral-100 rounded-md animate-pulse" />
+                    </div>
+                  ))}
+                </div>
+
+                <div className="border-t border-neutral-100 pt-4 space-y-2">
+                  <div className="flex justify-between">
+                    <div className="h-4 w-20 bg-neutral-100 rounded-md animate-pulse" />
+                    <div className="h-4 w-24 bg-neutral-100 rounded-md animate-pulse" />
+                  </div>
+                  <div className="flex justify-between">
+                    <div className="h-4 w-24 bg-neutral-100 rounded-md animate-pulse" />
+                    <div className="h-4 w-20 bg-neutral-100 rounded-md animate-pulse" />
+                  </div>
+                </div>
+
+                <div className="border-t border-neutral-100 pt-4 flex justify-between items-center">
+                  <div className="h-6 w-16 bg-neutral-200 rounded-md animate-pulse" />
+                  <div className="h-7 w-32 bg-neutral-200 rounded-md animate-pulse" />
+                </div>
+
+                <div className="h-14 w-full bg-neutral-200 rounded-2xl animate-pulse mt-4" />
+              </div>
+            </div>
           </div>
         </main>
         <Footer />
