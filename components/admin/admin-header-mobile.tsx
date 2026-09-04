@@ -59,6 +59,14 @@ function ReviewIcon({ className = "w-5 h-5" }: { className?: string }) {
   );
 }
 
+function VideoIcon({ className = "w-5 h-5" }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
+    </svg>
+  );
+}
+
 const formatFCFA = (n: number) => new Intl.NumberFormat("fr-FR").format(n);
 
 export function AdminHeaderMobile({
@@ -147,29 +155,37 @@ export function AdminHeaderMobile({
         </div>
       </div>
 
-      {/* Actions rapides : 1 pilule dorée + 2 pilules sombres */}
-      <div className="relative z-10 mt-5 grid grid-cols-3 gap-2.5">
+      {/* Actions rapides mobile : 4 raccourcis */}
+      <div className="relative z-10 mt-5 grid grid-cols-4 gap-2">
         <Link
           href="/admin/products/new"
-          className="flex items-center justify-center gap-1.5 rounded-2xl bg-gradient-to-r from-[var(--laiton,#B9793E)] via-[#D9AE78] to-[var(--laiton,#B9793E)] py-3 px-2 text-xs font-extrabold uppercase tracking-wider text-[var(--obsidienne,#0E0B09)] shadow-lg transition-transform active:scale-95 border border-white/20"
+          className="flex items-center justify-center gap-1 rounded-2xl bg-gradient-to-r from-[var(--laiton,#B9793E)] via-[#D9AE78] to-[var(--laiton,#B9793E)] py-2.5 px-1 text-[10px] font-extrabold uppercase tracking-wider text-[var(--obsidienne,#0E0B09)] shadow-lg transition-transform active:scale-95 border border-white/20"
         >
-          <PlusIcon className="h-4 w-4 stroke-[2.5]" />
+          <PlusIcon className="h-3.5 w-3.5 stroke-[2.5]" />
           <span>Produit</span>
         </Link>
 
         <Link
-          href="/admin/orders"
-          className="flex items-center justify-center gap-1.5 rounded-2xl border border-[var(--laiton,#B9793E)]/35 bg-white/10 py-3 px-2 text-xs font-bold uppercase tracking-wider text-[var(--porcelaine,#F1ECE3)] backdrop-blur-md transition-colors hover:bg-white/20 active:scale-95 shadow-sm"
+          href="/admin/reels"
+          className="flex items-center justify-center gap-1 rounded-2xl border border-[var(--laiton,#B9793E)]/35 bg-white/10 py-2.5 px-1 text-[10px] font-bold uppercase tracking-wider text-[var(--porcelaine,#F1ECE3)] backdrop-blur-md transition-colors hover:bg-white/20 active:scale-95 shadow-sm"
         >
-          <OrderIcon className="h-4 w-4" />
+          <VideoIcon className="h-3.5 w-3.5" />
+          <span>Reels</span>
+        </Link>
+
+        <Link
+          href="/admin/orders"
+          className="flex items-center justify-center gap-1 rounded-2xl border border-[var(--laiton,#B9793E)]/35 bg-white/10 py-2.5 px-1 text-[10px] font-bold uppercase tracking-wider text-[var(--porcelaine,#F1ECE3)] backdrop-blur-md transition-colors hover:bg-white/20 active:scale-95 shadow-sm"
+        >
+          <OrderIcon className="h-3.5 w-3.5" />
           <span>Ventes</span>
         </Link>
 
         <Link
           href="/admin/reviews"
-          className="flex items-center justify-center gap-1.5 rounded-2xl border border-[var(--laiton,#B9793E)]/35 bg-white/10 py-3 px-2 text-xs font-bold uppercase tracking-wider text-[var(--porcelaine,#F1ECE3)] backdrop-blur-md transition-colors hover:bg-white/20 active:scale-95 shadow-sm"
+          className="flex items-center justify-center gap-1 rounded-2xl border border-[var(--laiton,#B9793E)]/35 bg-white/10 py-2.5 px-1 text-[10px] font-bold uppercase tracking-wider text-[var(--porcelaine,#F1ECE3)] backdrop-blur-md transition-colors hover:bg-white/20 active:scale-95 shadow-sm"
         >
-          <ReviewIcon className="h-4 w-4" />
+          <ReviewIcon className="h-3.5 w-3.5" />
           <span>Avis</span>
         </Link>
       </div>

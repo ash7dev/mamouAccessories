@@ -1,5 +1,6 @@
 import { Navbar } from "@/components/boutique/navbar";
 import { Hero } from "@/components/home/Hero";
+import { ReelsStoryRail } from "@/components/home/ReelsStoryRail";
 import { CollectionCards } from "@/components/boutique/CollectionCards";
 import { ProductSection } from "@/components/home/ProductSection";
 import { PromoBanner } from "@/components/home/PromoBanner";
@@ -41,6 +42,8 @@ export default async function HomePage() {
       <Navbar />
 
       <Hero products={featured.length >= 3 ? featured.slice(0, 3) : (newArrivals.length >= 3 ? newArrivals.slice(0, 3) : recommended.slice(0, 3))} />
+
+      <ReelsStoryRail />
 
       <CollectionCards collections={collections} />
 

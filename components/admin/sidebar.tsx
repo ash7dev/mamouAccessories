@@ -47,6 +47,14 @@ function ReviewIcon({ className = "w-5 h-5" }: { className?: string }) {
   );
 }
 
+function VideoIcon({ className = "w-5 h-5" }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
+    </svg>
+  );
+}
+
 function SettingsIcon({ className = "w-5 h-5" }: { className?: string }) {
   return (
     <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -75,6 +83,7 @@ function LogoutIcon({ className = "w-5 h-5" }: { className?: string }) {
 const navLinks = [
   { href: "/admin", label: "Tableau de bord", icon: DashboardIcon },
   { href: "/admin/products", label: "Produits", icon: ProductIcon },
+  { href: "/admin/reels", label: "Reels Vidéo", icon: VideoIcon },
   { href: "/admin/orders", label: "Commandes", icon: OrderIcon },
   { href: "/admin/promotions", label: "Promotions", icon: PromotionIcon },
   { href: "/admin/reviews", label: "Avis clients", icon: ReviewIcon },
@@ -84,6 +93,7 @@ const navLinks = [
 const mobileLinks = [
   { href: "/admin", label: "Tableau", icon: DashboardIcon },
   { href: "/admin/products", label: "Produits", icon: ProductIcon },
+  { href: "/admin/reels", label: "Reels", icon: VideoIcon },
   { href: "/admin/orders", label: "Commandes", icon: OrderIcon },
   { href: "/admin/settings", label: "Paramètres", icon: SettingsIcon },
 ];
@@ -197,58 +207,27 @@ export function Sidebar() {
 
       {/* ===== Bottom Bar Mobile (Masquée sur les pages d'édition & création) ===== */}
       {!isEditOrNewPage && (
-        <nav className="fixed inset-x-4 bottom-4 z-50 lg:hidden">
-        <div className="mx-auto flex max-w-md items-center justify-between rounded-full border border-[var(--laiton,#B9793E)]/30 bg-[var(--obsidienne-soft,#17120D)]/95 backdrop-blur-xl px-4 py-2 shadow-[0_15px_40px_rgba(0,0,0,0.8)]">
-
-          {/* 2 premiers liens */}
-          {mobileLinks.slice(0, 2).map((link) => {
-            const active = isActive(link.href);
-            const Icon = link.icon;
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition-colors ${active
-                    ? "text-[var(--laiton-clair,#D9AE78)]"
-                    : "text-[var(--porcelaine,#F1ECE3)]/50 hover:text-[var(--porcelaine)]"
-                  }`}
-              >
-                <Icon className="h-5 w-5" />
-                <span className="text-[10px] font-semibold tracking-tight">{link.label}</span>
-              </Link>
-            );
-          })}
-
-          {/* Bouton Central + surélevé pour Ajouter un produit */}
-          <Link
-            href="/admin/products/new"
-            aria-label="Ajouter un produit"
-            className="-mt-7 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-tr from-[var(--laiton,#B9793E)] to-[#D9AE78] text-[var(--obsidienne,#0E0B09)] shadow-[0_8px_25px_rgba(185,121,62,0.4)] border-2 border-[var(--obsidienne,#0E0B09)] transition-transform active:scale-95"
-          >
-            <PlusIcon className="h-7 w-7 stroke-[2.5]" />
-          </Link>
-
-          {/* 2 derniers liens */}
-          {mobileLinks.slice(2).map((link) => {
-            const active = isActive(link.href);
-            const Icon = link.icon;
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition-colors ${active
-                    ? "text-[var(--laiton-clair,#D9AE78)]"
-                    : "text-[var(--porcelaine,#F1ECE3)]/50 hover:text-[var(--porcelaine)]"
-                  }`}
-              >
-                <Icon className="h-5 w-5" />
-                <span className="text-[10px] font-semibold tracking-tight">{link.label}</span>
-              </Link>
-            );
-          })}
-
-        </div>
-      </nav>
+        <nav className="fixed inset-x-3 bottom-3 z-50 lg:hidden">
+          <div className="mx-auto flex max-w-md items-center justify-around rounded-full border border-[var(--laiton,#B9793E)]/30 bg-[var(--obsidienne-soft,#17120D)]/95 backdrop-blur-xl px-3 py-2 shadow-[0_15px_40px_rgba(0,0,0,0.8)]">
+            {mobileLinks.map((link) => {
+              const active = isActive(link.href);
+              const Icon = link.icon;
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`flex flex-col items-center gap-1 py-1 px-2 rounded-xl transition-colors ${active
+                      ? "text-[var(--laiton-clair,#D9AE78)] font-bold"
+                      : "text-[var(--porcelaine,#F1ECE3)]/50 hover:text-[var(--porcelaine)]"
+                    }`}
+                >
+                  <Icon className="h-5 w-5" />
+                  <span className="text-[9px] font-semibold tracking-tight">{link.label}</span>
+                </Link>
+              );
+            })}
+          </div>
+        </nav>
       )}
     </>
   );

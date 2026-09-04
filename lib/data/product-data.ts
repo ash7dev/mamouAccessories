@@ -24,7 +24,7 @@ export async function getProductBySlug(slug: string): Promise<PublicProduct | nu
     `)
     .eq('slug', slug)
     .eq('is_active', true)
-    .single();
+    .maybeSingle();
 
   if (error || !product) {
     console.error('Error fetching product:', error);
