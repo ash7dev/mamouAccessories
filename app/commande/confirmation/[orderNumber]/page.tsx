@@ -208,14 +208,12 @@ export default function ConfirmationPage() {
                   </div>
                   <div>
                     <p className="text-sm font-bold text-[var(--text-dark)]">Paiement Instantané via Wave</p>
-                    <p className="text-xs text-[var(--text-dark)]/60">Cliquez ci-dessous pour ouvrir votre application Wave avec le montant pré-rempli.</p>
+                    <p className="text-xs text-[var(--text-dark)]/60">Cliquez ci-dessous pour ouvrir votre application Wave et effectuer le règlement.</p>
                   </div>
                 </div>
 
                 {(() => {
-                  const cleanWaveLink = waveLink.includes('?') 
-                    ? `${waveLink}&amount=${order.total}` 
-                    : `${waveLink.replace(/\/$/, '')}/?amount=${order.total}`;
+                  const cleanWaveLink = waveLink.trim();
                   const cleanWhatsapp = whatsappNumber.replace(/[^\d]/g, '') || "221770000000";
 
                   return (
@@ -245,7 +243,7 @@ export default function ConfirmationPage() {
                 })()}
 
                 <p className="text-[11px] text-[var(--text-dark)]/50 italic text-center pt-1">
-                  Sur mobile, appuyer sur le bouton bleu ouvre directement l'application Wave avec le montant exact.
+                  Sur mobile, appuyer sur le bouton bleu ouvre directement votre application Wave.
                 </p>
               </div>
             ) : (
