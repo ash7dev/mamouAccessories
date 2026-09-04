@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Upload, Video, Sparkles, Check, AlertCircle } from "lucide-react";
 import type { Reel, CreateReelInput } from "@/lib/types/reel";
+import { uploadMediaFile } from "@/lib/api/upload";
 
 interface ReelFormModalProps {
   isOpen: boolean;
@@ -27,6 +28,7 @@ export function ReelFormModal({
   const [productId, setProductId] = useState("");
   const [isActive, setIsActive] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -47,6 +49,7 @@ export function ReelFormModal({
       setIsActive(true);
     }
     setErrorMessage("");
+    setUploadProgress(0);
   }, [initialData, products, isOpen]);
 
   // Video File Upload & Duration Check
@@ -71,32 +74,14 @@ export function ReelFormModal({
       setDurationSeconds(duration);
       setErrorMessage("");
       setIsUploading(true);
+      setUploadProgress(0);
 
       try {
-        // Upload to Cloudinary
-        const configRes = await fetch("/api/cloudinary/config");
-        const config = await configRes.json();
-
-        const formData = new FormData();
-        formData.append("file", file);
-        formData.append("upload_preset", config.uploadPreset);
-        formData.append("folder", "reels");
-        formData.append("resource_type", "video");
-
-        const uploadRes = await fetch(
-          `https://api.cloudinary.com/v1_1/${config.cloudName}/video/upload`,
-          {
-            method: "POST",
-            body: formData,
-          }
-        );
-
-        if (!uploadRes.ok) {
-          throw new Error("Erreur d'upload vidéo sur Cloudinary.");
-        }
-
-        const data = await uploadRes.json();
-        setVideoUrl(data.secure_url);
+        // Upload direct Cloudinary haut débit (évite le proxy Vercel)
+        const result = await uploadMediaFile(file, "reels", (percent) => {
+          setUploadProgress(percent);
+        });
+        setVideoUrl(result.url);
       } catch (err: any) {
         setErrorMessage(err.message || "Impossible d'uploader la vidéo.");
       } finally {
@@ -209,9 +194,20 @@ export function ReelFormModal({
               </label>
               <div className="relative rounded-2xl border-2 border-dashed border-neutral-300 bg-neutral-50 p-5 text-center transition-all hover:border-[var(--laiton)] hover:bg-white">
                 {isUploading ? (
-                  <div className="flex items-center justify-center gap-2 py-3 text-xs font-bold text-[var(--laiton)]">
-                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-[var(--laiton)] border-t-transparent" />
-                    <span>Upload de la vidéo en cours...</span>
+                  <div className="space-y-2.5 py-2">
+                    <div className="flex items-center justify-between text-xs font-bold text-[var(--laiton,#B9793E)]">
+                      <span className="flex items-center gap-2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-[var(--laiton,#B9793E)] border-t-transparent" />
+                        <span>Envoi direct Cloudinary...</span>
+                      </span>
+                      <span className="font-mono text-sm font-extrabold">{uploadProgress}%</span>
+                    </div>
+                    <div className="h-3 w-full overflow-hidden rounded-full bg-neutral-200 p-0.5">
+                      <div
+                        className="h-full bg-gradient-to-r from-[var(--laiton,#B9793E)] via-amber-500 to-[var(--laiton,#B9793E)] transition-all duration-200 rounded-full"
+                        style={{ width: `${uploadProgress}%` }}
+                      />
+                    </div>
                   </div>
                 ) : (
                   <>

@@ -19,10 +19,18 @@ function getApiBaseUrl() {
 }
 
 /**
- * Upload une image unique
+ * Upload direct depuis le navigateur vers Cloudinary (Évite le serveur Vercel/Next.js)
+ * Supporte la progression en temps réel (%) pour les vidéos et images lourdes
  */
-export async function uploadProductImage(file: File, folder: string = 'products'): Promise<UploadResult> {
-  // 1. Essai d'upload direct Unsigned Cloudinary
+export async function uploadMediaFile(
+  file: File,
+  folder: string = 'products',
+  onProgress?: (percent: number) => void
+): Promise<UploadResult> {
+  const isVideo = file.type.startsWith('video/');
+  const resourceType = isVideo ? 'video' : 'auto';
+
+  // 1. Upload direct client Unsigned Cloudinary avec suivi de progression (XHR)
   try {
     const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'utngoden';
     const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'mamoujewelry_unsigned';
@@ -32,25 +40,43 @@ export async function uploadProductImage(file: File, folder: string = 'products'
     formData.append('upload_preset', uploadPreset);
     formData.append('folder', folder);
 
-    const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
-      method: 'POST',
-      body: formData,
-    });
+    return await new Promise<UploadResult>((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', `https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`);
 
-    if (res.ok) {
-      const data = await res.json();
-      if (data.public_id) {
-        return {
-          publicId: data.public_id,
-          url: data.secure_url || data.url,
-          provider: 'cloudinary',
+      if (onProgress && xhr.upload) {
+        xhr.upload.onprogress = (e) => {
+          if (e.lengthComputable) {
+            const percent = Math.round((e.loaded / e.total) * 100);
+            onProgress(percent);
+          }
         };
       }
-    } else {
-      console.warn('L\'upload direct Cloudinary a échoué. Tentative via l\'API serveur fallback...');
-    }
+
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          try {
+            const data = JSON.parse(xhr.responseText);
+            if (data.public_id) {
+              resolve({
+                publicId: data.public_id,
+                url: data.secure_url || data.url,
+                provider: 'cloudinary',
+              });
+              return;
+            }
+          } catch (e) {
+            reject(e);
+          }
+        }
+        reject(new Error(`Upload direct Cloudinary statut : ${xhr.status}`));
+      };
+
+      xhr.onerror = () => reject(new Error("Erreur réseau lors de l'upload direct Cloudinary"));
+      xhr.send(formData);
+    });
   } catch (err) {
-    console.warn('Erreur lors de l\'upload direct Cloudinary:', err);
+    console.warn("L'upload direct Cloudinary a échoué. Tentative via le serveur fallback...", err);
   }
 
   // 2. Fallback API Serveur /api/upload
@@ -65,7 +91,7 @@ export async function uploadProductImage(file: File, folder: string = 'products'
 
   if (!response.ok) {
     const errData = await response.json().catch(() => ({}));
-    throw new Error(errData.error || `Erreur d'upload de l'image (${response.status})`);
+    throw new Error(errData.error || `Erreur d'upload du fichier (${response.status})`);
   }
 
   const data = await response.json();
@@ -77,9 +103,21 @@ export async function uploadProductImage(file: File, folder: string = 'products'
 }
 
 /**
+ * Upload une image unique (Alias rétrocompatible)
+ */
+export async function uploadProductImage(
+  file: File,
+  folder: string = 'products',
+  onProgress?: (percent: number) => void
+): Promise<UploadResult> {
+  return uploadMediaFile(file, folder, onProgress);
+}
+
+/**
  * Upload plusieurs images en parallèle
  */
 export async function uploadProductImages(files: File[], folder: string = 'products'): Promise<UploadResult[]> {
   const uploadPromises = files.map((file) => uploadProductImage(file, folder));
   return Promise.all(uploadPromises);
 }
+

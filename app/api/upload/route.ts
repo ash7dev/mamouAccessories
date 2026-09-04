@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { v2 as cloudinary } from 'cloudinary';
 import { createServiceRoleClient } from '@/lib/supabase/service-role';
 
+export const maxDuration = 60; // Durée max d'exécution sur Vercel pour uploads lourds
+
 // Configurarion Cloudinary côté serveur
 cloudinary.config({
   cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
