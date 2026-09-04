@@ -57,17 +57,21 @@ export function ReelFormModal({
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // Instant local preview
+    const previewUrl = URL.createObjectURL(file);
+    setVideoUrl(previewUrl);
+
     // Check video duration via video element before uploading
     const videoElement = document.createElement("video");
     videoElement.preload = "metadata";
-    videoElement.src = URL.createObjectURL(file);
+    videoElement.src = previewUrl;
 
     videoElement.onloadedmetadata = async () => {
-      URL.revokeObjectURL(videoElement.src);
       const duration = Math.round(videoElement.duration);
 
       if (duration > 45) {
         setErrorMessage(`Cette vidéo dure ${duration}s. La durée maximale autorisée pour un Reel est de 45 secondes.`);
+        setVideoUrl("");
         return;
       }
 
@@ -189,42 +193,85 @@ export function ReelFormModal({
 
             {/* Upload Fichier Vidéo (Max 45s) */}
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-neutral-700 mb-1.5">
-                Fichier Vidéo (Max 45s - Format Vertical MP4)
-              </label>
-              <div className="relative rounded-2xl border-2 border-dashed border-neutral-300 bg-neutral-50 p-5 text-center transition-all hover:border-[var(--laiton)] hover:bg-white">
-                {isUploading ? (
-                  <div className="space-y-2.5 py-2">
-                    <div className="flex items-center justify-between text-xs font-bold text-[var(--laiton,#B9793E)]">
-                      <span className="flex items-center gap-2">
-                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-[var(--laiton,#B9793E)] border-t-transparent" />
-                        <span>Envoi direct Cloudinary...</span>
-                      </span>
-                      <span className="font-mono text-sm font-extrabold">{uploadProgress}%</span>
-                    </div>
-                    <div className="h-3 w-full overflow-hidden rounded-full bg-neutral-200 p-0.5">
-                      <div
-                        className="h-full bg-gradient-to-r from-[var(--laiton,#B9793E)] via-amber-500 to-[var(--laiton,#B9793E)] transition-all duration-200 rounded-full"
-                        style={{ width: `${uploadProgress}%` }}
-                      />
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    <Video className="mx-auto h-8 w-8 text-[var(--laiton)] mb-2" />
-                    <p className="text-xs font-bold text-[var(--obsidienne)]">
-                      {videoUrl ? "Vidéo sélectionnée (Changer le fichier)" : "Glisser ou importer une vidéo (MP4, WebM)"}
-                    </p>
-                    <p className="text-[10px] text-neutral-400 mt-1">Durée maximale autorisée : 45 secondes</p>
-                    <input
-                      type="file"
-                      accept="video/mp4,video/webm,video/quicktime"
-                      onChange={handleVideoFileChange}
-                      className="absolute inset-0 opacity-0 cursor-pointer"
-                    />
-                  </>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-xs font-bold uppercase tracking-wider text-neutral-700">
+                  Fichier Vidéo (Max 45s - MP4)
+                </label>
+                {durationSeconds > 0 && videoUrl && (
+                  <span className="text-[11px] font-mono font-bold text-[var(--laiton,#B9793E)] bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                    Durée: {durationSeconds}s / 45s max
+                  </span>
                 )}
               </div>
+
+              {/* Video Preview Player Box */}
+              {videoUrl && !isUploading ? (
+                <div className="relative overflow-hidden rounded-2xl border border-neutral-200 bg-neutral-900 p-2 shadow-inner">
+                  <div className="relative aspect-[9/16] max-h-72 mx-auto rounded-xl overflow-hidden bg-black flex items-center justify-center">
+                    <video
+                      src={videoUrl}
+                      controls
+                      playsInline
+                      muted
+                      loop
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                  <div className="mt-2 flex items-center justify-between px-3 py-2 bg-white rounded-xl border border-neutral-100 shadow-xs">
+                    <span className="text-[11px] font-bold text-emerald-700 flex items-center gap-1.5">
+                      <Check className="h-3.5 w-3.5" /> Vidéo prévisualisée
+                    </span>
+                    <label className="text-[11px] font-bold text-[var(--laiton,#B9793E)] hover:underline cursor-pointer">
+                      Changer la vidéo
+                      <input
+                        type="file"
+                        accept="video/mp4,video/webm,video/quicktime"
+                        onChange={handleVideoFileChange}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+                </div>
+              ) : (
+                <div className="relative rounded-2xl border-2 border-dashed border-neutral-300 bg-neutral-50 p-5 text-center transition-all hover:border-[var(--laiton)] hover:bg-white">
+                  {isUploading ? (
+                    <div className="space-y-3 py-2">
+                      {videoUrl && (
+                        <div className="relative aspect-[9/16] max-h-40 mx-auto rounded-xl overflow-hidden bg-black opacity-60 flex items-center justify-center">
+                          <video src={videoUrl} muted className="w-full h-full object-contain" />
+                        </div>
+                      )}
+                      <div className="flex items-center justify-between text-xs font-bold text-[var(--laiton,#B9793E)]">
+                        <span className="flex items-center gap-2">
+                          <div className="animate-spin rounded-full h-4 w-4 border-2 border-[var(--laiton,#B9793E)] border-t-transparent" />
+                          <span>Envoi vers Cloudinary...</span>
+                        </span>
+                        <span className="font-mono text-sm font-extrabold">{uploadProgress}%</span>
+                      </div>
+                      <div className="h-3 w-full overflow-hidden rounded-full bg-neutral-200 p-0.5">
+                        <div
+                          className="h-full bg-gradient-to-r from-[var(--laiton,#B9793E)] via-amber-500 to-[var(--laiton,#B9793E)] transition-all duration-200 rounded-full"
+                          style={{ width: `${uploadProgress}%` }}
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <Video className="mx-auto h-8 w-8 text-[var(--laiton)] mb-2" />
+                      <p className="text-xs font-bold text-[var(--obsidienne)]">
+                        Glisser ou importer une vidéo (MP4, WebM)
+                      </p>
+                      <p className="text-[10px] text-neutral-400 mt-1">Durée maximale autorisée : 45 secondes</p>
+                      <input
+                        type="file"
+                        accept="video/mp4,video/webm,video/quicktime"
+                        onChange={handleVideoFileChange}
+                        className="absolute inset-0 opacity-0 cursor-pointer"
+                      />
+                    </>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Saisie URL alternative */}
@@ -237,7 +284,7 @@ export function ReelFormModal({
                 value={videoUrl}
                 onChange={(e) => setVideoUrl(e.target.value)}
                 placeholder="https://res.cloudinary.com/.../video.mp4"
-                className="w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-xs text-[var(--obsidienne)] focus:border-[var(--laiton)] focus:outline-none"
+                className="w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-xs text-[var(--obsidienne)] focus:border-[var(--laiton)] focus:outline-none font-mono"
               />
             </div>
 
