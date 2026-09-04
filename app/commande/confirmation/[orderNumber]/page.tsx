@@ -221,36 +221,61 @@ export default function ConfirmationPage() {
 
                 {(() => {
                   const cleanWaveLink = waveLink.trim();
-                  const cleanWhatsapp = whatsappNumber.replace(/[^\d]/g, '') || "221770000000";
+                  const cleanWhatsapp = whatsappNumber.replace(/[^\d]/g, '') || "221774907955";
+                  const formattedPhone = "+221 77 490 79 55";
 
                   return (
-                    <div className="grid gap-3 sm:grid-cols-2 pt-2">
-                      <a
-                        href={cleanWaveLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center justify-center gap-2.5 rounded-2xl bg-[#1DC3EF] px-5 py-3.5 text-xs font-bold text-white shadow-md hover:bg-[#19b2db] active:scale-95 transition-all"
-                      >
-                        <img src="/wavelogo.jpeg" alt="Wave" className="h-5 w-5 rounded-full object-cover border border-white/40" />
-                        <span>Payer {formatFCFA(order.total)} FCFA sur Wave</span>
-                      </a>
+                    <div className="space-y-4 pt-2">
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        {/* Bouton 1: Ouvrir Wave */}
+                        <a
+                          href={cleanWaveLink}
+                          className="flex items-center justify-center gap-2.5 rounded-2xl bg-[#1DC3EF] px-5 py-3.5 text-xs font-bold text-white shadow-md hover:bg-[#19b2db] active:scale-95 transition-all"
+                        >
+                          <img src="/wavelogo.jpeg" alt="Wave" className="h-5 w-5 rounded-full object-cover border border-white/40" />
+                          <span>Payer sur l'application Wave</span>
+                        </a>
 
-                      <a
-                        href={`https://wa.me/${cleanWhatsapp}?text=${encodeURIComponent(
-                          `Bonjour Mamou Jewelry, je viens d'effectuer le paiement de ${formatFCFA(order.total)} FCFA par Wave pour ma commande N° ${order.order_number}.`
-                        )}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center justify-center gap-2.5 rounded-2xl bg-emerald-600 px-5 py-3.5 text-xs font-bold text-white shadow-md hover:bg-emerald-700 active:scale-95 transition-all"
-                      >
-                        <span>Envoyer la preuve sur WhatsApp</span>
-                      </a>
+                        {/* Bouton 2: WhatsApp Preuve */}
+                        <a
+                          href={`https://wa.me/${cleanWhatsapp}?text=${encodeURIComponent(
+                            `Bonjour Mamou Jewelry, je viens d'effectuer le paiement de ${formatFCFA(order.total)} FCFA par Wave pour ma commande N° ${order.order_number}.`
+                          )}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center justify-center gap-2.5 rounded-2xl bg-emerald-600 px-5 py-3.5 text-xs font-bold text-white shadow-md hover:bg-emerald-700 active:scale-95 transition-all"
+                        >
+                          <span>Envoyer la preuve sur WhatsApp</span>
+                        </a>
+                      </div>
+
+                      {/* Option Alternative: Transfert direct au numéro Wave */}
+                      <div className="rounded-2xl border border-sky-100 bg-sky-50/60 p-4 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[11px] font-bold uppercase tracking-wider text-sky-900">
+                            Ou transfert Wave manuel :
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              navigator.clipboard.writeText("774907955");
+                              alert("Numéro Wave copié (774907955) !");
+                            }}
+                            className="text-[11px] font-bold text-[#1DC3EF] hover:underline flex items-center gap-1"
+                          >
+                            📋 Copier le numéro
+                          </button>
+                        </div>
+                        <p className="text-xs text-sky-950 font-medium">
+                          Faites un transfert de <span className="font-bold text-emerald-700">{formatFCFA(order.total)} FCFA</span> au <span className="font-bold font-mono bg-white px-2 py-0.5 rounded-md border border-sky-200">{formattedPhone}</span>
+                        </p>
+                      </div>
                     </div>
                   );
                 })()}
 
                 <p className="text-[11px] text-[var(--text-dark)]/50 italic text-center pt-1">
-                  Sur mobile, appuyer sur le bouton bleu ouvre directement votre application Wave.
+                  Une fois le transfert effectué, cliquez sur le bouton vert pour envoyer votre reçu sur WhatsApp.
                 </p>
               </div>
             ) : (
