@@ -142,11 +142,19 @@ export function Checkout({
 
       const { order } = await response.json();
 
-      router.push(`/commande/confirmation/${order.order_number}`);
+      clear();
 
-      setTimeout(() => {
-        clear();
-      }, 100);
+      if (payment === "wave") {
+        const waveUrl = "https://pay.wave.com/m/M_sn_wi1Bfmu7HgWY/c/sn/";
+        // 1. Rediriger vers la page de confirmation en arrière-plan
+        router.push(`/commande/confirmation/${order.order_number}`);
+        // 2. Déclencher immédiatement l'ouverture de l'application Wave
+        setTimeout(() => {
+          window.location.href = waveUrl;
+        }, 300);
+      } else {
+        router.push(`/commande/confirmation/${order.order_number}`);
+      }
     } catch (error) {
       console.error('Order creation error:', error);
       setErrors({
