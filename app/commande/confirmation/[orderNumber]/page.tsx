@@ -220,7 +220,7 @@ export default function ConfirmationPage() {
                 </div>
 
                 {(() => {
-                  const cleanWaveLink = waveLink.trim();
+                  const cleanWaveLink = waveLink.trim() || "https://pay.wave.com/m/M_sn_wi1Bfmu7HgWY/c/sn/";
                   const cleanWhatsapp = whatsappNumber.replace(/[^\d]/g, '') || "221774907955";
                   const formattedPhone = "+221 77 490 79 55";
 
@@ -230,10 +230,12 @@ export default function ConfirmationPage() {
                         {/* Bouton 1: Ouvrir Wave */}
                         <a
                           href={cleanWaveLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
                           className="flex items-center justify-center gap-2.5 rounded-2xl bg-[#1DC3EF] px-5 py-3.5 text-xs font-bold text-white shadow-md hover:bg-[#19b2db] active:scale-95 transition-all"
                         >
                           <img src="/wavelogo.jpeg" alt="Wave" className="h-5 w-5 rounded-full object-cover border border-white/40" />
-                          <span>Payer sur l'application Wave</span>
+                          <span>Payer {formatFCFA(order.total)} FCFA sur Wave</span>
                         </a>
 
                         {/* Bouton 2: WhatsApp Preuve */}
