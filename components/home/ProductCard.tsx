@@ -92,15 +92,15 @@ export function ProductCard({ product }: { product: PublicProductCard }) {
         </div>
 
         {/* ---------- Informations Produit (Structure Flex Alignée) ---------- */}
-        <div className="flex-1 flex flex-col justify-between p-4 sm:p-5">
+        <div className="flex-1 flex flex-col justify-between p-3.5 sm:p-5">
           <div>
             {/* Catégorie */}
-            <p className="text-[11px] font-bold tracking-wider uppercase text-[var(--laiton,#B9793E)] mb-1">
+            <p className="text-[10px] sm:text-[11px] font-bold tracking-wider uppercase text-[var(--laiton,#B9793E)] mb-1">
               {product.categoryName}
             </p>
 
             {/* Titre avec hauteur minimale égale pour empêcher tout décalage */}
-            <h3 className="font-heading text-sm sm:text-base font-semibold text-[var(--obsidienne,#0E0B09)] line-clamp-2 min-h-[2.5rem] sm:min-h-[2.8rem] mb-2 leading-tight group-hover:text-[var(--laiton)] transition-colors">
+            <h3 className="font-heading text-sm sm:text-base font-semibold text-[var(--obsidienne,#0E0B09)] line-clamp-2 min-h-[2.4rem] sm:min-h-[2.8rem] mb-2 leading-tight group-hover:text-[var(--laiton)] transition-colors">
               {product.name}
             </h3>
           </div>
@@ -108,11 +108,11 @@ export function ProductCard({ product }: { product: PublicProductCard }) {
           {/* Bloc Bas : Prix + Bouton Panier */}
           <div>
             {/* Prix */}
-            <div className="flex items-baseline gap-2 mb-3">
+            <div className="flex items-baseline gap-1.5 mb-3 flex-wrap">
               <span className="text-base sm:text-lg font-bold text-[var(--obsidienne)] tabular-nums tracking-tight">
                 {formatFCFA(product.price)}
               </span>
-              <span className="text-[11px] text-[var(--obsidienne)]/50 font-medium">FCFA</span>
+              <span className="text-[10px] sm:text-[11px] text-[var(--obsidienne)]/50 font-medium">FCFA</span>
               {product.compareAtPrice && product.compareAtPrice > product.price && (
                 <span className="text-xs text-[var(--obsidienne)]/40 line-through tabular-nums ml-auto">
                   {formatFCFA(product.compareAtPrice)}
