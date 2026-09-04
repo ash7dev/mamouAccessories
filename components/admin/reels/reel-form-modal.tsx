@@ -205,21 +205,54 @@ export function ReelFormModal({
               </div>
 
               {/* Video Preview Player Box */}
-              {videoUrl && !isUploading ? (
+              {videoUrl ? (
                 <div className="relative overflow-hidden rounded-2xl border border-neutral-200 bg-neutral-900 p-2 shadow-inner">
                   <div className="relative aspect-[9/16] max-h-72 mx-auto rounded-xl overflow-hidden bg-black flex items-center justify-center">
                     <video
+                      key={videoUrl}
                       src={videoUrl}
                       controls
                       playsInline
                       muted
                       loop
+                      autoPlay
                       className="w-full h-full object-contain"
                     />
+
+                    {/* Live Uploading Progress Overlay */}
+                    {isUploading && (
+                      <div className="absolute inset-0 bg-black/65 backdrop-blur-xs flex flex-col items-center justify-center p-4 space-y-3 z-20">
+                        <div className="animate-spin rounded-full h-8 w-8 border-3 border-[var(--laiton,#B9793E)] border-t-transparent" />
+                        <span className="text-xs font-bold text-white tracking-wide">
+                          Upload Cloudinary en cours...
+                        </span>
+                        <div className="w-full max-w-[200px]">
+                          <div className="flex items-center justify-between text-[11px] font-mono font-bold text-amber-300 mb-1">
+                            <span>Progression</span>
+                            <span>{uploadProgress}%</span>
+                          </div>
+                          <div className="h-2.5 w-full overflow-hidden rounded-full bg-white/20">
+                            <div
+                              className="h-full bg-gradient-to-r from-amber-400 via-[var(--laiton,#B9793E)] to-amber-200 transition-all duration-200 rounded-full"
+                              style={{ width: `${uploadProgress}%` }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
+
                   <div className="mt-2 flex items-center justify-between px-3 py-2 bg-white rounded-xl border border-neutral-100 shadow-xs">
                     <span className="text-[11px] font-bold text-emerald-700 flex items-center gap-1.5">
-                      <Check className="h-3.5 w-3.5" /> Vidéo prévisualisée
+                      {isUploading ? (
+                        <span className="text-amber-700 animate-pulse flex items-center gap-1">
+                          <span className="h-2 w-2 rounded-full bg-amber-500 animate-ping" /> Synchronisation...
+                        </span>
+                      ) : (
+                        <>
+                          <Check className="h-3.5 w-3.5" /> Vidéo prête & prévisualisée
+                        </>
+                      )}
                     </span>
                     <label className="text-[11px] font-bold text-[var(--laiton,#B9793E)] hover:underline cursor-pointer">
                       Changer la vidéo
@@ -227,6 +260,7 @@ export function ReelFormModal({
                         type="file"
                         accept="video/mp4,video/webm,video/quicktime"
                         onChange={handleVideoFileChange}
+                        disabled={isUploading}
                         className="hidden"
                       />
                     </label>
@@ -234,42 +268,17 @@ export function ReelFormModal({
                 </div>
               ) : (
                 <div className="relative rounded-2xl border-2 border-dashed border-neutral-300 bg-neutral-50 p-5 text-center transition-all hover:border-[var(--laiton)] hover:bg-white">
-                  {isUploading ? (
-                    <div className="space-y-3 py-2">
-                      {videoUrl && (
-                        <div className="relative aspect-[9/16] max-h-40 mx-auto rounded-xl overflow-hidden bg-black opacity-60 flex items-center justify-center">
-                          <video src={videoUrl} muted className="w-full h-full object-contain" />
-                        </div>
-                      )}
-                      <div className="flex items-center justify-between text-xs font-bold text-[var(--laiton,#B9793E)]">
-                        <span className="flex items-center gap-2">
-                          <div className="animate-spin rounded-full h-4 w-4 border-2 border-[var(--laiton,#B9793E)] border-t-transparent" />
-                          <span>Envoi vers Cloudinary...</span>
-                        </span>
-                        <span className="font-mono text-sm font-extrabold">{uploadProgress}%</span>
-                      </div>
-                      <div className="h-3 w-full overflow-hidden rounded-full bg-neutral-200 p-0.5">
-                        <div
-                          className="h-full bg-gradient-to-r from-[var(--laiton,#B9793E)] via-amber-500 to-[var(--laiton,#B9793E)] transition-all duration-200 rounded-full"
-                          style={{ width: `${uploadProgress}%` }}
-                        />
-                      </div>
-                    </div>
-                  ) : (
-                    <>
-                      <Video className="mx-auto h-8 w-8 text-[var(--laiton)] mb-2" />
-                      <p className="text-xs font-bold text-[var(--obsidienne)]">
-                        Glisser ou importer une vidéo (MP4, WebM)
-                      </p>
-                      <p className="text-[10px] text-neutral-400 mt-1">Durée maximale autorisée : 45 secondes</p>
-                      <input
-                        type="file"
-                        accept="video/mp4,video/webm,video/quicktime"
-                        onChange={handleVideoFileChange}
-                        className="absolute inset-0 opacity-0 cursor-pointer"
-                      />
-                    </>
-                  )}
+                  <Video className="mx-auto h-8 w-8 text-[var(--laiton)] mb-2" />
+                  <p className="text-xs font-bold text-[var(--obsidienne)]">
+                    Glisser ou importer une vidéo (MP4, WebM)
+                  </p>
+                  <p className="text-[10px] text-neutral-400 mt-1">Durée maximale autorisée : 45 secondes</p>
+                  <input
+                    type="file"
+                    accept="video/mp4,video/webm,video/quicktime"
+                    onChange={handleVideoFileChange}
+                    className="absolute inset-0 opacity-0 cursor-pointer"
+                  />
                 </div>
               )}
             </div>
