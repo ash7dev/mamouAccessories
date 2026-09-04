@@ -245,7 +245,7 @@ export function ProductDetailPublic({ product, relatedProducts = [] }: ProductDe
           </div>
 
           {/* ===================== FICHE INFORMATIONS (lg:col-span-5) ===================== */}
-          <div className="lg:col-span-5 flex flex-col space-y-6">
+          <div className="lg:col-span-5 flex flex-col space-y-6 lg:sticky lg:top-24">
             {/* En-tête : Catégorie & Titre en Playfair Display */}
             <div>
               <span className="inline-flex items-center gap-2 rounded-full border border-[var(--laiton)]/30 bg-[var(--laiton)]/10 px-3.5 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--laiton)] mb-3">
@@ -506,64 +506,73 @@ export function ProductDetailPublic({ product, relatedProducts = [] }: ProductDe
       </div>
 
       {/* ===================== BARRE D'ACTION MOBILE FIXE EN BAS ===================== */}
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-[var(--laiton)]/20 bg-white/95 px-4 py-3.5 backdrop-blur-xl shadow-[0_-10px_30px_rgba(14,11,9,0.1)] lg:hidden">
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-[#B9793E]/30 bg-[#0E0B09]/95 px-4 pt-3 pb-safe pb-4 backdrop-blur-2xl shadow-[0_-12px_40px_rgba(0,0,0,0.3)] lg:hidden">
         {!isOut ? (
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-3">
             {/* Prix & Quantité */}
-            <div className="flex flex-col pr-1">
-              <span className="text-[10px] font-bold text-[var(--laiton)] uppercase tracking-wider">Total</span>
-              <span className="font-mono text-base font-extrabold text-[var(--obsidienne)] tabular-nums leading-none">
-                {formatFCFA(product.price * quantity)}
-              </span>
+            <div className="flex flex-col shrink-0 justify-center">
+              <span className="text-[10px] font-bold tracking-wider text-[#B9793E] uppercase">Total</span>
+              <div className="flex items-baseline gap-1">
+                <span className="font-mono text-lg font-extrabold text-white tabular-nums leading-none">
+                  {formatFCFA(product.price * quantity)}
+                </span>
+                <span className="text-[10px] font-bold text-white/50">FCFA</span>
+              </div>
             </div>
 
-            {/* Bouton WhatsApp direct */}
+            {/* Bouton WhatsApp rapide avec badge actif */}
             <a
               href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 active:scale-95 transition-transform"
+              className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-950/80 border border-emerald-500/30 text-emerald-400 active:scale-95 transition-all shadow-xs"
               aria-label="Contacter sur WhatsApp"
             >
               <MessageCircle className="h-5 w-5" />
+              <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-emerald-400 animate-ping" />
+              <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-emerald-500" />
             </a>
 
-            {/* Bouton Ajouter au Panier */}
-            <button
-              onClick={handleAdd}
-              className={`flex h-12 flex-1 items-center justify-center gap-1.5 rounded-full text-xs font-bold uppercase tracking-wider text-white shadow-md active:scale-95 transition-all ${
-                justAdded ? "bg-emerald-600" : "bg-[var(--obsidienne)]"
-              }`}
-            >
-              {justAdded ? (
-                <>
-                  <Check className="h-4 w-4" />
-                  <span>Ajouté</span>
-                </>
-              ) : (
-                <>
-                  <ShoppingCart className="h-4 w-4" />
-                  <span>Ajouter</span>
-                </>
-              )}
-            </button>
+            {/* Actions Panier & Acheter */}
+            <div className="flex flex-1 items-center gap-2">
+              <button
+                onClick={handleAdd}
+                className={`flex h-12 flex-1 items-center justify-center gap-1.5 rounded-2xl text-xs font-bold uppercase tracking-wider transition-all duration-300 active:scale-95 shadow-md ${
+                  justAdded
+                    ? "bg-emerald-600 text-white"
+                    : "bg-white/10 hover:bg-white/20 text-white border border-white/15"
+                }`}
+              >
+                {justAdded ? (
+                  <>
+                    <Check className="h-4 w-4" />
+                    <span>Ajouté</span>
+                  </>
+                ) : (
+                  <>
+                    <ShoppingCart className="h-4 w-4 text-[#B9793E]" />
+                    <span>Panier</span>
+                  </>
+                )}
+              </button>
 
-            {/* Bouton Acheter */}
-            <button
-              onClick={handleBuyNow}
-              className="flex h-12 flex-1 items-center justify-center rounded-full bg-gradient-to-r from-[var(--laiton)] to-[#9A622E] text-xs font-bold uppercase tracking-wider text-white shadow-md active:scale-95 transition-transform"
-            >
-              Acheter
-            </button>
+              <button
+                onClick={handleBuyNow}
+                className="flex h-12 flex-1 items-center justify-center gap-1.5 rounded-2xl bg-gradient-to-r from-[#B9793E] to-[#9A622E] text-xs font-bold uppercase tracking-wider text-white shadow-lg shadow-[#B9793E]/25 active:scale-95 transition-transform"
+              >
+                <ShoppingBag className="h-4 w-4" />
+                <span>Acheter</span>
+              </button>
+            </div>
           </div>
         ) : (
           <a
             href={whatsappUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[var(--obsidienne)] text-xs font-bold uppercase tracking-wider text-white shadow-md"
+            className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-[#B9793E] text-xs font-bold uppercase tracking-wider text-white shadow-lg active:scale-95 transition-transform"
           >
-            <MessageCircle className="h-4 w-4 text-[var(--laiton)]" />
+            <MessageCircle className="h-4 w-4" />
             <span>Me prévenir du retour sur WhatsApp</span>
           </a>
         )}
