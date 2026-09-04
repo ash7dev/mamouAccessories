@@ -72,13 +72,6 @@ export function ProductCard({ product, priority = false }: { product: PublicProd
             </span>
           )}
 
-          {/* Badge Stock Limité / Rareté */}
-          {!isOut && product.stock <= 3 && (
-            <span className="absolute right-2.5 top-2.5 sm:right-3 sm:top-3 z-10 rounded-full bg-amber-600/95 backdrop-blur-sm px-2 py-0.5 sm:px-2.5 sm:py-1 text-[8px] sm:text-[9px] font-extrabold text-white shadow-sm tracking-wider uppercase flex items-center gap-1">
-              <span>⚡</span> {product.stock} dispo
-            </span>
-          )}
-
           {/* Badge Rupture */}
           {isOut && (
             <span className="absolute inset-0 z-10 flex items-center justify-center">
