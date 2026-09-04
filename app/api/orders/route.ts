@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceRoleClient } from '@/lib/supabase/service-role';
 import type { CreateOrderInput, OrderFilters } from '@/lib/types/order';
+import { broadcastOrderPushNotification } from '@/lib/server/push-server';
 
 // GET /api/orders - Récupérer toutes les commandes
 export async function GET(request: NextRequest) {
@@ -214,6 +215,14 @@ export async function POST(request: NextRequest) {
       `)
       .eq('id', order.id)
       .single();
+
+    // Broadcast Web Push VAPID Notification vers l'administration
+    broadcastOrderPushNotification({
+      orderNumber: order.order_number,
+      customerName: body.customer_name,
+      total,
+      orderId: order.id,
+    }).catch(err => console.error('Error broadcasting push notification:', err));
 
     return NextResponse.json(
       { order: orderWithItems },

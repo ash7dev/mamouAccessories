@@ -92,25 +92,45 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-// Gestion des notifications push (pour le futur)
+// Gestion des notifications push VAPID
 self.addEventListener('push', (event) => {
-  const data = event.data ? event.data.json() : {};
+  let data = {};
+  try {
+    data = event.data ? event.data.json() : {};
+  } catch (e) {
+    data = { title: "Mamou's Accessories", body: event.data ? event.data.text() : 'Nouvelle notification' };
+  }
+
   const title = data.title || "Mamou's Accessories";
   const options = {
-    body: data.body || 'Nouvelle notification',
-    icon: '/logo.jpg',
-    badge: '/logo.jpg',
-    vibrate: [200, 100, 200],
-    data: data.url || '/',
+    body: data.body || 'Nouvelle notification de commande',
+    icon: data.icon || '/logo.jpg',
+    badge: data.badge || '/icon-192.png',
+    vibrate: [300, 100, 300, 100, 400],
+    tag: 'order-push-notification',
+    renotify: true,
+    data: data.url || '/admin/orders',
   };
 
   event.waitUntil(self.registration.showNotification(title, options));
 });
 
-// Gestion du clic sur les notifications
+// Gestion du clic sur les notifications système
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
+  const targetUrl = event.notification.data || '/admin/orders';
+
   event.waitUntil(
-    clients.openWindow(event.notification.data || '/')
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      for (const client of clientList) {
+        if (client.url.includes('/admin') && 'focus' in client) {
+          client.navigate(targetUrl);
+          return client.focus();
+        }
+      }
+      if (clients.openWindow) {
+        return clients.openWindow(targetUrl);
+      }
+    })
   );
 });

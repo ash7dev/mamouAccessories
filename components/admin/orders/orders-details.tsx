@@ -79,11 +79,12 @@ export interface OrderDetailData {
 const formatFCFA = (n: number) => new Intl.NumberFormat("fr-FR").format(n);
 
 const cancelReasons = [
-  "Injoignable",
-  "Paiement non reçu",
+  "Injoignable / Ne répond pas",
+  "Paiement Wave non reçu",
   "Rupture de stock",
   "Demande de la cliente",
-  "Autre",
+  "Commande en double / Erreur",
+  "Autre raison",
 ];
 
 /* ---------- Sub-components ---------- */
@@ -692,45 +693,81 @@ export function CommandeDetail({ order: initialOrder }: { order: OrderDetailData
         {/* ===================== ACTIONS CONTEXTUELLES DESKTOP ===================== */}
         {!needsPaymentCheck && order.status !== "delivered" && order.status !== "cancelled" && (
           <Card className="hidden sm:block">
-            <Eyebrow icon={ChevronRight}>Action suivante recommandée</Eyebrow>
+            <Eyebrow icon={ChevronRight}>Actions d'Administration</Eyebrow>
             <div className="flex flex-wrap items-center gap-3">
               {order.status === "pending" && (
-                <button
-                  type="button"
-                  onClick={() => transition("confirmed")}
-                  disabled={busy}
-                  className="flex items-center gap-2 rounded-2xl bg-[var(--obsidienne,#0E0B09)] text-[var(--porcelaine,#F1ECE3)] border border-[var(--laiton,#B9793E)] px-6 py-4 text-xs font-bold uppercase tracking-wider shadow-md transition-all hover:bg-[var(--laiton,#B9793E)] hover:text-[var(--obsidienne,#0E0B09)] active:scale-95 disabled:opacity-50"
-                >
-                  <CheckCircle2 className="h-4 w-4 text-[var(--laiton-clair,#D9AE78)]" />
-                  Confirmer la commande
-                </button>
+                <>
+                  <button
+                    type="button"
+                    onClick={() => transition("confirmed")}
+                    disabled={busy}
+                    className="flex items-center gap-2 rounded-2xl bg-emerald-600 text-white border border-emerald-500 px-6 py-4 text-xs font-bold uppercase tracking-wider shadow-md transition-all hover:bg-emerald-500 active:scale-95 disabled:opacity-50"
+                  >
+                    <CheckCircle2 className="h-4 w-4" />
+                    Confirmer la commande
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setCancelOpen(true)}
+                    disabled={busy}
+                    className="flex items-center gap-2 rounded-2xl bg-rose-50 border border-rose-300 px-6 py-4 text-xs font-bold uppercase tracking-wider text-rose-700 shadow-xs transition-all hover:bg-rose-600 hover:text-white active:scale-95 disabled:opacity-50"
+                  >
+                    <XCircle className="h-4 w-4" />
+                    Refuser la commande
+                  </button>
+                </>
               )}
               {order.status === "confirmed" && (
-                <button
-                  type="button"
-                  onClick={() => transition("shipped")}
-                  disabled={busy}
-                  className="flex items-center gap-2 rounded-2xl bg-[var(--obsidienne,#0E0B09)] text-[var(--porcelaine,#F1ECE3)] border border-[var(--laiton,#B9793E)] px-6 py-4 text-xs font-bold uppercase tracking-wider shadow-md transition-all hover:bg-[var(--laiton,#B9793E)] hover:text-[var(--obsidienne,#0E0B09)] active:scale-95 disabled:opacity-50"
-                >
-                  <Truck className="h-4 w-4 text-[var(--laiton-clair,#D9AE78)]" />
-                  Marquer comme expédiée
-                </button>
+                <>
+                  <button
+                    type="button"
+                    onClick={() => transition("shipped")}
+                    disabled={busy}
+                    className="flex items-center gap-2 rounded-2xl bg-[var(--obsidienne,#0E0B09)] text-[var(--porcelaine,#F1ECE3)] border border-[var(--laiton,#B9793E)] px-6 py-4 text-xs font-bold uppercase tracking-wider shadow-md transition-all hover:bg-[var(--laiton,#B9793E)] hover:text-[var(--obsidienne,#0E0B09)] active:scale-95 disabled:opacity-50"
+                  >
+                    <Truck className="h-4 w-4 text-[var(--laiton-clair,#D9AE78)]" />
+                    Marquer comme expédiée
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setCancelOpen(true)}
+                    disabled={busy}
+                    className="flex items-center gap-2 rounded-2xl bg-rose-50 border border-rose-300 px-5 py-4 text-xs font-bold uppercase tracking-wider text-rose-700 shadow-xs transition-all hover:bg-rose-600 hover:text-white active:scale-95 disabled:opacity-50"
+                  >
+                    <XCircle className="h-4 w-4" />
+                    Refuser / Annuler
+                  </button>
+                </>
               )}
               {order.status === "shipped" && (
-                <button
-                  type="button"
-                  onClick={() =>
-                    transition("delivered", {
-                      paymentStatus:
-                        order.paymentMethod === "cash_on_delivery" ? "paid" : order.paymentStatus,
-                    })
-                  }
-                  disabled={busy}
-                  className="flex items-center gap-2 rounded-2xl bg-emerald-600 text-white px-6 py-4 text-xs font-bold uppercase tracking-wider shadow-md transition-all hover:bg-emerald-500 active:scale-95 disabled:opacity-50"
-                >
-                  <PackageCheck className="h-4 w-4" />
-                  Marquer comme livrée{order.paymentMethod === "cash_on_delivery" ? " et payée" : ""}
-                </button>
+                <>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      transition("delivered", {
+                        paymentStatus:
+                          order.paymentMethod === "cash_on_delivery" ? "paid" : order.paymentStatus,
+                      })
+                    }
+                    disabled={busy}
+                    className="flex items-center gap-2 rounded-2xl bg-emerald-600 text-white px-6 py-4 text-xs font-bold uppercase tracking-wider shadow-md transition-all hover:bg-emerald-500 active:scale-95 disabled:opacity-50"
+                  >
+                    <PackageCheck className="h-4 w-4" />
+                    Marquer comme livrée{order.paymentMethod === "cash_on_delivery" ? " et payée" : ""}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setCancelOpen(true)}
+                    disabled={busy}
+                    className="flex items-center gap-2 rounded-2xl bg-rose-50 border border-rose-300 px-5 py-4 text-xs font-bold uppercase tracking-wider text-rose-700 shadow-xs transition-all hover:bg-rose-600 hover:text-white active:scale-95 disabled:opacity-50"
+                  >
+                    <XCircle className="h-4 w-4" />
+                    Annuler la commande
+                  </button>
+                </>
               )}
             </div>
           </Card>
@@ -1008,44 +1045,80 @@ export function CommandeDetail({ order: initialOrder }: { order: OrderDetailData
 
         {/* Action statut principale (si applicable) */}
         {!needsPaymentCheck && order.status !== "delivered" && order.status !== "cancelled" && (
-          <div>
+          <div className="flex items-center gap-2">
             {order.status === "pending" && (
-              <button
-                type="button"
-                onClick={() => transition("confirmed")}
-                disabled={busy}
-                className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[var(--laiton,#B9793E)] via-[#D9AE78] to-[var(--laiton,#B9793E)] text-[var(--obsidienne,#0E0B09)] py-3 text-xs font-extrabold uppercase tracking-wider shadow-lg active:scale-95 disabled:opacity-50"
-              >
-                <CheckCircle2 className="h-4 w-4 stroke-[2.5]" />
-                Confirmer la commande
-              </button>
+              <>
+                <button
+                  type="button"
+                  onClick={() => transition("confirmed")}
+                  disabled={busy}
+                  className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 text-white py-3 text-xs font-extrabold uppercase tracking-wider shadow-lg active:scale-95 disabled:opacity-50"
+                >
+                  <CheckCircle2 className="h-4 w-4 stroke-[2.5]" />
+                  <span>Confirmer</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setCancelOpen(true)}
+                  disabled={busy}
+                  className="flex items-center justify-center gap-1 rounded-xl bg-rose-950/80 border border-rose-500/40 text-rose-300 px-3.5 py-3 text-xs font-bold uppercase tracking-wider active:scale-95 disabled:opacity-50"
+                >
+                  <XCircle className="h-4 w-4 text-rose-400" />
+                  <span>Refuser</span>
+                </button>
+              </>
             )}
             {order.status === "confirmed" && (
-              <button
-                type="button"
-                onClick={() => transition("shipped")}
-                disabled={busy}
-                className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[var(--laiton,#B9793E)] via-[#D9AE78] to-[var(--laiton,#B9793E)] text-[var(--obsidienne,#0E0B09)] py-3 text-xs font-extrabold uppercase tracking-wider shadow-lg active:scale-95 disabled:opacity-50"
-              >
-                <Truck className="h-4 w-4 stroke-[2.5]" />
-                Marquer comme expédiée
-              </button>
+              <>
+                <button
+                  type="button"
+                  onClick={() => transition("shipped")}
+                  disabled={busy}
+                  className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-[var(--laiton,#B9793E)] via-[#D9AE78] to-[var(--laiton,#B9793E)] text-[var(--obsidienne,#0E0B09)] py-3 text-xs font-extrabold uppercase tracking-wider shadow-lg active:scale-95 disabled:opacity-50"
+                >
+                  <Truck className="h-4 w-4 stroke-[2.5]" />
+                  <span>Expédier</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setCancelOpen(true)}
+                  disabled={busy}
+                  className="flex items-center justify-center gap-1 rounded-xl bg-rose-950/80 border border-rose-500/40 text-rose-300 px-3.5 py-3 text-xs font-bold uppercase tracking-wider active:scale-95 disabled:opacity-50"
+                >
+                  <XCircle className="h-4 w-4 text-rose-400" />
+                  <span>Annuler</span>
+                </button>
+              </>
             )}
             {order.status === "shipped" && (
-              <button
-                type="button"
-                onClick={() =>
-                  transition("delivered", {
-                    paymentStatus:
-                      order.paymentMethod === "cash_on_delivery" ? "paid" : order.paymentStatus,
-                  })
-                }
-                disabled={busy}
-                className="w-full flex items-center justify-center gap-2 rounded-xl bg-emerald-500 text-white py-3 text-xs font-extrabold uppercase tracking-wider shadow-lg active:scale-95 disabled:opacity-50"
-              >
-                <PackageCheck className="h-4 w-4 stroke-[2.5]" />
-                Marquer comme livrée
-              </button>
+              <>
+                <button
+                  type="button"
+                  onClick={() =>
+                    transition("delivered", {
+                      paymentStatus:
+                        order.paymentMethod === "cash_on_delivery" ? "paid" : order.paymentStatus,
+                    })
+                  }
+                  disabled={busy}
+                  className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-emerald-500 text-white py-3 text-xs font-extrabold uppercase tracking-wider shadow-lg active:scale-95 disabled:opacity-50"
+                >
+                  <PackageCheck className="h-4 w-4 stroke-[2.5]" />
+                  <span>Livrée</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setCancelOpen(true)}
+                  disabled={busy}
+                  className="flex items-center justify-center gap-1 rounded-xl bg-rose-950/80 border border-rose-500/40 text-rose-300 px-3.5 py-3 text-xs font-bold uppercase tracking-wider active:scale-95 disabled:opacity-50"
+                >
+                  <XCircle className="h-4 w-4 text-rose-400" />
+                  <span>Annuler</span>
+                </button>
+              </>
             )}
           </div>
         )}

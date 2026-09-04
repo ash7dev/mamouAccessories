@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { playOrderPingSound, unlockAudioContext } from "@/lib/audio-notifier";
+import { urlBase64ToUint8Array } from "@/lib/push-notifications";
 
 interface OrderNotification {
   id: string;
@@ -21,6 +22,36 @@ export function AdminOrderNotifier() {
   const [notifications, setNotifications] = useState<OrderNotification[]>([]);
   const lastCheckTimestamp = useRef<string | null>(null);
   const isInitialMount = useRef<boolean>(true);
+
+  // Auto-register VAPID Push Subscription for Admin Notifications
+  useEffect(() => {
+    async function registerPush() {
+      if (typeof window === "undefined" || !("serviceWorker" in navigator) || !("PushManager" in window)) return;
+      try {
+        const registration = await navigator.serviceWorker.ready;
+        const permission = await Notification.requestPermission();
+        if (permission !== "granted") return;
+
+        const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+        if (!publicKey) return;
+
+        const subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(publicKey) as unknown as BufferSource,
+        });
+
+        await fetch("/api/admin/push/subscribe", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ subscription }),
+        });
+      } catch (err) {
+        console.error("Error registering VAPID push:", err);
+      }
+    }
+
+    registerPush();
+  }, []);
 
   // Auto-unlock audio context on user interaction
   useEffect(() => {
