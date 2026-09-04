@@ -126,10 +126,15 @@ export async function PUT(
 
       // Supprimer les anciennes images de Cloudinary (en arrière-plan)
       if (oldImages && oldImages.length > 0) {
-        const publicIds = oldImages.map(img => img.cloudinary_public_id);
-        deleteImages(publicIds).catch(err =>
-          console.error('Error deleting old images from Cloudinary:', err)
-        );
+        const publicIds = oldImages
+          .map((img) => img.cloudinary_public_id)
+          .filter((id) => id && !id.startsWith('http://') && !id.startsWith('https://') && !id.startsWith('/'));
+
+        if (publicIds.length > 0) {
+          deleteImages(publicIds).catch((err) =>
+            console.error('Error deleting old images from Cloudinary:', err)
+          );
+        }
       }
 
       // Ajouter les nouvelles images

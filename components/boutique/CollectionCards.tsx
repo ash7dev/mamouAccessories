@@ -23,17 +23,16 @@ export function CollectionCards({ collections }: CollectionCardsProps) {
       <div className="mx-auto max-w-7xl px-5 lg:px-8">
         <div className="mb-6 flex items-end justify-between lg:mb-8">
           <div>
-            <h2 className="font-cinzel text-2xl font-bold text-[var(--text-dark)] md:text-3xl">
+            <h2 className="font-heading text-2xl font-bold text-[var(--obsidienne,#0E0B09)] md:text-3xl">
               Nos Collections
             </h2>
-            <p className="mt-1.5 text-[15px] text-[var(--text-dark)]/60 lg:text-base">
+            <p className="mt-1.5 text-[15px] text-[var(--obsidienne)]/60 lg:text-base">
               Explorez nos catégories exclusives
             </p>
           </div>
-          {/* Visible sur toutes les tailles désormais : plus de point de sortie perdu sur mobile */}
           <Link
-            href="/categories"
-            className="flex items-center gap-1.5 whitespace-nowrap text-sm font-semibold text-[var(--gold-dark)] transition-colors hover:text-[var(--gold)]"
+            href="/boutique"
+            className="flex items-center gap-1.5 whitespace-nowrap text-sm font-semibold text-[var(--laiton,#B9793E)] transition-colors hover:text-[var(--laiton-clair)]"
           >
             Voir tout
             <ArrowRight className="h-4 w-4" />
@@ -55,28 +54,27 @@ export function CollectionCards({ collections }: CollectionCardsProps) {
             >
               <Link
                 href={collection.slug ? `/boutique?category=${collection.slug}` : "/boutique"}
-                className="block rounded-[1.5rem] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:ring-offset-2 lg:rounded-[1.75rem]"
+                className="block rounded-[1.5rem] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--laiton)] focus-visible:ring-offset-2 lg:rounded-[1.75rem]"
               >
                 <motion.div
                   whileHover={{ y: -4 }}
                   transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
-                  className="group relative aspect-[3/4] overflow-hidden rounded-[1.5rem] shadow-[0_6px_24px_-6px_rgba(36,27,20,0.25)] transition-shadow duration-500 hover:shadow-[0_20px_44px_-12px_rgba(36,27,20,0.4)] lg:rounded-[1.75rem]"
+                  className="group relative aspect-[3/4] overflow-hidden rounded-[1.5rem] shadow-[0_6px_24px_-6px_rgba(14,11,9,0.25)] transition-shadow duration-500 hover:shadow-[0_20px_44px_-12px_rgba(185,121,62,0.35)] lg:rounded-[1.75rem]"
                 >
                   <div
                     className="absolute inset-0 bg-cover bg-center transition-transform duration-[1200ms] ease-out group-hover:scale-[1.06]"
                     style={{ backgroundImage: `url(${collection.image})` }}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#241B14]/90 via-[#241B14]/35 to-[#241B14]/0" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[var(--obsidienne)]/90 via-[var(--obsidienne)]/35 to-transparent" />
 
                   <div className="absolute inset-0 flex flex-col justify-end p-5 lg:p-6">
                     <span
-                      className="mb-1.5 text-[13px] text-[var(--gold)]/90"
-                      style={{ fontVariant: "small-caps", letterSpacing: "0.02em" }}
+                      className="mb-1.5 text-[12px] font-bold uppercase tracking-wider text-[var(--laiton-clair)]"
                     >
                       {collection.productCount} articles
                     </span>
 
-                    <h3 className="font-cinzel text-xl font-bold text-white lg:text-2xl">
+                    <h3 className="font-heading text-xl font-bold text-white lg:text-2xl">
                       {collection.name}
                     </h3>
 

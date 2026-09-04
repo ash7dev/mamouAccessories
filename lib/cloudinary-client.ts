@@ -1,6 +1,4 @@
-/**
- * Utilitaires Cloudinary côté client (sans dépendances Node.js)
- */
+import { resolveProductImageUrl, ImageTransformOptions } from './utils/image-helpers';
 
 export interface BuildImageUrlOptions {
   width?: number;
@@ -10,43 +8,16 @@ export interface BuildImageUrlOptions {
   bustCache?: boolean;
 }
 
-export function buildImageUrl(publicId: string, options: BuildImageUrlOptions = {}): string | null {
-  if (!publicId) {
-    console.error('No publicId provided to buildImageUrl');
-    return null;
-  }
+export function buildImageUrl(publicId: string | null | undefined, options: BuildImageUrlOptions = {}): string | null {
+  if (!publicId) return null;
 
-  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-  if (!cloudName) {
-    console.error('NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME not set');
-    return null;
-  }
+  const transformOptions: ImageTransformOptions = {
+    width: options.width,
+    height: options.height,
+    quality: options.quality === 'auto' ? 'auto' : options.quality ? Number(options.quality) : 'auto',
+    format: options.format as any,
+    bustCache: options.bustCache,
+  };
 
-  const {
-    width = 800,
-    height = 800,
-    quality = 'auto',
-    format = 'auto',
-    bustCache = false,
-  } = options;
-
-  // Build transformation string
-  const transformations = [
-    `w_${width}`,
-    `h_${height}`,
-    `c_limit`,
-    `q_${quality}`,
-    `f_${format}`,
-  ].join(',');
-
-  // Build base URL
-  const baseUrl = `https://res.cloudinary.com/${cloudName}/image/upload/${transformations}/${publicId}`;
-
-  // Add cache-busting timestamp if requested
-  if (bustCache) {
-    const timestamp = Date.now();
-    return `${baseUrl}?_t=${timestamp}`;
-  }
-
-  return baseUrl;
+  return resolveProductImageUrl(publicId, transformOptions);
 }

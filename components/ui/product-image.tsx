@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
+import { resolveProductImageUrl, PLACEHOLDER_IMAGE } from "@/lib/utils/image-helpers";
 
 interface ProductImageProps {
-  src: string | null;
+  src: string | null | undefined;
   alt: string;
   className?: string;
   fill?: boolean;
@@ -12,11 +13,12 @@ interface ProductImageProps {
   height?: number;
   priority?: boolean;
   sizes?: string;
+  unoptimized?: boolean;
+  quality?: number;
 }
 
 /**
- * Composant Image avec fallback automatique
- * Si l'image Cloudinary ne charge pas, affiche une image placeholder
+ * Composant Image réutilisable avec fallback automatique & résolution d'URL robuste
  */
 export function ProductImage({
   src,
@@ -27,55 +29,75 @@ export function ProductImage({
   height,
   priority = false,
   sizes,
+  unoptimized = true,
+  quality,
 }: ProductImageProps) {
-  const [error, setError] = useState(false);
-  const [imgSrc, setImgSrc] = useState(src);
+  const resolvedSrc = resolveProductImageUrl(src, {
+    width: width || (fill ? undefined : 800),
+    height: height || (fill ? undefined : 800),
+  });
 
-  // Si pas de src ou erreur, utiliser le placeholder
-  const finalSrc = !imgSrc || error ? "/placeholder-product.svg" : imgSrc;
+  const [currentSrc, setCurrentSrc] = useState<string>(resolvedSrc);
+  const [hasError, setHasError] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  // Synchronisation si la prop src change
+  useEffect(() => {
+    const updated = resolveProductImageUrl(src, {
+      width: width || (fill ? undefined : 800),
+      height: height || (fill ? undefined : 800),
+    });
+    setCurrentSrc(updated);
+    setHasError(false);
+    setIsLoading(true);
+  }, [src, width, height, fill]);
 
   const handleError = () => {
-    setError(true);
+    if (!hasError) {
+      setHasError(true);
+      setCurrentSrc(PLACEHOLDER_IMAGE);
+      setIsLoading(false);
+    }
   };
 
   const handleLoad = () => {
-    setError(false);
+    setIsLoading(false);
   };
 
-  // Si src change, réinitialiser l'état d'erreur
-  if (src !== imgSrc && !error) {
-    setImgSrc(src);
-    setError(false);
-  }
+  const finalSrc = hasError || !currentSrc ? PLACEHOLDER_IMAGE : currentSrc;
 
   if (fill) {
     return (
-      <Image
-        src={finalSrc}
-        alt={alt}
-        fill
-        className={className}
-        onError={handleError}
-        onLoad={handleLoad}
-        priority={priority}
-        sizes={sizes}
-        unoptimized // Cloudinary gère déjà l'optimisation
-      />
+      <div className={`relative h-full w-full overflow-hidden ${isLoading ? 'animate-pulse bg-neutral-100' : ''}`}>
+        <Image
+          src={finalSrc}
+          alt={alt || "Image produit"}
+          fill
+          className={`transition-opacity duration-300 ${isLoading ? 'opacity-0' : 'opacity-100'} ${className}`}
+          onError={handleError}
+          onLoad={handleLoad}
+          priority={priority}
+          sizes={sizes}
+          unoptimized={unoptimized || finalSrc.endsWith('.svg') || finalSrc.startsWith('data:')}
+          quality={quality}
+        />
+      </div>
     );
   }
 
   return (
     <Image
       src={finalSrc}
-      alt={alt}
+      alt={alt || "Image produit"}
       width={width || 500}
       height={height || 500}
-      className={className}
+      className={`transition-opacity duration-300 ${isLoading ? 'opacity-0' : 'opacity-100'} ${className}`}
       onError={handleError}
       onLoad={handleLoad}
       priority={priority}
       sizes={sizes}
-      unoptimized // Cloudinary gère déjà l'optimisation
+      unoptimized={unoptimized || finalSrc.endsWith('.svg') || finalSrc.startsWith('data:')}
+      quality={quality}
     />
   );
 }

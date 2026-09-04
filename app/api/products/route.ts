@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { createServiceRoleClient } from '@/lib/supabase/service-role';
-import { deleteImages, buildImageUrl } from '@/lib/cloudinary';
+import { resolveProductImageUrl } from '@/lib/utils/image-helpers';
 import type { CreateProductInput, ProductFilters } from '@/lib/types/product';
 
 // GET /api/products - Récupérer tous les produits avec filtres
@@ -71,9 +71,9 @@ export async function GET(request: NextRequest) {
       compareAtPrice: product.compare_at_price ?? null,
       stock: Number(product.stock ?? 0),
       imageOrientation: product.image_orientation || 'portrait',
-      imageUrl: buildImageUrl(
-        product.images?.find((img: any) => img.position === 0)?.cloudinary_public_id
-      ) ?? null,
+      imageUrl: resolveProductImageUrl(
+        (product.images || []).sort((a: any, b: any) => (a.position ?? 0) - (b.position ?? 0))[0]?.cloudinary_public_id
+      ),
       isActive: Boolean(product.is_active),
       isFeatured: Boolean(product.is_featured),
       unitsSold: 0, // TODO: calculate from orders

@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
-import { buildImageUrl } from '@/lib/cloudinary';
+import { resolveProductImageUrl } from '@/lib/utils/image-helpers';
 import type { PublicProduct } from '@/components/boutique/productsdetail';
 
 /**
@@ -38,9 +38,9 @@ export async function getProductBySlug(slug: string): Promise<PublicProduct | nu
     .eq('product_id', product.id)
     .order('position', { ascending: true });
 
-  // Transformer les images avec Cloudinary URLs avec fallback automatique
+  // Transformer les images avec résolveur universel
   const productImages: Array<{ id: string; url: string }> = (images || []).map((img) => {
-    const url = buildImageUrl(img.cloudinary_public_id, {}) || '/placeholder-product.svg';
+    const url = resolveProductImageUrl(img.cloudinary_public_id);
     return { id: img.id, url };
   });
 

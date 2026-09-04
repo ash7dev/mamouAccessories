@@ -4,8 +4,7 @@ import { SearchBar } from "@/components/home/SearchBar";
 import { CollectionCards } from "@/components/boutique/CollectionCards";
 import { ProductSection } from "@/components/home/ProductSection";
 import { PromoBanner } from "@/components/home/PromoBanner";
-import { TrustBadges } from "@/components/home/TrustBadges";
-import { Testimonials } from "@/components/home/Testimonials";
+import { MaisonMamouExperience } from "@/components/home/MaisonMamouExperience";
 import { NewsletterSection } from "@/components/NewsletterSection";
 import { Footer } from "@/components/footer";
 import { PWAInstallPrompt } from "@/components/ui/pwa-install-prompt";
@@ -13,7 +12,6 @@ import {
   getHomeCollections,
   getFeaturedProducts,
   getNewArrivals,
-  getApprovedReviews,
   getActivePromo,
   getRecommendedProducts,
 } from "@/lib/data/home-data";
@@ -31,11 +29,10 @@ export const revalidate = 600;
 
 export default async function HomePage() {
   // Requêtes Supabase parallèles pour optimiser le chargement
-  const [collections, featured, newArrivals, reviews, activePromo, recommended] = await Promise.all([
+  const [collections, featured, newArrivals, activePromo, recommended] = await Promise.all([
     getHomeCollections(),
     getFeaturedProducts(),      // is_featured = true, is_active = true
     getNewArrivals(),           // order by created_at desc, limit 8
-    getApprovedReviews(6),      // is_approved = true
     getActivePromo(),           // depuis settings/promotions
     getRecommendedProducts(),   // produits aléatoires
   ]);
@@ -66,7 +63,7 @@ export default async function HomePage() {
         mobileLayout="carousel"
       />
 
-      {activePromo && <PromoBanner />}
+      {activePromo && <PromoBanner promo={activePromo} />}
 
       <ProductSection
         eyebrow="Fraîchement arrivés"
@@ -76,9 +73,7 @@ export default async function HomePage() {
         mobileLayout="grid"
       />
 
-      <TrustBadges />
-
-      <Testimonials reviews={reviews} />
+      <MaisonMamouExperience />
 
       <NewsletterSection />
 

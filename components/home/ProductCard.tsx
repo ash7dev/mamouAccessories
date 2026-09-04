@@ -3,21 +3,9 @@
 import Link from "next/link";
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Heart, Check } from "lucide-react";
+import { Heart, Check, ShoppingBag } from "lucide-react";
 import { useCart } from "@/lib/cart-context";
-
-/* ============================================================
-   ProductCard — carte produit publique réutilisable
-
-   Utilisée par les sections "Coups de cœur" et "Nouveautés"
-   de l'accueil, et par la grille boutique. Respecte
-   l'orientation de l'image du produit.
-
-   Direction design : une seule carte peut se permettre un geste
-   marquant (le lift + la révélation du CTA au survol). Tout le
-   reste — badges, favoris, libellés — reste discret pour ne pas
-   lui faire concurrence.
-   ============================================================ */
+import { ProductImage } from "@/components/ui/product-image";
 
 export interface PublicProductCard {
   id: string;
@@ -37,8 +25,8 @@ export function ProductCard({ product }: { product: PublicProductCard }) {
   const { addItem } = useCart();
   const [justAdded, setJustAdded] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
-  const [imageError, setImageError] = useState(false);
   const isOut = product.stock === 0;
+
   const discount =
     product.compareAtPrice && product.compareAtPrice > product.price
       ? Math.round((1 - product.price / product.compareAtPrice) * 100)
@@ -57,120 +45,112 @@ export function ProductCard({ product }: { product: PublicProductCard }) {
     setIsFavorite((v) => !v);
   };
 
-  const handleImageError = () => {
-    setImageError(true);
-  };
-
   return (
-    <Link href={`/produit/${product.slug}`} className="group block">
+    <Link href={`/produit/${product.slug}`} className="group flex flex-col h-full w-full">
       <motion.div
-        whileHover={{ y: -6 }}
-        transition={{ duration: 0.45, ease: [0.25, 0.1, 0.25, 1] }}
+        whileHover={{ y: -5 }}
+        transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+        className="flex flex-col justify-between h-full w-full rounded-[1.75rem] border border-[var(--laiton)]/15 bg-white shadow-[0_4px_20px_-4px_rgba(14,11,9,0.06)] hover:shadow-[0_20px_48px_-12px_rgba(185,121,62,0.22)] hover:border-[var(--laiton)]/40 transition-all duration-300 overflow-hidden"
       >
-        {/* ---------- Image ---------- */}
-        <div className="relative aspect-[3/4] overflow-hidden rounded-[1.5rem] bg-[var(--cream,#F4EFE6)] border border-[var(--text-dark)]/[0.06] shadow-[0_2px_16px_-4px_rgba(36,27,20,0.1)] transition-shadow duration-500 group-hover:shadow-[0_18px_40px_-12px_rgba(36,27,20,0.25)]">
-          {product.imageUrl && !imageError ? (
-            <img
-              src={product.imageUrl}
-              alt={product.name}
-              loading="lazy"
-              onError={handleImageError}
-              className={`h-full w-full object-cover transition-transform duration-[1400ms] ease-out group-hover:scale-[1.045] ${
-                isOut ? "opacity-50 grayscale" : ""
-              }`}
-            />
-          ) : (
-            <img
-              src="/placeholder-product.svg"
-              alt={product.name}
-              className="h-full w-full object-cover p-8 opacity-40 bg-[var(--cream,#F4EFE6)]"
-            />
-          )}
+        {/* ---------- Zone Image Pleine Largeur (Ratios 3:4, Sans Bordure Interne) ---------- */}
+        <div className="relative aspect-[3/4] w-full overflow-hidden rounded-t-[1.75rem] bg-[var(--porcelaine)] shrink-0">
+          <ProductImage
+            src={product.imageUrl}
+            alt={product.name}
+            fill
+            className={`h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105 ${
+              isOut ? "opacity-40 grayscale" : ""
+            }`}
+          />
 
-          {/* Discount badge */}
+          {/* Badge Promo */}
           {discount && !isOut && (
-            <span className="absolute left-4 top-4 rounded-full bg-[var(--gold)] px-3 py-1 text-[11px] font-semibold text-[#241B14]">
+            <span className="absolute left-3 top-3 z-10 rounded-full bg-gradient-to-r from-[var(--laiton)] to-[#9A622E] px-2.5 py-1 text-[10px] font-bold text-white shadow-sm tracking-wider uppercase">
               −{discount}%
             </span>
           )}
 
-          {/* Out of stock tag */}
+          {/* Badge Rupture */}
           {isOut && (
-            <span className="absolute left-4 top-4 rounded-full bg-[#241B14]/85 backdrop-blur-sm px-3 py-1 text-[11px] font-medium tracking-wide text-[#F4EFE6]">
+            <span className="absolute left-3 top-3 z-10 rounded-full bg-[var(--obsidienne)]/90 backdrop-blur-md px-2.5 py-1 text-[10px] font-semibold tracking-wide text-white shadow">
               Épuisé
             </span>
           )}
 
-          {/* Favorite */}
+          {/* Bouton Favori Flottant */}
           <button
             onClick={handleFavorite}
             aria-label={isFavorite ? "Retirer des favoris" : "Ajouter aux favoris"}
-            className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-white/50 backdrop-blur-md border border-white/40 transition-colors hover:bg-white/70"
+            className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white/70 backdrop-blur-md border border-white/50 shadow-sm transition-all hover:scale-110 active:scale-95"
           >
             <Heart
               className={`h-4 w-4 transition-colors ${
-                isFavorite ? "fill-[var(--gold-dark)] text-[var(--gold-dark)]" : "text-[#241B14]/50"
+                isFavorite ? "fill-[var(--laiton)] text-[var(--laiton)]" : "text-[var(--obsidienne)]/60"
               }`}
             />
           </button>
-
-          {/* CTA reveal — slides up on hover, always present on touch devices */}
-          {!isOut && (
-            <button
-              onClick={handleAddToCart}
-              className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-2 bg-[#241B14]/90 backdrop-blur-md py-3.5 text-[13px] font-medium tracking-wide text-[#F4EFE6] transition-all duration-400 ease-out translate-y-full opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100"
-            >
-              {justAdded ? (
-                <motion.span
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="flex items-center gap-2"
-                >
-                  <Check className="h-4 w-4" /> Ajouté au panier
-                </motion.span>
-              ) : (
-                "Ajouter au panier"
-              )}
-            </button>
-          )}
         </div>
 
-        {/* ---------- Infos ---------- */}
-        <div className="mt-5 px-1">
-          <p
-            className="mb-1.5 text-[13px] text-[var(--gold-dark)]/80"
-            style={{ fontVariant: "small-caps", letterSpacing: "0.02em" }}
-          >
-            {product.categoryName}
-          </p>
-          <h3 className="font-heading text-lg font-semibold leading-snug text-[var(--text-dark)] line-clamp-2 mb-2.5">
-            {product.name}
-          </h3>
-          <div className="flex items-baseline gap-2.5 mb-4">
-            <span className="text-xl font-semibold text-[var(--text-dark)] tabular-nums tracking-tight">
-              {formatFCFA(product.price)}
-            </span>
-            <span className="text-xs text-[var(--text-dark)]/50">FCFA</span>
-            {product.compareAtPrice && (
-              <span className="text-sm text-[var(--text-dark)]/40 line-through tabular-nums">
-                {formatFCFA(product.compareAtPrice)}
-              </span>
-            )}
+        {/* ---------- Informations Produit (Structure Flex Alignée) ---------- */}
+        <div className="flex-1 flex flex-col justify-between p-4 sm:p-5">
+          <div>
+            {/* Catégorie */}
+            <p className="text-[11px] font-bold tracking-wider uppercase text-[var(--laiton,#B9793E)] mb-1">
+              {product.categoryName}
+            </p>
+
+            {/* Titre avec hauteur minimale égale pour empêcher tout décalage */}
+            <h3 className="font-heading text-sm sm:text-base font-semibold text-[var(--obsidienne,#0E0B09)] line-clamp-2 min-h-[2.5rem] sm:min-h-[2.8rem] mb-2 leading-tight group-hover:text-[var(--laiton)] transition-colors">
+              {product.name}
+            </h3>
           </div>
 
-          {/* Mobile-visible, understated CTA (mirrors the hover panel on touch devices) */}
-          {!isOut && (
-            <button
-              onClick={handleAddToCart}
-              className={`md:hidden w-full rounded-full border py-3 text-[13px] font-medium tracking-wide transition-colors ${
-                justAdded
-                  ? "border-emerald-600/30 bg-emerald-50 text-emerald-700"
-                  : "border-[var(--text-dark)]/15 text-[var(--text-dark)] hover:bg-[var(--text-dark)] hover:text-[#F4EFE6]"
-              }`}
-            >
-              {justAdded ? "Ajouté au panier" : "Ajouter au panier"}
-            </button>
-          )}
+          {/* Bloc Bas : Prix + Bouton Panier */}
+          <div>
+            {/* Prix */}
+            <div className="flex items-baseline gap-2 mb-3">
+              <span className="text-base sm:text-lg font-bold text-[var(--obsidienne)] tabular-nums tracking-tight">
+                {formatFCFA(product.price)}
+              </span>
+              <span className="text-[11px] text-[var(--obsidienne)]/50 font-medium">FCFA</span>
+              {product.compareAtPrice && product.compareAtPrice > product.price && (
+                <span className="text-xs text-[var(--obsidienne)]/40 line-through tabular-nums ml-auto">
+                  {formatFCFA(product.compareAtPrice)}
+                </span>
+              )}
+            </div>
+
+            {/* Bouton CTA Panier Toujours Alignés */}
+            {!isOut ? (
+              <button
+                onClick={handleAddToCart}
+                className={`w-full rounded-full py-2.5 px-3 text-xs font-bold uppercase tracking-wider transition-all duration-300 shadow flex items-center justify-center gap-1.5 active:scale-95 ${
+                  justAdded
+                    ? "bg-emerald-600 text-white"
+                    : "bg-[var(--obsidienne)] hover:bg-[var(--laiton)] text-white"
+                }`}
+              >
+                {justAdded ? (
+                  <>
+                    <Check className="h-3.5 w-3.5" />
+                    <span>Ajouté</span>
+                  </>
+                ) : (
+                  <>
+                    <ShoppingBag className="h-3.5 w-3.5" />
+                    <span>Ajouter</span>
+                  </>
+                )}
+              </button>
+            ) : (
+              <button
+                disabled
+                className="w-full rounded-full py-2.5 px-3 text-xs font-semibold uppercase tracking-wider bg-neutral-100 text-neutral-400 cursor-not-allowed text-center"
+              >
+                Indisponible
+              </button>
+            )}
+          </div>
         </div>
       </motion.div>
     </Link>

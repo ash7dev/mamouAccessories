@@ -1,20 +1,12 @@
 import { createClient } from '@/lib/supabase/server';
+import { resolveProductImageUrl } from '@/lib/utils/image-helpers';
 import type { HomeCategory } from '@/components/home/CategoryRail';
 import type { PublicProductCard } from '@/components/home/ProductCard';
 import type { HomeReview } from '@/components/home/Testimonials';
 import type { Collection } from '@/components/boutique/CollectionCards';
 
-function buildCloudinaryImageUrl(publicId: string) {
-  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'utngoden';
-
-  if (!publicId) {
-    console.error('No publicId provided to buildCloudinaryImageUrl');
-    return null;
-  }
-
-  // URL simple sans transformations complexes pour éviter les erreurs
-  const url = `https://res.cloudinary.com/${cloudName}/image/upload/${publicId}`;
-  return url;
+function buildCloudinaryImageUrl(publicId: string | null | undefined) {
+  return resolveProductImageUrl(publicId);
 }
 
 /**
@@ -324,28 +316,80 @@ export async function getApprovedReviews(limit = 6): Promise<HomeReview[]> {
   }));
 }
 
-/**
- * Récupère la promotion active (si existe)
- */
-export async function getActivePromo(): Promise<{ isActive: boolean } | null> {
-  const supabase = await createClient();
+export interface ActivePromoData {
+  id?: string;
+  title: string;
+  subtitle?: string;
+  discountType?: string;
+  discountValue?: number;
+  promoCode?: string;
+  endDate?: string;
+  ctaLabel?: string;
+  ctaHref?: string;
+  isActive: boolean;
+}
 
+/**
+ * Récupère la promotion active (depuis la table `promotions` ou la clef `settings`)
+ */
+export async function getActivePromo(): Promise<ActivePromoData | null> {
+  const supabase = await createClient();
+  const now = new Date().toISOString();
+
+  // 1. Chercher dans la table promotions si une offre est active selon les dates
+  const { data: activePromos, error: promoError } = await supabase
+    .from('promotions')
+    .select('*')
+    .eq('is_active', true)
+    .lte('start_date', now)
+    .gte('end_date', now)
+    .order('discount_value', { ascending: false })
+    .limit(1);
+
+  if (!promoError && activePromos && activePromos.length > 0) {
+    const p = activePromos[0];
+    return {
+      id: p.id,
+      title: p.name || 'Offre Privilège Maison Mamou',
+      subtitle: p.description || 'Bénéficiez d’une remise exceptionnelle sur nos collections exclusives.',
+      discountType: p.discount_type,
+      discountValue: p.discount_value,
+      promoCode: p.code || 'MAMOUVIP',
+      endDate: p.end_date,
+      ctaLabel: 'En profiter',
+      ctaHref: '/boutique',
+      isActive: true,
+    };
+  }
+
+  // 2. Fallback dans la table settings (active_promo)
   const { data, error } = await supabase
     .from('settings')
     .select('value')
     .eq('key', 'active_promo')
     .single();
 
-  if (error || !data) {
-    return null;
+  if (!error && data?.value) {
+    try {
+      const promo = JSON.parse(data.value);
+      if (promo && promo.isActive !== false) {
+        return {
+          title: promo.title || 'Ventes Privées',
+          subtitle: promo.subtitle || 'Profitez de nos offres du moment.',
+          ctaLabel: promo.ctaLabel || 'Découvrir',
+          ctaHref: promo.ctaHref || '/boutique',
+          promoCode: promo.promoCode || promo.code,
+          discountValue: promo.discountValue || promo.discount_value,
+          endDate: promo.endDate || promo.end_date,
+          isActive: true,
+        };
+      }
+    } catch (e) {
+      console.error('Error parsing active_promo setting:', e);
+    }
   }
 
-  try {
-    const promo = JSON.parse(data.value);
-    return promo.isActive ? promo : null;
-  } catch {
-    return null;
-  }
+  return null;
 }
 
 /**

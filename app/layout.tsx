@@ -1,8 +1,23 @@
 import type { Metadata, Viewport } from "next";
+import { Plus_Jakarta_Sans, Outfit } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 import { PageTransition } from "@/components/ui/page-transition";
 import { CartProvider } from "@/lib/cart-context";
+
+const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  variable: "--font-sans-custom",
+  display: "swap",
+  weight: ["300", "400", "500", "600", "700"],
+});
+
+const outfit = Outfit({
+  subsets: ["latin"],
+  variable: "--font-heading-custom",
+  display: "swap",
+  weight: ["400", "500", "600", "700", "800"],
+});
 
 export const metadata: Metadata = {
   title: "Mamou's Accessories - Accessoires Premium",
@@ -42,7 +57,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr" className="h-full antialiased">
+    <html lang="fr" className={`h-full antialiased ${plusJakartaSans.variable} ${outfit.variable}`}>
       <body className="min-h-full flex flex-col font-sans" suppressHydrationWarning>
         <CartProvider>
           <PageTransition>

@@ -4,7 +4,9 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { createProduct, deleteProduct, updateProduct, uploadImagesToCloudinary } from "@/lib/api/products";
+import { createProduct, deleteProduct, updateProduct } from "@/lib/api/products";
+import { uploadProductImage } from "@/lib/api/upload";
+import { ProductImageUploader, ImageItem } from "@/components/ui/product-image-uploader";
 import { toast } from "sonner";
 import { useConfirmDialog } from "@/components/ui/confirm-dialog";
 
@@ -20,14 +22,6 @@ import { useConfirmDialog } from "@/components/ui/confirm-dialog";
      /admin/products/new        →  <ProductForm />
      /admin/products/[id]/edit  →  <ProductForm product={product} />
    ============================================================ */
-
-interface ProductImage {
-  id: string;
-  url: string;
-  cloudinaryPublicId: string;
-  file?: File;
-  isNew?: boolean; // true = pas encore uploadée sur Cloudinary
-}
 
 export interface ProductWithImages {
   id: string;
@@ -205,12 +199,10 @@ export function ProductForm({ product }: ProductFormProps) {
     fetchCategories();
   }, []);
 
-  const [images, setImages] = useState<ProductImage[]>(
+  const [images, setImages] = useState<ImageItem[]>(
     product?.images.map((img) => ({ ...img, isNew: false })) ?? []
   );
-  // Images existantes retirées par l'admin → à supprimer de Cloudinary côté serveur
-  const [, setRemovedImageIds] = useState<string[]>([]);
-  const [isUploading, setIsUploading] = useState(false);
+
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -227,13 +219,30 @@ export function ProductForm({ product }: ProductFormProps) {
       return;
     }
 
+    if (images.length === 0) {
+      toast.error("Au moins une photo est requise pour le produit");
+      return;
+    }
+
     setIsSaving(true);
     try {
       const slug = isEdit && product ? product.slug : buildSlug(formData.name);
       const price = Number(formData.price);
       const compareAtPrice = formData.compareAtPrice ? Number(formData.compareAtPrice) : null;
       const stock = formData.stock ? Number(formData.stock) : 0;
-      const newFiles = images.filter((img) => img.isNew && img.file).map((img) => img.file!);
+
+      // Upload sécurisé de toutes les nouvelles images
+      const finalPublicIds: string[] = [];
+      for (const img of images) {
+        if (!img.isNew && img.cloudinaryPublicId) {
+          finalPublicIds.push(img.cloudinaryPublicId);
+        } else if (img.file) {
+          toast.loading("Upload de la photo...", { id: "upload-status" });
+          const res = await uploadProductImage(img.file);
+          finalPublicIds.push(res.publicId);
+          toast.dismiss("upload-status");
+        }
+      }
 
       const payload = {
         category_id: formData.categoryId,
@@ -249,21 +258,17 @@ export function ProductForm({ product }: ProductFormProps) {
       };
 
       if (isEdit && product) {
-        const keepPublicIds = images
-          .filter((img) => !img.isNew && img.cloudinaryPublicId)
-          .map((img) => img.cloudinaryPublicId);
-        const uploadedPublicIds = newFiles.length > 0 ? await uploadImagesToCloudinary(newFiles) : [];
-
         await updateProduct(product.id, {
           ...payload,
-          cloudinary_public_ids: [...keepPublicIds, ...uploadedPublicIds],
+          cloudinary_public_ids: finalPublicIds,
         });
+        toast.success("Produit mis à jour avec succès");
       } else {
-        const uploadedPublicIds = newFiles.length > 0 ? await uploadImagesToCloudinary(newFiles) : [];
         await createProduct({
           ...payload,
-          cloudinary_public_ids: uploadedPublicIds,
+          cloudinary_public_ids: finalPublicIds,
         });
+        toast.success("Produit créé avec succès");
       }
 
       router.push("/admin/products");
@@ -301,52 +306,7 @@ export function ProductForm({ product }: ProductFormProps) {
     });
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
 
-    if (images.length + files.length > 5) {
-      toast.error("Maximum 5 photos autorisées par produit");
-      return;
-    }
-
-    setIsUploading(true);
-
-    // TODO: Implement Cloudinary upload
-    const newImages: ProductImage[] = [];
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      const url = URL.createObjectURL(file);
-      newImages.push({
-        id: `temp-${Date.now()}-${i}`,
-        url,
-        cloudinaryPublicId: "",
-        file,
-        isNew: true,
-      });
-    }
-
-    setImages((prev) => [...prev, ...newImages]);
-    setIsUploading(false);
-  };
-
-  const removeImage = (id: string) => {
-    setImages((prev) => {
-      const img = prev.find((i) => i.id === id);
-      if (img && !img.isNew) {
-        setRemovedImageIds((current) => [...current, id]);
-      }
-      return prev.filter((i) => i.id !== id);
-    });
-  };
-
-  const moveImage = (index: number, direction: "up" | "down") => {
-    const newImages = [...images];
-    const targetIndex = direction === "up" ? index - 1 : index + 1;
-    if (targetIndex < 0 || targetIndex >= images.length) return;
-    [newImages[index], newImages[targetIndex]] = [newImages[targetIndex], newImages[index]];
-    setImages(newImages);
-  };
 
   return (
     <>
@@ -584,125 +544,15 @@ export function ProductForm({ product }: ProductFormProps) {
               )}
           </div>
 
-          {/* Upload */}
-          <FieldLabel required>Photos ({images.length}/5)</FieldLabel>
-
-          {images.length === 0 && (
-            <div className="rounded-2xl bg-[var(--ivory)]/60 p-8 text-center">
-              <div className="flex flex-col items-center gap-3">
-                <div className="relative">
-                  <div aria-hidden className="absolute -inset-2 rounded-full border border-[var(--gold)]/20" />
-                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white text-[var(--gold-dark)] ring-1 ring-inset ring-[var(--gold)]/25 [&>svg]:h-6 [&>svg]:w-6">
-                    <PhotoIcon />
-                  </div>
-                </div>
-                <div>
-                  <p className="mb-1 text-sm font-semibold text-[var(--text-dark)]">
-                    Ajoutez les photos du produit
-                  </p>
-                  <p className="text-xs text-[var(--text-dark)]/50">
-                    Jusqu&apos;à 5 photos · Format{" "}
-                    {formData.imageOrientation === "portrait" ? "vertical (3:4)" : "horizontal (4:3)"}
-                  </p>
-                </div>
-                <label className="cursor-pointer rounded-full bg-[var(--text-dark)] px-6 py-3 text-sm font-semibold text-white shadow-lg transition-transform hover:bg-[var(--text-dark)]/90 active:scale-95">
-                  Choisir des photos
-                  <input
-                    type="file"
-                    multiple
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="hidden"
-                    disabled={isUploading || images.length >= 5}
-                  />
-                </label>
-              </div>
-            </div>
-          )}
-
-          {images.length > 0 && (
-            <div>
-              <div className="mb-4 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
-                {images.map((image, index) => (
-                  <div
-                    key={image.id}
-                    className="group relative aspect-square overflow-hidden rounded-2xl border border-[var(--gold)]/15 bg-[var(--ivory)]/50"
-                  >
-                    <img src={image.url} alt={`Photo ${index + 1}`} className="h-full w-full object-cover" />
-
-                    {index === 0 && (
-                      <div className="absolute left-2 top-2 rounded-full bg-[var(--gold)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-[#241B14]">
-                        Principale
-                      </div>
-                    )}
-
-                    {/* Badge "nouvelle" en mode édition */}
-                    {isEdit && image.isNew && (
-                      <div className="absolute right-2 top-2 rounded-full bg-white/90 px-2 py-0.5 text-[10px] font-semibold text-[var(--gold-dark)]">
-                        Nouvelle
-                      </div>
-                    )}
-
-                    <div className="absolute inset-0 flex items-center justify-center gap-2 bg-[#241B14]/60 opacity-0 transition-opacity group-hover:opacity-100">
-                      {index > 0 && (
-                        <button
-                          type="button"
-                          onClick={() => moveImage(index, "up")}
-                          className="rounded-full bg-white p-2 transition-colors hover:bg-[var(--ivory)]"
-                          title="Déplacer vers la gauche"
-                        >
-                          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                          </svg>
-                        </button>
-                      )}
-
-                      <button
-                        type="button"
-                        onClick={() => removeImage(image.id)}
-                        className="rounded-full bg-red-500 p-2 text-white transition-colors hover:bg-red-600"
-                        title="Supprimer"
-                      >
-                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                      </button>
-
-                      {index < images.length - 1 && (
-                        <button
-                          type="button"
-                          onClick={() => moveImage(index, "down")}
-                          className="rounded-full bg-white p-2 transition-colors hover:bg-[var(--ivory)]"
-                          title="Déplacer vers la droite"
-                        >
-                          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                          </svg>
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {images.length < 5 && (
-                <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-dashed border-[var(--gold)]/40 bg-[var(--ivory)]/40 px-5 py-2.5 text-sm font-medium text-[var(--text-dark)]/70 transition-colors hover:border-[var(--gold)] hover:text-[var(--text-dark)]">
-                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4.5v15m7.5-7.5h-15" />
-                  </svg>
-                  Ajouter d&apos;autres photos
-                  <input
-                    type="file"
-                    multiple
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="hidden"
-                    disabled={isUploading}
-                  />
-                </label>
-              )}
-            </div>
-          )}
+          {/* Upload universel via ProductImageUploader */}
+          <FieldLabel required>Photos du produit ({images.length}/5)</FieldLabel>
+          <ProductImageUploader
+            images={images}
+            onChange={setImages}
+            maxImages={5}
+            orientation={formData.imageOrientation}
+            disabled={isSaving || isDeleting}
+          />
         </SectionCard>
 
         {/* ===== 5. Zone de danger — uniquement en édition ===== */}
@@ -741,7 +591,7 @@ export function ProductForm({ product }: ProductFormProps) {
           </Link>
           <button
             type="submit"
-            disabled={isUploading || isSaving || images.length === 0}
+            disabled={isSaving || images.length === 0}
             className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-[var(--gold-dark)] to-[var(--gold)] px-8 py-3.5 text-sm font-bold text-white shadow-xl transition-all hover:shadow-2xl hover:scale-105 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
           >
             <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 transition-opacity group-hover:opacity-100"></div>
@@ -770,7 +620,7 @@ export function ProductForm({ product }: ProductFormProps) {
         <div className="lg:hidden flex flex-col gap-3 pt-4">
           <button
             type="submit"
-            disabled={isUploading || isSaving || images.length === 0}
+            disabled={isSaving || images.length === 0}
             className="group relative w-full overflow-hidden rounded-2xl bg-gradient-to-br from-[var(--gold-dark)] to-[var(--gold)] px-6 py-4 text-base font-bold text-white shadow-xl transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 transition-opacity group-active:opacity-100"></div>
