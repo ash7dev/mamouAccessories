@@ -43,6 +43,19 @@ export function Footer() {
       {/* Carte Flottante Principale Style Joaillerie Obsidienne */}
       <div className="max-w-[1480px] mx-auto rounded-[2.5rem] bg-[var(--obsidienne,#0E0B09)] text-[var(--texte-nuit,#F1ECE3)] p-6 sm:p-10 md:p-12 lg:p-14 border border-[var(--laiton)]/20 shadow-[0_32px_80px_-20px_rgba(14,11,9,0.5)] relative overflow-hidden">
         
+        {/* Ornement cercles métalliques dorés d'ambiance */}
+        <div aria-hidden className="pointer-events-none absolute -right-28 -top-28 opacity-30">
+          <div className="h-96 w-96 rounded-full border border-[var(--laiton)]/20 animate-spin-slow" />
+          <div className="absolute inset-12 rounded-full border border-[var(--laiton)]/30" />
+          <div className="absolute inset-24 rounded-full border border-[var(--laiton)]/40" />
+        </div>
+
+        {/* Halo lumineux d'ambiance */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -bottom-20 -left-20 h-80 w-80 rounded-full bg-[var(--laiton)]/10 blur-3xl"
+        />
+
         {/* Ligne lumineuse Laiton supérieure */}
         <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[var(--laiton-clair,#D9AE78)] to-transparent opacity-70" />
 

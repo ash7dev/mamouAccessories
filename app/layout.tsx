@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Plus_Jakarta_Sans, Outfit, Cormorant_Garamond } from "next/font/google";
+import { Plus_Jakarta_Sans, Outfit, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 import { PageTransition } from "@/components/ui/page-transition";
@@ -19,11 +19,11 @@ const outfit = Outfit({
   weight: ["400", "500", "600", "700", "800"],
 });
 
-const cormorant = Cormorant_Garamond({
+const playfair = Playfair_Display({
   subsets: ["latin"],
   variable: "--font-serif-custom",
   display: "swap",
-  weight: ["400", "500", "600", "700"],
+  weight: ["400", "500", "600", "700", "800"],
 });
 
 export const metadata: Metadata = {
@@ -64,7 +64,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr" className={`h-full antialiased ${plusJakartaSans.variable} ${outfit.variable} ${cormorant.variable}`}>
+    <html lang="fr" className={`h-full antialiased ${plusJakartaSans.variable} ${outfit.variable} ${playfair.variable}`}>
       <body className="min-h-full flex flex-col font-sans" suppressHydrationWarning>
         <CartProvider>
           <PageTransition>

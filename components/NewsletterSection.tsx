@@ -64,6 +64,19 @@ export function NewsletterSection() {
             {/* Ligne filet laiton supérieure */}
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[var(--laiton)] to-transparent opacity-80" />
 
+            {/* Ornement cercles dorés concentriques d'ambiance */}
+            <div aria-hidden className="pointer-events-none absolute -right-24 -top-24 opacity-35 sm:opacity-45">
+              <div className="h-80 w-80 rounded-full border border-[var(--laiton)]/20 animate-spin-slow" />
+              <div className="absolute inset-10 rounded-full border border-[var(--laiton)]/30" />
+              <div className="absolute inset-20 rounded-full border border-[var(--laiton)]/40" />
+            </div>
+
+            {/* Halo lumineux d'ambiance */}
+            <div
+              aria-hidden
+              className="pointer-events-none absolute -bottom-16 -left-16 h-64 w-64 rounded-full bg-[var(--laiton)]/15 blur-3xl"
+            />
+
             <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
               {/* Côté Gauche - Contenu */}
               <div className="text-center md:text-left">
