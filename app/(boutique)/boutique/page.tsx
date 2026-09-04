@@ -215,19 +215,6 @@ function BoutiquePageContent() {
               </div>
             </div>
 
-            {/* Bandeau de Réassurance Haute-Couture */}
-            <div className="mt-3 flex flex-wrap items-center gap-2 text-[10px] sm:text-xs font-semibold text-[var(--obsidienne)]/75">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/80 border border-[var(--laiton)]/15 px-3 py-1 shadow-xs">
-                <ShieldCheck className="h-3.5 w-3.5 text-[var(--laiton)]" /> Satisfait ou Échangé 7J
-              </span>
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/80 border border-[var(--laiton)]/15 px-3 py-1 shadow-xs">
-                <Truck className="h-3.5 w-3.5 text-[var(--laiton)]" /> Livraison Express 24-48H
-              </span>
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/80 border border-[var(--laiton)]/15 px-3 py-1 shadow-xs">
-                <Headphones className="h-3.5 w-3.5 text-emerald-600" /> Support WhatsApp 24/7
-              </span>
-            </div>
-
             {/* ================= BARRE / CARTE DES FILTRES UNIFIÉE — MOBILE ================= */}
             <div className="lg:hidden mt-5 rounded-[2rem] bg-white p-3.5 shadow-[0_4px_20px_-4px_rgba(14,11,9,0.06)] border border-[var(--laiton)]/15 space-y-3">
               {/* Ligne 1 : Recherche + Bouton filtre rond noir */}
@@ -295,29 +282,7 @@ function BoutiquePageContent() {
                 </button>
               </div>
 
-              {/* Ligne 2 : Pilules de tri 1-clic mobile */}
-              <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-1 pt-1 border-t border-neutral-100">
-                <span className="text-[9px] font-bold text-neutral-400 uppercase shrink-0 mr-1">TRI :</span>
-                {[
-                  { id: "recent", label: "Nouveautés" },
-                  { id: "price-asc", label: "Prix ↑" },
-                  { id: "price-desc", label: "Prix ↓" },
-                ].map((opt) => (
-                  <button
-                    key={opt.id}
-                    onClick={() => setSortBy(opt.id as SortOption)}
-                    className={`shrink-0 rounded-full px-3 py-1 text-[9px] font-bold uppercase tracking-wider transition-all ${
-                      sortBy === opt.id
-                        ? "bg-[var(--laiton,#B9793E)] text-white shadow-xs"
-                        : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
-                    }`}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
-
-              {/* Ligne 3 : Pilules de catégories défilantes */}
+              {/* Ligne 2 : Pilules de catégories défilantes */}
               <div className="scrollbar-none -mx-3.5 flex items-center gap-2 overflow-x-auto px-3.5 pb-1 border-t border-neutral-100 pt-2">
                 <button
                   onClick={() => handleSelectCategory(null)}
