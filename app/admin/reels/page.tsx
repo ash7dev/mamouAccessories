@@ -72,14 +72,20 @@ export default function AdminReelsPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(input),
         });
-        if (!res.ok) throw new Error("Erreur lors de la mise à jour");
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.error || "Erreur lors de la mise à jour");
+        }
       } else {
         const res = await fetch("/api/admin/reels", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(input),
         });
-        if (!res.ok) throw new Error("Erreur lors de la création");
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.error || "Erreur lors de la création");
+        }
       }
 
       await loadData();

@@ -1,9 +1,9 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { resolveProductImageUrl } from "@/lib/utils/image-helpers";
 import {
   updateOrderStatus,
@@ -284,6 +284,7 @@ export function CommandeDetail({ order: initialOrder }: { order: OrderDetailData
 
   const transition = async (next: OrderStatus, extra?: Partial<OrderDetailData>) => {
     setBusy(true);
+    const toastId = toast.loading("Mise à jour du statut en cours...");
     try {
       const result = await updateOrderStatus(order.id, next, {
         adminNote: extra?.adminNote ?? undefined,
@@ -292,15 +293,28 @@ export function CommandeDetail({ order: initialOrder }: { order: OrderDetailData
       });
 
       if (!result.success) {
-        alert(result.error || "Erreur lors de la mise à jour");
+        toast.error(result.error || "Erreur lors de la mise à jour", { id: toastId });
         return;
       }
 
       setOrder((o) => ({ ...o, status: next, ...extra }));
+
+      if (next === "cancelled") {
+        toast.success("Commande refusée/annulée. Le stock des bijoux a été réapprovisionné !", { id: toastId });
+      } else if (next === "confirmed") {
+        toast.success("Commande confirmée avec succès !", { id: toastId });
+      } else if (next === "shipped") {
+        toast.success("Commande marquée comme expédiée !", { id: toastId });
+      } else if (next === "delivered") {
+        toast.success("Commande marquée comme livrée !", { id: toastId });
+      } else {
+        toast.success("Statut de la commande mis à jour.", { id: toastId });
+      }
+
       router.refresh();
     } catch (error) {
       console.error("Error updating order:", error);
-      alert("Erreur inattendue");
+      toast.error("Erreur inattendue lors de la mise à jour", { id: toastId });
     } finally {
       setBusy(false);
     }
@@ -308,26 +322,29 @@ export function CommandeDetail({ order: initialOrder }: { order: OrderDetailData
 
   const verifyPayment = async (received: boolean) => {
     setBusy(true);
+    const toastId = toast.loading("Vérification du paiement...");
     try {
       if (received) {
         const result = await markPaymentVerified(order.id);
         if (!result.success) {
-          alert(result.error || "Erreur lors de la vérification");
+          toast.error(result.error || "Erreur lors de la vérification", { id: toastId });
           return;
         }
         setOrder((o) => ({ ...o, paymentStatus: "paid", status: "confirmed" }));
+        toast.success("Paiement Wave validé ! Commande confirmée.", { id: toastId });
       } else {
         const result = await markPaymentNotReceived(order.id);
         if (!result.success) {
-          alert(result.error || "Erreur lors de la mise à jour");
+          toast.error(result.error || "Erreur lors de la mise à jour", { id: toastId });
           return;
         }
         setOrder((o) => ({ ...o, paymentStatus: "unpaid" }));
+        toast.info("Paiement marqué comme non reçu.", { id: toastId });
       }
       router.refresh();
     } catch (error) {
       console.error("Error verifying payment:", error);
-      alert("Erreur inattendue");
+      toast.error("Erreur inattendue", { id: toastId });
     } finally {
       setBusy(false);
     }
@@ -335,10 +352,11 @@ export function CommandeDetail({ order: initialOrder }: { order: OrderDetailData
 
   const changePaymentStatus = async (newStatus: PaymentStatus) => {
     setBusy(true);
+    const toastId = toast.loading("Mise à jour du statut de paiement...");
     try {
       const result = await updatePaymentStatus(order.id, newStatus);
       if (!result.success) {
-        alert(result.error || "Erreur lors de la mise à jour du statut de paiement");
+        toast.error(result.error || "Erreur lors de la mise à jour du paiement", { id: toastId });
         return;
       }
       setOrder((o) => ({
@@ -346,29 +364,33 @@ export function CommandeDetail({ order: initialOrder }: { order: OrderDetailData
         paymentStatus: newStatus,
         status: newStatus === "paid" && o.status === "pending" ? "confirmed" : o.status,
       }));
+      toast.success("Statut de paiement mis à jour !", { id: toastId });
       router.refresh();
     } catch (error) {
       console.error("Error updating payment status:", error);
-      alert("Erreur inattendue");
+      toast.error("Erreur inattendue", { id: toastId });
     } finally {
       setBusy(false);
     }
   };
 
   const confirmCancel = async () => {
-    if (!cancelReason) return;
+    const reason = cancelReason || "Refusée par l'administrateur";
     await transition("cancelled", {
-      cancelReason,
+      cancelReason: reason,
       paymentStatus: order.paymentStatus === "paid" ? "refunded" : order.paymentStatus,
     });
     setCancelOpen(false);
+    setCancelReason(null);
   };
 
   const saveNote = async () => {
     try {
       await saveAdminNote(order.id, adminNote);
+      toast.success("Note interne enregistrée");
     } catch (error) {
       console.error("Error saving note:", error);
+      toast.error("Erreur d'enregistrement de la note");
     }
   };
 
@@ -1123,6 +1145,92 @@ export function CommandeDetail({ order: initialOrder }: { order: OrderDetailData
           </div>
         )}
       </div>
+
+      {/* ===================== MODAL DE REFUS / ANNULATION DE COMMANDE ===================== */}
+      {cancelOpen && (
+        <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
+          <div
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm transition-opacity"
+            onClick={() => setCancelOpen(false)}
+          />
+
+          <div className="relative z-10 w-full max-w-lg overflow-hidden rounded-[2.5rem] bg-white p-6 sm:p-8 shadow-2xl border border-rose-200 animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between pb-4 border-b border-rose-100">
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-rose-100 text-rose-700">
+                  <XCircle className="h-6 w-6 stroke-[2]" />
+                </div>
+                <div>
+                  <h3 className="font-serif text-lg font-bold text-neutral-900">
+                    Refuser la commande
+                  </h3>
+                  <p className="text-xs text-neutral-500 font-sans">
+                    Commande {order.orderNumber} ({order.customerName})
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setCancelOpen(false)}
+                className="rounded-full p-2 text-neutral-400 hover:bg-neutral-100"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="mt-5 space-y-4 font-sans">
+              <p className="text-xs font-semibold text-neutral-700">
+                Sélectionnez le motif du refus (le stock des bijoux sera réapprovisionné) :
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {cancelReasons.map((reason) => {
+                  const isSelected = cancelReason === reason;
+                  return (
+                    <button
+                      key={reason}
+                      type="button"
+                      onClick={() => setCancelReason(reason)}
+                      className={`rounded-2xl border p-3 text-left text-xs font-semibold transition-all cursor-pointer ${
+                        isSelected
+                          ? "border-rose-600 bg-rose-600 text-white shadow-sm ring-2 ring-rose-600/30"
+                          : "border-neutral-200 bg-neutral-50 text-neutral-800 hover:border-rose-300 hover:bg-rose-50/50"
+                      }`}
+                    >
+                      {reason}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="rounded-2xl bg-amber-50 border border-amber-200 p-3.5 text-xs text-amber-900 leading-relaxed">
+                ℹ️ <strong>Impact automatique :</strong> Le refus annulera la commande et rajoutera les articles au stock disponible.
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-neutral-100">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCancelOpen(false);
+                    setCancelReason(null);
+                  }}
+                  className="rounded-full px-5 py-2.5 text-xs font-bold text-neutral-600 hover:bg-neutral-100"
+                >
+                  Annuler
+                </button>
+                <button
+                  type="button"
+                  onClick={confirmCancel}
+                  disabled={busy}
+                  className="inline-flex items-center gap-2 rounded-full bg-rose-600 px-6 py-3 text-xs font-bold uppercase tracking-wider text-white shadow-lg hover:bg-rose-700 disabled:opacity-50 transition-all cursor-pointer"
+                >
+                  {busy ? "Traitement..." : "Confirmer le refus"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

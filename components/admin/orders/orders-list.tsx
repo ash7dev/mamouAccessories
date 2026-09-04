@@ -1,8 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Eye, Sparkles, ChevronRight, ShoppingBag } from "lucide-react";
+import { toast } from "sonner";
+import { Eye, Sparkles, ChevronRight, ShoppingBag, Check, XCircle, AlertCircle } from "lucide-react";
+import { updateOrderStatus } from "@/app/admin/orders/[id]/actions";
 
 /* ============================================================
    Liste des commandes — /admin/orders
@@ -25,6 +28,15 @@ export interface OrderListItem {
 }
 
 const formatFCFA = (n: number) => new Intl.NumberFormat("fr-FR").format(n);
+
+const cancelReasons = [
+  "Injoignable / Ne répond pas",
+  "Paiement Wave non reçu",
+  "Rupture de stock",
+  "Demande de la cliente",
+  "Commande en double / Erreur",
+  "Autre raison",
+];
 
 function timeAgo(iso: string) {
   const diffMs = Date.now() - new Date(iso).getTime();
@@ -149,11 +161,54 @@ function EmptyState() {
 
 export function CommandesList({ orders }: { orders: OrderListItem[] }) {
   const router = useRouter();
+  const [selectedOrderForRefuse, setSelectedOrderForRefuse] = useState<OrderListItem | null>(null);
+  const [refuseReason, setRefuseReason] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
 
   if (orders.length === 0) return <EmptyState />;
 
   const handleRowClick = (orderId: string) => {
     router.push(`/admin/orders/${orderId}`);
+  };
+
+  const handleQuickConfirm = async (orderId: string) => {
+    setBusy(true);
+    const toastId = toast.loading("Confirmation de la commande...");
+    try {
+      const res = await updateOrderStatus(orderId, "confirmed");
+      if (!res.success) {
+        toast.error(res.error || "Erreur lors de la confirmation", { id: toastId });
+        return;
+      }
+      toast.success("Commande confirmée avec succès !", { id: toastId });
+      router.refresh();
+    } catch (err: any) {
+      toast.error(err.message || "Erreur inattendue", { id: toastId });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleConfirmRefuse = async () => {
+    if (!selectedOrderForRefuse) return;
+    setBusy(true);
+    const toastId = toast.loading("Refus de la commande et réapprovisionnement du stock...");
+    try {
+      const reason = refuseReason || "Refusée par l'administrateur";
+      const res = await updateOrderStatus(selectedOrderForRefuse.id, "cancelled", { cancelReason: reason });
+      if (!res.success) {
+        toast.error(res.error || "Erreur lors du refus de la commande", { id: toastId });
+        return;
+      }
+      toast.success(`Commande ${selectedOrderForRefuse.orderNumber} refusée. Le stock a été restauré !`, { id: toastId });
+      setSelectedOrderForRefuse(null);
+      setRefuseReason(null);
+      router.refresh();
+    } catch (err: any) {
+      toast.error(err.message || "Erreur inattendue", { id: toastId });
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -288,6 +343,36 @@ export function CommandesList({ orders }: { orders: OrderListItem[] }) {
 
             {/* Actions */}
             <div className="flex items-center justify-end gap-1.5">
+              {order.status === "pending" && (
+                <>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleQuickConfirm(order.id);
+                    }}
+                    disabled={busy}
+                    className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-700 hover:bg-emerald-600 hover:text-white transition-all shadow-2xs"
+                    title="Confirmer la commande"
+                  >
+                    <Check className="h-3.5 w-3.5 stroke-[2.5]" />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedOrderForRefuse(order);
+                    }}
+                    disabled={busy}
+                    className="flex h-8 w-8 items-center justify-center rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-700 hover:bg-rose-600 hover:text-white transition-all shadow-2xs"
+                    title="Refuser la commande"
+                  >
+                    <XCircle className="h-3.5 w-3.5 stroke-[2.5]" />
+                  </button>
+                </>
+              )}
+
               <Link
                 href={`/admin/orders/${order.id}`}
                 className="flex h-8 w-8 items-center justify-center rounded-xl border border-[var(--laiton,#B9793E)]/25 bg-[var(--obsidienne,#0E0B09)] text-[var(--porcelaine,#F1ECE3)] transition-all hover:bg-[var(--laiton,#B9793E)] hover:scale-105 shadow-2xs"
@@ -310,6 +395,92 @@ export function CommandesList({ orders }: { orders: OrderListItem[] }) {
           </div>
         ))}
       </div>
+
+      {/* Modal de Refus rapide depuis la liste */}
+      {selectedOrderForRefuse && (
+        <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
+          <div
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm transition-opacity"
+            onClick={() => setSelectedOrderForRefuse(null)}
+          />
+
+          <div className="relative z-10 w-full max-w-lg overflow-hidden rounded-[2.5rem] bg-white p-6 sm:p-8 shadow-2xl border border-rose-200 animate-in fade-in zoom-in-95 duration-200 font-sans">
+            <div className="flex items-center justify-between pb-4 border-b border-rose-100">
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-rose-100 text-rose-700">
+                  <XCircle className="h-6 w-6 stroke-[2]" />
+                </div>
+                <div>
+                  <h3 className="font-serif text-lg font-bold text-neutral-900">
+                    Refuser la commande
+                  </h3>
+                  <p className="text-xs text-neutral-500">
+                    {selectedOrderForRefuse.orderNumber} ({selectedOrderForRefuse.customerName})
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedOrderForRefuse(null)}
+                className="rounded-full p-2 text-neutral-400 hover:bg-neutral-100"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="mt-5 space-y-4 font-sans">
+              <p className="text-xs font-semibold text-neutral-700">
+                Sélectionnez le motif du refus (le stock sera réapprovisionné) :
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {cancelReasons.map((reason) => {
+                  const isSelected = refuseReason === reason;
+                  return (
+                    <button
+                      key={reason}
+                      type="button"
+                      onClick={() => setRefuseReason(reason)}
+                      className={`rounded-2xl border p-3 text-left text-xs font-semibold transition-all cursor-pointer ${
+                        isSelected
+                          ? "border-rose-600 bg-rose-600 text-white shadow-sm ring-2 ring-rose-600/30"
+                          : "border-neutral-200 bg-neutral-50 text-neutral-800 hover:border-rose-300 hover:bg-rose-50/50"
+                      }`}
+                    >
+                      {reason}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="rounded-2xl bg-amber-50 border border-amber-200 p-3.5 text-xs text-amber-900 leading-relaxed">
+                ℹ️ <strong>Restauration de stock :</strong> Le refus annulera la commande et rajoutera les bijoux au stock disponible en boutique.
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-neutral-100">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedOrderForRefuse(null);
+                    setRefuseReason(null);
+                  }}
+                  className="rounded-full px-5 py-2.5 text-xs font-bold text-neutral-600 hover:bg-neutral-100"
+                >
+                  Annuler
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmRefuse}
+                  disabled={busy}
+                  className="inline-flex items-center gap-2 rounded-full bg-rose-600 px-6 py-3 text-xs font-bold uppercase tracking-wider text-white shadow-lg hover:bg-rose-700 disabled:opacity-50 transition-all cursor-pointer"
+                >
+                  {busy ? "Traitement..." : "Confirmer le refus"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
