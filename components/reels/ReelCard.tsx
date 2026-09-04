@@ -2,8 +2,8 @@
 
 import { useRef, useState, useEffect } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
-import { Volume2, VolumeX, ShoppingBag, Check, ArrowRight, Sparkles } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Volume2, VolumeX, ShoppingBag, Check, ArrowRight, Sparkles, ChevronDown, ChevronUp } from "lucide-react";
 import { useCart } from "@/lib/cart-context";
 import { ProductImage } from "@/components/ui/product-image";
 import type { Reel } from "@/lib/types/reel";
@@ -28,6 +28,7 @@ export function ReelCard({
   const { addItem } = useCart();
   const [justAdded, setJustAdded] = useState(false);
   const [videoError, setVideoError] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
 
   // Play / Pause video based on active viewport state
   useEffect(() => {
@@ -39,6 +40,14 @@ export function ReelCard({
       video.play().catch(() => {
         // Fallback for browsers that restrict video playback
       });
+
+      // Auto-collapse product card after 2.5s to let the user enjoy full video
+      setIsExpanded(true);
+      const timer = setTimeout(() => {
+        setIsExpanded(false);
+      }, 2500);
+
+      return () => clearTimeout(timer);
     } else {
       video.pause();
     }
@@ -58,7 +67,7 @@ export function ReelCard({
 
     addItem(reel.productId, 1);
     setJustAdded(true);
-    setTimeout(() => setJustAdded(false), 2000);
+    setTimeout(() => setJustAdded(false), 1200);
   };
 
   return (
@@ -73,7 +82,8 @@ export function ReelCard({
           muted={isMuted}
           playsInline
           onError={() => setVideoError(true)}
-          className="h-full w-full object-cover"
+          className="h-full w-full object-cover cursor-pointer"
+          onClick={() => setIsExpanded(!isExpanded)}
         />
       ) : (
         /* Fallback si la vidéo ne charge pas */
@@ -90,7 +100,7 @@ export function ReelCard({
       )}
 
       {/* Overlay dégradé sombre en bas pour lisibilité optimale */}
-      <div className="absolute inset-x-0 bottom-0 h-96 bg-gradient-to-t from-[var(--obsidienne,#0E0B09)] via-[var(--obsidienne,#0E0B09)]/60 to-transparent pointer-events-none" />
+      <div className="absolute inset-x-0 bottom-0 h-80 bg-gradient-to-t from-[var(--obsidienne,#0E0B09)] via-[var(--obsidienne,#0E0B09)]/40 to-transparent pointer-events-none" />
 
       {/* ---------- Bouton Son (🔊 / 🔇) ---------- */}
       <button
@@ -101,90 +111,147 @@ export function ReelCard({
         {isMuted ? <VolumeX className="h-5 w-5 text-red-400" /> : <Volume2 className="h-5 w-5 text-[var(--laiton-clair,#D9AE78)]" />}
       </button>
 
-      {/* ---------- Overlay Card Produit Incrusté (Style Haute Joaillerie Mobile-First) ---------- */}
-      <div className="absolute inset-x-3 sm:inset-x-6 bottom-6 sm:bottom-8 z-20 max-w-md mx-auto">
-        <div className="rounded-3xl border border-[var(--laiton,#B9793E)]/35 bg-[var(--obsidienne,#0E0B09)]/90 backdrop-blur-2xl p-4 sm:p-5 shadow-[0_20px_60px_rgba(0,0,0,0.8)] text-white space-y-3.5">
-          
-          {/* Header Info Produit */}
-          <div className="flex items-center gap-3.5">
-            {/* Vignette Produit avec ring doré */}
-            <Link href={`/produit/${reel.productSlug}`} className="relative h-16 w-16 shrink-0 rounded-2xl overflow-hidden border-2 border-[var(--laiton,#B9793E)]/50 bg-[#17120D] shadow-md group">
-              <ProductImage src={reel.productImageUrl} alt={reel.productName} fill className="object-cover transition-transform duration-500 group-hover:scale-110" />
-            </Link>
-
-            {/* Détails Bijou & Titre */}
-            <div className="flex-1 min-w-0 text-left">
-              <div className="flex items-center gap-2 mb-0.5">
-                <span className="inline-block text-[9px] font-extrabold uppercase tracking-[0.2em] text-[var(--laiton-clair,#D9AE78)]">
-                  ✦ BIJOU EN VIDÉO
-                </span>
-                <span className="h-1 w-1 rounded-full bg-[var(--laiton,#B9793E)]" />
-                <span className="text-[9px] font-sans font-semibold text-emerald-400 uppercase tracking-wider">
-                  En Stock
-                </span>
-              </div>
-
-              <h3 className="font-serif text-base font-bold text-[#F1ECE3] truncate leading-tight">
-                {reel.productName}
-              </h3>
-
-              <div className="flex items-baseline gap-2.5 mt-1">
-                <span className="font-mono text-base font-black text-white tabular-nums">
-                  {formatFCFA(reel.productPrice)} FCFA
-                </span>
-                {reel.productComparePrice && (
-                  <span className="text-xs text-white/45 line-through tabular-nums">
-                    {formatFCFA(reel.productComparePrice)} FCFA
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Bouton Acheter Direct - Ultra visible et large pour mobile */}
-          {reel.productStock > 0 ? (
-            <motion.button
-              whileTap={{ scale: 0.96 }}
-              onClick={handleAddToCart}
-              className={`flex w-full h-12 items-center justify-center gap-2.5 rounded-full text-xs font-extrabold uppercase tracking-[0.15em] transition-all duration-300 shadow-[0_8px_30px_rgba(185,121,62,0.4)] cursor-pointer ${
-                justAdded
-                  ? "bg-emerald-600 text-white shadow-emerald-900/50"
-                  : "bg-gradient-to-r from-[var(--laiton,#B9793E)] via-[#E5C195] to-[var(--laiton,#B9793E)] text-[var(--obsidienne,#0E0B09)] hover:brightness-110"
-              }`}
+      {/* ---------- Overlay Card Produit Incrusté (Réduction automatique du temps d'affichage) ---------- */}
+      <div className="absolute inset-x-3 sm:inset-x-6 bottom-5 sm:bottom-7 z-20 max-w-md mx-auto">
+        <AnimatePresence mode="wait">
+          {isExpanded ? (
+            /* Carte Complète Développée (Pendant 2.5s initiales ou au clic) */
+            <motion.div
+              key="expanded-card"
+              initial={{ opacity: 0, y: 15, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 15, scale: 0.98 }}
+              transition={{ duration: 0.25, ease: "easeOut" }}
+              className="relative rounded-3xl border border-[var(--laiton,#B9793E)]/35 bg-[var(--obsidienne,#0E0B09)]/90 backdrop-blur-2xl p-4 sm:p-5 shadow-[0_20px_60px_rgba(0,0,0,0.8)] text-white space-y-3"
             >
-              {justAdded ? (
-                <>
-                  <Check className="h-5 w-5 stroke-[2.5]" />
-                  <span>Ajouté au Panier !</span>
-                </>
+              {/* Bouton de réduction manuelle */}
+              <button
+                onClick={() => setIsExpanded(false)}
+                className="absolute top-3 right-3 text-white/50 hover:text-white p-1 rounded-full hover:bg-white/10 transition-colors"
+                title="Masquer les détails pour voir la vidéo"
+              >
+                <ChevronDown className="h-5 w-5" />
+              </button>
+
+              {/* Header Info Produit */}
+              <div className="flex items-center gap-3.5 pr-6">
+                <Link href={`/produit/${reel.productSlug}`} className="relative h-14 w-14 shrink-0 rounded-2xl overflow-hidden border-2 border-[var(--laiton,#B9793E)]/50 bg-[#17120D] shadow-md group">
+                  <ProductImage src={reel.productImageUrl} alt={reel.productName} fill className="object-cover transition-transform duration-500 group-hover:scale-110" />
+                </Link>
+
+                <div className="flex-1 min-w-0 text-left">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className="inline-block text-[9px] font-extrabold uppercase tracking-[0.2em] text-[var(--laiton-clair,#D9AE78)]">
+                      ✦ BIJOU EN VIDÉO
+                    </span>
+                  </div>
+
+                  <h3 className="font-serif text-sm font-bold text-[#F1ECE3] truncate leading-tight">
+                    {reel.productName}
+                  </h3>
+
+                  <div className="flex items-baseline gap-2 mt-0.5">
+                    <span className="font-mono text-sm font-black text-white tabular-nums">
+                      {formatFCFA(reel.productPrice)} FCFA
+                    </span>
+                    {reel.productComparePrice && (
+                      <span className="text-[11px] text-white/45 line-through tabular-nums">
+                        {formatFCFA(reel.productComparePrice)} FCFA
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Bouton Panier */}
+              {reel.productStock > 0 ? (
+                <motion.button
+                  whileTap={{ scale: 0.96 }}
+                  onClick={handleAddToCart}
+                  className={`flex w-full h-11 items-center justify-center gap-2 rounded-full text-xs font-extrabold uppercase tracking-[0.15em] transition-all duration-300 shadow-[0_8px_30px_rgba(185,121,62,0.4)] cursor-pointer ${
+                    justAdded
+                      ? "bg-emerald-600 text-white shadow-emerald-900/50"
+                      : "bg-gradient-to-r from-[var(--laiton,#B9793E)] via-[#E5C195] to-[var(--laiton,#B9793E)] text-[var(--obsidienne,#0E0B09)] hover:brightness-110"
+                  }`}
+                >
+                  {justAdded ? (
+                    <>
+                      <Check className="h-4 w-4 stroke-[2.5]" />
+                      <span>Ajouté !</span>
+                    </>
+                  ) : (
+                    <>
+                      <ShoppingBag className="h-4 w-4 stroke-[2.2]" />
+                      <span>Ajouter au Panier • {formatFCFA(reel.productPrice)} FCFA</span>
+                    </>
+                  )}
+                </motion.button>
               ) : (
-                <>
-                  <ShoppingBag className="h-5 w-5 stroke-[2.2]" />
-                  <span>Ajouter au Panier • {formatFCFA(reel.productPrice)} FCFA</span>
-                </>
+                <div className="w-full py-2.5 text-center rounded-full bg-white/10 text-white/50 text-[11px] font-bold uppercase tracking-wider border border-white/10">
+                  Rupture de Stock
+                </div>
               )}
-            </motion.button>
+
+              {/* Footer */}
+              <div className="pt-1.5 border-t border-white/10 flex items-center justify-between text-xs">
+                <span className="text-white/60 font-serif italic truncate max-w-[65%]">
+                  "{reel.title}"
+                </span>
+                <Link
+                  href={`/produit/${reel.productSlug}`}
+                  className="inline-flex items-center gap-1 font-bold text-[var(--laiton-clair,#D9AE78)] hover:text-white transition-colors uppercase tracking-wider shrink-0 text-[10px]"
+                >
+                  <span>Voir la pièce</span>
+                  <ArrowRight className="h-3 w-3" />
+                </Link>
+              </div>
+            </motion.div>
           ) : (
-            <div className="w-full py-3 text-center rounded-full bg-white/10 text-white/50 text-xs font-bold uppercase tracking-wider border border-white/10">
-              Rupture de Stock
-            </div>
-          )}
-
-          {/* Footer Card avec Titre du Reel & Lien Fiche */}
-          <div className="pt-2 border-t border-white/10 flex items-center justify-between text-xs">
-            <span className="text-white/60 font-serif italic truncate max-w-[65%]">
-              "{reel.title}"
-            </span>
-            <Link
-              href={`/produit/${reel.productSlug}`}
-              className="inline-flex items-center gap-1 font-bold text-[var(--laiton-clair,#D9AE78)] hover:text-white transition-colors uppercase tracking-wider shrink-0 text-[11px]"
+            /* Pillule Compacte Discrète (Permet de profiter à 100% de la vidéo) */
+            <motion.div
+              key="compact-pill"
+              initial={{ opacity: 0, y: 10, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 10, scale: 0.95 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              onClick={() => setIsExpanded(true)}
+              className="flex items-center justify-between rounded-full border border-[var(--laiton,#B9793E)]/40 bg-[var(--obsidienne,#0E0B09)]/85 backdrop-blur-xl p-1.5 pr-4 shadow-[0_12px_40px_rgba(0,0,0,0.7)] text-white cursor-pointer hover:bg-[var(--obsidienne)] transition-colors group"
             >
-              <span>Voir la pièce</span>
-              <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
-          </div>
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="relative h-10 w-10 shrink-0 rounded-full overflow-hidden border border-[var(--laiton)]/60 bg-[#17120D]">
+                  <ProductImage src={reel.productImageUrl} alt={reel.productName} fill className="object-cover" />
+                </div>
+                <div className="min-w-0 text-left">
+                  <h4 className="font-serif text-xs font-bold text-white truncate max-w-[140px] sm:max-w-[180px]">
+                    {reel.productName}
+                  </h4>
+                  <span className="font-mono text-[11px] font-extrabold text-[var(--laiton-clair,#D9AE78)]">
+                    {formatFCFA(reel.productPrice)} FCFA
+                  </span>
+                </div>
+              </div>
 
-        </div>
+              <div className="flex items-center gap-2">
+                {reel.productStock > 0 && (
+                  <button
+                    onClick={handleAddToCart}
+                    className={`flex h-8 px-3 items-center gap-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all ${
+                      justAdded
+                        ? "bg-emerald-600 text-white"
+                        : "bg-[var(--laiton,#B9793E)] text-white hover:bg-[#A36630]"
+                    }`}
+                  >
+                    {justAdded ? <Check className="h-3 w-3" /> : <ShoppingBag className="h-3 w-3" />}
+                    <span>{justAdded ? "Ajouté" : "Acheter"}</span>
+                  </button>
+                )}
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-white/10 text-white group-hover:bg-white/20 transition-colors">
+                  <ChevronUp className="h-4 w-4" />
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
