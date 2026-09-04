@@ -1,6 +1,16 @@
 import { NextResponse } from 'next/server';
 import { createServiceRoleClient } from '@/lib/supabase/service-role';
 
+export const DEFAULT_DELIVERY_FEES = {
+  delivery_fee_zone1: 2000,
+  delivery_fee_zone2: 2500,
+  delivery_fee_zone3: 3500,
+  delivery_fee_zone4: 3500,
+  delivery_fee_zone5: 3500,
+  delivery_fee_dakar: 2000,
+  delivery_fee_regions: 3500,
+};
+
 // GET /api/settings/delivery-fees - Récupérer les frais de livraison (public)
 export async function GET() {
   try {
@@ -8,42 +18,25 @@ export async function GET() {
 
     const { data: settings, error } = await supabase
       .from('settings')
-      .select('key, value')
-      .in('key', ['delivery_fee_dakar', 'delivery_fee_regions']);
+      .select('key, value');
 
-    if (error) {
-      console.error('Error fetching delivery fees:', error);
-      return NextResponse.json(
-        {
-          delivery_fee_dakar: 1500,
-          delivery_fee_regions: 3000
-        },
-        { status: 200 }
-      );
+    const fees = { ...DEFAULT_DELIVERY_FEES };
+
+    if (!error && settings) {
+      settings.forEach((setting) => {
+        if (setting.key in fees) {
+          const val = parseInt(setting.value, 10);
+          if (!isNaN(val) && val >= 0) {
+            (fees as any)[setting.key] = val;
+          }
+        }
+      });
     }
-
-    const fees = {
-      delivery_fee_dakar: 1500,
-      delivery_fee_regions: 3000,
-    };
-
-    settings?.forEach((setting) => {
-      if (setting.key === 'delivery_fee_dakar') {
-        fees.delivery_fee_dakar = parseInt(setting.value, 10) || 1500;
-      } else if (setting.key === 'delivery_fee_regions') {
-        fees.delivery_fee_regions = parseInt(setting.value, 10) || 3000;
-      }
-    });
 
     return NextResponse.json(fees, { status: 200 });
   } catch (error) {
-    console.error('Unexpected error:', error);
-    return NextResponse.json(
-      {
-        delivery_fee_dakar: 1500,
-        delivery_fee_regions: 3000
-      },
-      { status: 200 }
-    );
+    console.error('Unexpected error fetching delivery fees:', error);
+    return NextResponse.json(DEFAULT_DELIVERY_FEES, { status: 200 });
   }
 }
+

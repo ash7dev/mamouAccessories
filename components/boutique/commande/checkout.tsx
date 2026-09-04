@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/lib/cart-context";
@@ -124,9 +124,67 @@ export function Checkout({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
 
+  const [zoneFees, setZoneFees] = useState({
+    delivery_fee_zone1: 2000,
+    delivery_fee_zone2: 2500,
+    delivery_fee_zone3: 3500,
+    delivery_fee_zone4: 3500,
+    delivery_fee_zone5: 3500,
+  });
+
+  useEffect(() => {
+    fetch('/api/settings/delivery-fees')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data) {
+          setZoneFees({
+            delivery_fee_zone1: data.delivery_fee_zone1 || 2000,
+            delivery_fee_zone2: data.delivery_fee_zone2 || 2500,
+            delivery_fee_zone3: data.delivery_fee_zone3 || 3500,
+            delivery_fee_zone4: data.delivery_fee_zone4 || 3500,
+            delivery_fee_zone5: data.delivery_fee_zone5 || 3500,
+          });
+        }
+      })
+      .catch((err) => console.error('Failed to load live zone fees:', err));
+  }, []);
+
+  const deliveryZones = useMemo<DeliveryZoneOption[]>(() => [
+    {
+      id: "zone-1",
+      name: `Zone 1 - Dakar (${formatFCFA(zoneFees.delivery_fee_zone1)} Fcfa)`,
+      subtext: "Plateau, Fann, Point E, Mermoz, Sacré-Cœur, Liberté, Ouakam, Ngor, Almadies, Yoff, Les Mamelles",
+      fee: zoneFees.delivery_fee_zone1,
+    },
+    {
+      id: "zone-2",
+      name: `Zone 2 - Pikine Guediawaye (${formatFCFA(zoneFees.delivery_fee_zone2)} Fcfa)`,
+      subtext: "Pikine, Guédiawaye, Parcelles Assainies, Grand Yoff, Cambérène",
+      fee: zoneFees.delivery_fee_zone2,
+    },
+    {
+      id: "zone-3",
+      name: `Zone 3 - Thiaroye Yeumbeul - Mbao - Keur Massar - Keur Mbaye Fall (${formatFCFA(zoneFees.delivery_fee_zone3)} Fcfa)`,
+      subtext: "Thiaroye, Yeumbeul, Mbao, Keur Massar, Keur Mbaye Fall, Fas Mbao",
+      fee: zoneFees.delivery_fee_zone3,
+    },
+    {
+      id: "zone-4",
+      name: `Zone 4 : Rufisque - Malika - Tivaouane Peulh (${formatFCFA(zoneFees.delivery_fee_zone4)} Fcfa)`,
+      subtext: "Rufisque, Malika, Tivaouane Peulh, Bargny, Diamniadio, Sangalkam",
+      fee: zoneFees.delivery_fee_zone4,
+    },
+    {
+      id: "zone-5",
+      name: `Zone 5 : Regions (${formatFCFA(zoneFees.delivery_fee_zone5)} Fcfa)`,
+      subtext: "Thiès, Mbour, Saly, Saint-Louis, Kaolack, Touba, Ziguinchor, Diourbel, etc.",
+      fee: zoneFees.delivery_fee_zone5,
+    },
+  ], [zoneFees]);
+
   const selectedZone = useMemo(() => {
-    return DELIVERY_ZONES.find((z) => z.id === selectedZoneId) || DELIVERY_ZONES[0];
-  }, [selectedZoneId]);
+    return deliveryZones.find((z) => z.id === selectedZoneId) || deliveryZones[0];
+  }, [selectedZoneId, deliveryZones]);
 
   // Fusion panier × produits résolus
   const lines = useMemo(() => {
@@ -354,7 +412,7 @@ export function Checkout({
 
                   {/* Liste Visuelle des Items sur Fond Blanc (Cards Premium) */}
                   <div className="space-y-2.5">
-                    {DELIVERY_ZONES.map((z) => {
+                    {deliveryZones.map((z) => {
                       const isSelected = z.id === selectedZoneId;
                       return (
                         <button

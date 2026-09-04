@@ -11,7 +11,11 @@ import { isSoundEnabled, setSoundEnabled, playOrderPingSound, getSoundType, setS
 
 interface SettingsData {
   wave_link: string;
-  delivery_fee: string;
+  delivery_fee_zone1: string;
+  delivery_fee_zone2: string;
+  delivery_fee_zone3: string;
+  delivery_fee_zone4: string;
+  delivery_fee_zone5: string;
   delivery_days: string;
   whatsapp_number: string;
   store_name: string;
@@ -34,7 +38,11 @@ export default function SettingsPage() {
   }, []);
   const [formData, setFormData] = useState<SettingsData>({
     wave_link: "https://pay.wave.com/m/M_sn_wi1Bfmu7HgWY/c/sn/",
-    delivery_fee: "1500",
+    delivery_fee_zone1: "2000",
+    delivery_fee_zone2: "2500",
+    delivery_fee_zone3: "3500",
+    delivery_fee_zone4: "3500",
+    delivery_fee_zone5: "3500",
     delivery_days: "1",
     whatsapp_number: "+221770000000",
     store_name: "Mamou Jewelry",
@@ -54,7 +62,11 @@ export default function SettingsPage() {
       if (data.settings) {
         setFormData({
           wave_link: data.settings.wave_link || "https://pay.wave.com/m/M_sn_wi1Bfmu7HgWY/c/sn/",
-          delivery_fee: data.settings.delivery_fee || "1500",
+          delivery_fee_zone1: data.settings.delivery_fee_zone1 || "2000",
+          delivery_fee_zone2: data.settings.delivery_fee_zone2 || "2500",
+          delivery_fee_zone3: data.settings.delivery_fee_zone3 || "3500",
+          delivery_fee_zone4: data.settings.delivery_fee_zone4 || "3500",
+          delivery_fee_zone5: data.settings.delivery_fee_zone5 || "3500",
           delivery_days: data.settings.delivery_days || "1",
           whatsapp_number: data.settings.whatsapp_number || "+221770000000",
           store_name: data.settings.store_name || "Mamou Jewelry",
@@ -134,40 +146,102 @@ export default function SettingsPage() {
         {/* Delivery Section */}
         <SettingsSection
           icon={<Truck className="h-6 w-6 text-[var(--laiton,#B9793E)]" />}
-          title="Livraison"
-          subtitle="Paramètres de livraison et zones desservies"
+          title="Frais de Livraison par Zone"
+          subtitle="Modifiez les tarifs appliqués pour chaque zone de livraison au Sénégal"
         >
           <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-[var(--obsidienne,#0E0B09)] mb-2">
-                Frais de livraison (FCFA)
-              </label>
-              <input
-                type="number"
-                value={formData.delivery_fee}
-                onChange={(e) => handleChange("delivery_fee", e.target.value)}
-                placeholder="1000"
-                className="w-full rounded-2xl border border-[var(--laiton,#B9793E)]/25 bg-white px-4 py-3 text-sm text-[var(--obsidienne,#0E0B09)] placeholder:text-[var(--obsidienne,#0E0B09)]/40 focus:border-[var(--laiton,#B9793E)] focus:outline-none focus:ring-2 focus:ring-[var(--laiton,#B9793E)]/20 transition-colors"
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold text-[var(--obsidienne,#0E0B09)] mb-1">
+                  Zone 1 - Dakar (FCFA)
+                </label>
+                <p className="text-[11px] text-gray-500 mb-2">Plateau, Fann, Point E, Mermoz, Sacré-Cœur, Liberté, Ouakam, Ngor, Almadies, Yoff, Mamelles</p>
+                <input
+                  type="number"
+                  value={formData.delivery_fee_zone1}
+                  onChange={(e) => handleChange("delivery_fee_zone1", e.target.value)}
+                  placeholder="2000"
+                  className="w-full rounded-2xl border border-[var(--laiton,#B9793E)]/25 bg-white px-4 py-3 text-sm text-[var(--obsidienne,#0E0B09)] focus:border-[var(--laiton,#B9793E)] focus:outline-none focus:ring-2 focus:ring-[var(--laiton,#B9793E)]/20"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-[var(--obsidienne,#0E0B09)] mb-1">
+                  Zone 2 - Pikine / Guédiawaye (FCFA)
+                </label>
+                <p className="text-[11px] text-gray-500 mb-2">Pikine, Guédiawaye, Parcelles Assainies, Grand Yoff, Cambérène</p>
+                <input
+                  type="number"
+                  value={formData.delivery_fee_zone2}
+                  onChange={(e) => handleChange("delivery_fee_zone2", e.target.value)}
+                  placeholder="2500"
+                  className="w-full rounded-2xl border border-[var(--laiton,#B9793E)]/25 bg-white px-4 py-3 text-sm text-[var(--obsidienne,#0E0B09)] focus:border-[var(--laiton,#B9793E)] focus:outline-none focus:ring-2 focus:ring-[var(--laiton,#B9793E)]/20"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-[var(--obsidienne,#0E0B09)] mb-1">
+                  Zone 3 - Thiaroye / Keur Massar (FCFA)
+                </label>
+                <p className="text-[11px] text-gray-500 mb-2">Thiaroye, Yeumbeul, Mbao, Keur Massar, Keur Mbaye Fall, Fas Mbao</p>
+                <input
+                  type="number"
+                  value={formData.delivery_fee_zone3}
+                  onChange={(e) => handleChange("delivery_fee_zone3", e.target.value)}
+                  placeholder="3500"
+                  className="w-full rounded-2xl border border-[var(--laiton,#B9793E)]/25 bg-white px-4 py-3 text-sm text-[var(--obsidienne,#0E0B09)] focus:border-[var(--laiton,#B9793E)] focus:outline-none focus:ring-2 focus:ring-[var(--laiton,#B9793E)]/20"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-[var(--obsidienne,#0E0B09)] mb-1">
+                  Zone 4 - Rufisque / Malika (FCFA)
+                </label>
+                <p className="text-[11px] text-gray-500 mb-2">Rufisque, Malika, Tivaouane Peulh, Bargny, Diamniadio, Sangalkam</p>
+                <input
+                  type="number"
+                  value={formData.delivery_fee_zone4}
+                  onChange={(e) => handleChange("delivery_fee_zone4", e.target.value)}
+                  placeholder="3500"
+                  className="w-full rounded-2xl border border-[var(--laiton,#B9793E)]/25 bg-white px-4 py-3 text-sm text-[var(--obsidienne,#0E0B09)] focus:border-[var(--laiton,#B9793E)] focus:outline-none focus:ring-2 focus:ring-[var(--laiton,#B9793E)]/20"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-[var(--obsidienne,#0E0B09)] mb-1">
+                  Zone 5 - Régions du Sénégal (FCFA)
+                </label>
+                <p className="text-[11px] text-gray-500 mb-2">Thiès, Mbour, Saly, Saint-Louis, Kaolack, Touba, Ziguinchor, Diourbel...</p>
+                <input
+                  type="number"
+                  value={formData.delivery_fee_zone5}
+                  onChange={(e) => handleChange("delivery_fee_zone5", e.target.value)}
+                  placeholder="3500"
+                  className="w-full rounded-2xl border border-[var(--laiton,#B9793E)]/25 bg-white px-4 py-3 text-sm text-[var(--obsidienne,#0E0B09)] focus:border-[var(--laiton,#B9793E)] focus:outline-none focus:ring-2 focus:ring-[var(--laiton,#B9793E)]/20"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-[var(--obsidienne,#0E0B09)] mb-1">
+                  Délai moyen de livraison (Jours)
+                </label>
+                <p className="text-[11px] text-gray-500 mb-2">Délai estimé indiqué aux clients lors de la commande</p>
+                <input
+                  type="number"
+                  value={formData.delivery_days}
+                  onChange={(e) => handleChange("delivery_days", e.target.value)}
+                  placeholder="1"
+                  className="w-full rounded-2xl border border-[var(--laiton,#B9793E)]/25 bg-white px-4 py-3 text-sm text-[var(--obsidienne,#0E0B09)] focus:border-[var(--laiton,#B9793E)] focus:outline-none focus:ring-2 focus:ring-[var(--laiton,#B9793E)]/20"
+                />
+              </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-[var(--obsidienne,#0E0B09)] mb-2">
-                Délai de livraison (jours)
-              </label>
-              <input
-                type="number"
-                value={formData.delivery_days}
-                onChange={(e) => handleChange("delivery_days", e.target.value)}
-                placeholder="3"
-                className="w-full rounded-2xl border border-[var(--laiton,#B9793E)]/25 bg-white px-4 py-3 text-sm text-[var(--obsidienne,#0E0B09)] placeholder:text-[var(--obsidienne,#0E0B09)]/40 focus:border-[var(--laiton,#B9793E)] focus:outline-none focus:ring-2 focus:ring-[var(--laiton,#B9793E)]/20 transition-colors"
-              />
-            </div>
+
             <button
-              onClick={() => saveSettings(["delivery_fee", "delivery_days"])}
+              onClick={() => saveSettings(["delivery_fee_zone1", "delivery_fee_zone2", "delivery_fee_zone3", "delivery_fee_zone4", "delivery_fee_zone5", "delivery_days"])}
               disabled={saveState === "saving"}
               className="rounded-full bg-[var(--obsidienne,#0E0B09)] px-6 py-2.5 text-sm font-medium text-[var(--porcelaine,#F1ECE3)] transition-all hover:bg-[var(--laiton,#B9793E)] active:scale-95 disabled:opacity-50"
             >
-              {saveState === "saving" ? "Enregistrement..." : "Enregistrer"}
+              {saveState === "saving" ? "Enregistrement..." : "Enregistrer les tarifs de livraison"}
             </button>
           </div>
         </SettingsSection>

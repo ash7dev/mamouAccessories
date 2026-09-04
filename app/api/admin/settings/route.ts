@@ -17,7 +17,11 @@ export async function GET() {
     // Convertir le format clé-valeur en objet
     const settingsObj: Record<string, string> = {
       wave_link: 'https://pay.wave.com/m/M_sn_wi1Bfmu7HgWY/c/sn/',
-      delivery_fee: '1500',
+      delivery_fee_zone1: '2000',
+      delivery_fee_zone2: '2500',
+      delivery_fee_zone3: '3500',
+      delivery_fee_zone4: '3500',
+      delivery_fee_zone5: '3500',
       whatsapp_number: '+221770000000',
       store_name: 'Mamou Jewelry',
     };
