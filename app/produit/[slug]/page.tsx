@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 import { Navbar } from '@/components/boutique/navbar';
 import { ProductDetailPublic } from '@/components/boutique/productsdetail';
 import { Footer } from '@/components/footer';
-import { getProductBySlug } from '@/lib/data/product-data';
+import { getProductBySlug, getRelatedProducts } from '@/lib/data/product-data';
 
 interface PageProps {
   params: Promise<{
@@ -21,10 +21,12 @@ export default async function ProductPage({ params }: PageProps) {
     notFound();
   }
 
+  const relatedProducts = await getRelatedProducts(product.id, 4);
+
   return (
     <>
       <Navbar />
-      <ProductDetailPublic product={product} />
+      <ProductDetailPublic product={product} relatedProducts={relatedProducts} />
       <Footer />
     </>
   );

@@ -57,3 +57,61 @@ export async function getProductBySlug(slug: string): Promise<PublicProduct | nu
     images: productImages,
   };
 }
+
+/**
+ * Récupère des produits similaires/recommandés pour la fiche produit
+ */
+export async function getRelatedProducts(currentProductId: string, limit = 4) {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from('products')
+    .select(`
+      id,
+      name,
+      slug,
+      price,
+      compare_at_price,
+      stock,
+      image_orientation,
+      categories!inner(name)
+    `)
+    .eq('is_active', true)
+    .neq('id', currentProductId)
+    .limit(limit * 2);
+
+  if (error || !data) {
+    console.error('Error fetching related products:', error);
+    return [];
+  }
+
+  // Sélectionner aléatoirement
+  const shuffled = (data || []).sort(() => Math.random() - 0.5).slice(0, limit);
+
+  const productsWithImages = await Promise.all(
+    shuffled.map(async (product) => {
+      const { data: images } = await supabase
+        .from('product_images')
+        .select('cloudinary_public_id')
+        .eq('product_id', product.id)
+        .order('position', { ascending: true })
+        .limit(1);
+
+      return {
+        id: product.id,
+        name: product.name,
+        slug: product.slug,
+        categoryName: Array.isArray(product.categories) && product.categories.length > 0 ? product.categories[0].name : 'Bijoux',
+        price: product.price,
+        compareAtPrice: product.compare_at_price,
+        stock: product.stock,
+        imageUrl: images?.[0]?.cloudinary_public_id
+          ? resolveProductImageUrl(images[0].cloudinary_public_id)
+          : null,
+        imageOrientation: product.image_orientation || 'portrait',
+      };
+    })
+  );
+
+  return productsWithImages;
+}
