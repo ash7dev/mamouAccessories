@@ -148,10 +148,10 @@ export function ReelFormModal({
           initial={{ opacity: 0, scale: 0.95, y: 10 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 10 }}
-          className="relative z-10 w-full max-w-lg overflow-hidden rounded-[2.5rem] bg-white p-6 sm:p-8 shadow-[0_20px_60px_rgba(0,0,0,0.25)] border border-neutral-200"
+          className="relative z-10 w-full max-w-lg max-h-[90vh] sm:max-h-[85vh] flex flex-col overflow-hidden rounded-[2rem] sm:rounded-[2.5rem] bg-white shadow-[0_20px_60px_rgba(0,0,0,0.25)] border border-neutral-200"
         >
-          {/* Header */}
-          <div className="flex items-center justify-between pb-4 border-b border-neutral-100">
+          {/* Header (Sticky) */}
+          <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-100 shrink-0 bg-white">
             <div>
               <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--laiton,#B9793E)] block mb-0.5">
                 ✦ CONTENU VIDÉO
@@ -169,174 +169,177 @@ export function ReelFormModal({
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="mt-6 space-y-5">
-            {errorMessage && (
-              <div className="flex items-center gap-2 rounded-2xl bg-red-50 p-3 text-xs font-semibold text-red-700 border border-red-200">
-                <AlertCircle className="h-4 w-4 shrink-0" />
-                <span>{errorMessage}</span>
-              </div>
-            )}
+          <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0 overflow-hidden">
+            {/* Scrollable Form Body */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-5">
+              {errorMessage && (
+                <div className="flex items-center gap-2 rounded-2xl bg-red-50 p-3 text-xs font-semibold text-red-700 border border-red-200">
+                  <AlertCircle className="h-4 w-4 shrink-0" />
+                  <span>{errorMessage}</span>
+                </div>
+              )}
 
-            {/* Titre du Reel */}
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-neutral-700 mb-1.5">
-                Titre de la vidéo
-              </label>
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Ex: Éclat du Collier Or au Soleil"
-                className="w-full rounded-2xl border border-neutral-200 bg-white text-neutral-900 px-4 py-3 text-xs font-medium focus:border-[var(--laiton,#B9793E)] focus:ring-2 focus:ring-[var(--laiton,#B9793E)]/20 focus:outline-none transition-all shadow-xs"
-              />
-            </div>
-
-            {/* Upload Fichier Vidéo (Max 45s) */}
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-xs font-bold uppercase tracking-wider text-neutral-700">
-                  Fichier Vidéo (Max 45s - MP4)
+              {/* Titre du Reel */}
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-neutral-700 mb-1.5">
+                  Titre de la vidéo
                 </label>
-                {durationSeconds > 0 && videoUrl && (
-                  <span className="text-[11px] font-mono font-bold text-[var(--laiton,#B9793E)] bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
-                    Durée: {durationSeconds}s / 45s max
-                  </span>
+                <input
+                  type="text"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="Ex: Éclat du Collier Or au Soleil"
+                  className="w-full rounded-2xl border border-neutral-200 bg-white text-neutral-900 px-4 py-3 text-xs font-medium focus:border-[var(--laiton,#B9793E)] focus:ring-2 focus:ring-[var(--laiton,#B9793E)]/20 focus:outline-none transition-all shadow-xs"
+                />
+              </div>
+
+              {/* Upload Fichier Vidéo (Max 45s) */}
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-neutral-700">
+                    Fichier Vidéo (Max 45s - MP4)
+                  </label>
+                  {durationSeconds > 0 && videoUrl && (
+                    <span className="text-[11px] font-mono font-bold text-[var(--laiton,#B9793E)] bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                      Durée: {durationSeconds}s / 45s max
+                    </span>
+                  )}
+                </div>
+
+                {/* Video Preview Player Box */}
+                {videoUrl ? (
+                  <div className="relative overflow-hidden rounded-2xl border border-neutral-200 bg-neutral-900 p-2 shadow-inner">
+                    <div className="relative aspect-[9/16] max-h-60 mx-auto rounded-xl overflow-hidden bg-black flex items-center justify-center">
+                      <video
+                        key={videoUrl}
+                        src={videoUrl}
+                        controls
+                        playsInline
+                        muted
+                        loop
+                        autoPlay
+                        className="w-full h-full object-contain"
+                      />
+
+                      {/* Live Uploading Progress Overlay */}
+                      {isUploading && (
+                        <div className="absolute inset-0 bg-black/65 backdrop-blur-xs flex flex-col items-center justify-center p-4 space-y-3 z-20">
+                          <div className="animate-spin rounded-full h-8 w-8 border-3 border-[var(--laiton,#B9793E)] border-t-transparent" />
+                          <span className="text-xs font-bold text-white tracking-wide">
+                            Upload Cloudinary en cours...
+                          </span>
+                          <div className="w-full max-w-[200px]">
+                            <div className="flex items-center justify-between text-[11px] font-mono font-bold text-amber-300 mb-1">
+                              <span>Progression</span>
+                              <span>{uploadProgress}%</span>
+                            </div>
+                            <div className="h-2.5 w-full overflow-hidden rounded-full bg-white/20">
+                              <div
+                                className="h-full bg-gradient-to-r from-amber-400 via-[var(--laiton,#B9793E)] to-amber-200 transition-all duration-200 rounded-full"
+                                style={{ width: `${uploadProgress}%` }}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="mt-2 flex items-center justify-between px-3 py-2 bg-white rounded-xl border border-neutral-100 shadow-xs">
+                      <span className="text-[11px] font-bold text-emerald-700 flex items-center gap-1.5">
+                        {isUploading ? (
+                          <span className="text-amber-700 animate-pulse flex items-center gap-1">
+                            <span className="h-2 w-2 rounded-full bg-amber-500 animate-ping" /> Synchronisation...
+                          </span>
+                        ) : (
+                          <>
+                            <Check className="h-3.5 w-3.5" /> Vidéo prête & prévisualisée
+                          </>
+                        )}
+                      </span>
+                      <label className="text-[11px] font-bold text-[var(--laiton,#B9793E)] hover:underline cursor-pointer">
+                        Changer la vidéo
+                        <input
+                          type="file"
+                          accept="video/mp4,video/webm,video/quicktime"
+                          onChange={handleVideoFileChange}
+                          disabled={isUploading}
+                          className="hidden"
+                        />
+                      </label>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="relative rounded-2xl border-2 border-dashed border-neutral-300 bg-neutral-50 p-5 text-center transition-all hover:border-[var(--laiton)] hover:bg-white">
+                    <Video className="mx-auto h-8 w-8 text-[var(--laiton)] mb-2" />
+                    <p className="text-xs font-bold text-[var(--obsidienne)]">
+                      Glisser ou importer une vidéo (MP4, WebM)
+                    </p>
+                    <p className="text-[10px] text-neutral-400 mt-1">Durée maximale autorisée : 45 secondes</p>
+                    <input
+                      type="file"
+                      accept="video/mp4,video/webm,video/quicktime"
+                      onChange={handleVideoFileChange}
+                      className="absolute inset-0 opacity-0 cursor-pointer"
+                    />
+                  </div>
                 )}
               </div>
 
-              {/* Video Preview Player Box */}
-              {videoUrl ? (
-                <div className="relative overflow-hidden rounded-2xl border border-neutral-200 bg-neutral-900 p-2 shadow-inner">
-                  <div className="relative aspect-[9/16] max-h-72 mx-auto rounded-xl overflow-hidden bg-black flex items-center justify-center">
-                    <video
-                      key={videoUrl}
-                      src={videoUrl}
-                      controls
-                      playsInline
-                      muted
-                      loop
-                      autoPlay
-                      className="w-full h-full object-contain"
-                    />
-
-                    {/* Live Uploading Progress Overlay */}
-                    {isUploading && (
-                      <div className="absolute inset-0 bg-black/65 backdrop-blur-xs flex flex-col items-center justify-center p-4 space-y-3 z-20">
-                        <div className="animate-spin rounded-full h-8 w-8 border-3 border-[var(--laiton,#B9793E)] border-t-transparent" />
-                        <span className="text-xs font-bold text-white tracking-wide">
-                          Upload Cloudinary en cours...
-                        </span>
-                        <div className="w-full max-w-[200px]">
-                          <div className="flex items-center justify-between text-[11px] font-mono font-bold text-amber-300 mb-1">
-                            <span>Progression</span>
-                            <span>{uploadProgress}%</span>
-                          </div>
-                          <div className="h-2.5 w-full overflow-hidden rounded-full bg-white/20">
-                            <div
-                              className="h-full bg-gradient-to-r from-amber-400 via-[var(--laiton,#B9793E)] to-amber-200 transition-all duration-200 rounded-full"
-                              style={{ width: `${uploadProgress}%` }}
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="mt-2 flex items-center justify-between px-3 py-2 bg-white rounded-xl border border-neutral-100 shadow-xs">
-                    <span className="text-[11px] font-bold text-emerald-700 flex items-center gap-1.5">
-                      {isUploading ? (
-                        <span className="text-amber-700 animate-pulse flex items-center gap-1">
-                          <span className="h-2 w-2 rounded-full bg-amber-500 animate-ping" /> Synchronisation...
-                        </span>
-                      ) : (
-                        <>
-                          <Check className="h-3.5 w-3.5" /> Vidéo prête & prévisualisée
-                        </>
-                      )}
-                    </span>
-                    <label className="text-[11px] font-bold text-[var(--laiton,#B9793E)] hover:underline cursor-pointer">
-                      Changer la vidéo
-                      <input
-                        type="file"
-                        accept="video/mp4,video/webm,video/quicktime"
-                        onChange={handleVideoFileChange}
-                        disabled={isUploading}
-                        className="hidden"
-                      />
-                    </label>
-                  </div>
-                </div>
-              ) : (
-                <div className="relative rounded-2xl border-2 border-dashed border-neutral-300 bg-neutral-50 p-5 text-center transition-all hover:border-[var(--laiton)] hover:bg-white">
-                  <Video className="mx-auto h-8 w-8 text-[var(--laiton)] mb-2" />
-                  <p className="text-xs font-bold text-[var(--obsidienne)]">
-                    Glisser ou importer une vidéo (MP4, WebM)
-                  </p>
-                  <p className="text-[10px] text-neutral-400 mt-1">Durée maximale autorisée : 45 secondes</p>
-                  <input
-                    type="file"
-                    accept="video/mp4,video/webm,video/quicktime"
-                    onChange={handleVideoFileChange}
-                    className="absolute inset-0 opacity-0 cursor-pointer"
-                  />
-                </div>
-              )}
-            </div>
-
-            {/* Saisie URL alternative */}
-            <div>
-              <label className="block text-[10px] font-bold uppercase tracking-wider text-neutral-500 mb-1">
-                Ou coller directement l'URL vidéo HTTP/Cloudinary
-              </label>
-              <input
-                type="url"
-                value={videoUrl}
-                onChange={(e) => setVideoUrl(e.target.value)}
-                placeholder="https://res.cloudinary.com/.../video.mp4"
-                className="w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-xs text-[var(--obsidienne)] focus:border-[var(--laiton)] focus:outline-none font-mono"
-              />
-            </div>
-
-            {/* Sélecteur de Bijou Rattaché */}
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-neutral-700 mb-1.5">
-                Bijou présenté dans cette vidéo *
-              </label>
-              <select
-                value={productId}
-                onChange={(e) => setProductId(e.target.value)}
-                className="w-full rounded-2xl border border-neutral-200 bg-white text-neutral-900 px-4 py-3 text-xs font-bold focus:border-[var(--laiton,#B9793E)] focus:ring-2 focus:ring-[var(--laiton,#B9793E)]/20 focus:outline-none transition-all cursor-pointer shadow-xs"
-              >
-                <option value="" className="bg-white text-neutral-900 font-sans py-2">-- Choisir un bijou du catalogue --</option>
-                {products.map((p) => (
-                  <option key={p.id} value={p.id} className="bg-white text-neutral-900 font-sans py-2">
-                    {p.name} ({new Intl.NumberFormat("fr-FR").format(p.price)} FCFA)
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Status Actif / Masqué */}
-            <div className="flex items-center justify-between pt-2">
-              <label className="flex items-center gap-3 cursor-pointer">
+              {/* Saisie URL alternative */}
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-neutral-500 mb-1">
+                  Ou coller directement l'URL vidéo HTTP/Cloudinary
+                </label>
                 <input
-                  type="checkbox"
-                  checked={isActive}
-                  onChange={(e) => setIsActive(e.target.checked)}
-                  className="h-5 w-5 rounded border-neutral-300 text-[var(--laiton)] focus:ring-[var(--laiton)]"
+                  type="url"
+                  value={videoUrl}
+                  onChange={(e) => setVideoUrl(e.target.value)}
+                  placeholder="https://res.cloudinary.com/.../video.mp4"
+                  className="w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2 text-xs text-[var(--obsidienne)] focus:border-[var(--laiton)] focus:outline-none font-mono"
                 />
-                <span className="text-xs font-bold text-[var(--obsidienne)]">
-                  Publier immédiatement en ligne
-                </span>
-              </label>
+              </div>
+
+              {/* Sélecteur de Bijou Rattaché */}
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-neutral-700 mb-1.5">
+                  Bijou présenté dans cette vidéo *
+                </label>
+                <select
+                  value={productId}
+                  onChange={(e) => setProductId(e.target.value)}
+                  className="w-full rounded-2xl border border-neutral-200 bg-white text-neutral-900 px-4 py-3 text-xs font-bold focus:border-[var(--laiton,#B9793E)] focus:ring-2 focus:ring-[var(--laiton,#B9793E)]/20 focus:outline-none transition-all cursor-pointer shadow-xs"
+                >
+                  <option value="" className="bg-white text-neutral-900 font-sans py-2">-- Choisir un bijou du catalogue --</option>
+                  {products.map((p) => (
+                    <option key={p.id} value={p.id} className="bg-white text-neutral-900 font-sans py-2">
+                      {p.name} ({new Intl.NumberFormat("fr-FR").format(p.price)} FCFA)
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Status Actif / Masqué */}
+              <div className="flex items-center justify-between pt-1">
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={isActive}
+                    onChange={(e) => setIsActive(e.target.checked)}
+                    className="h-5 w-5 rounded border-neutral-300 text-[var(--laiton)] focus:ring-[var(--laiton)]"
+                  />
+                  <span className="text-xs font-bold text-[var(--obsidienne)]">
+                    Publier immédiatement en ligne
+                  </span>
+                </label>
+              </div>
             </div>
 
-            {/* Submit Actions */}
-            <div className="flex items-center justify-end gap-3 pt-4 border-t border-neutral-100">
+            {/* Submit Actions (Sticky Footer) */}
+            <div className="shrink-0 flex items-center justify-end gap-3 px-6 py-4 border-t border-neutral-100 bg-neutral-50/90 backdrop-blur-md">
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-full px-5 py-2.5 text-xs font-bold text-neutral-600 hover:bg-neutral-100 transition-colors"
+                className="rounded-full px-5 py-2.5 text-xs font-bold text-neutral-600 hover:bg-neutral-200/60 transition-colors"
               >
                 Annuler
               </button>
