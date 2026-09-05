@@ -41,60 +41,159 @@ export default function ConfirmationPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Polling Retry & Timer state
+  const [attemptCount, setAttemptCount] = useState(1);
+  const [secondsElapsed, setSecondsElapsed] = useState(0);
+  const maxAttempts = 5;
+
+  // Elapsed seconds timer tick
   useEffect(() => {
-    async function fetchData() {
+    if (!loading) return;
+    const interval = setInterval(() => {
+      setSecondsElapsed((prev) => prev + 1);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [loading]);
+
+  // Order Fetch with Auto-Retry / Polling loop
+  useEffect(() => {
+    if (!orderNumber) return;
+
+    let isMounted = true;
+    let timeoutId: NodeJS.Timeout;
+
+    async function fetchOrderWithRetry(currentAttempt: number) {
+      if (!isMounted) return;
+
       try {
         const [orderRes, settingsRes] = await Promise.all([
           fetch(`/api/orders?order_number=${orderNumber}`),
-          fetch('/api/admin/settings').catch(() => null)
+          fetch("/api/admin/settings").catch(() => null),
         ]);
 
-        if (!orderRes.ok) {
-          throw new Error("Commande introuvable");
+        if (orderRes.ok) {
+          const data = await orderRes.json();
+          if (data.orders && data.orders.length > 0) {
+            if (isMounted) {
+              setOrder(data.orders[0]);
+
+              if (settingsRes && settingsRes.ok) {
+                const settingsData = await settingsRes.json();
+                if (settingsData.settings) {
+                  if (settingsData.settings.wave_link) setWaveLink(settingsData.settings.wave_link);
+                  if (settingsData.settings.whatsapp_number) setWhatsappNumber(settingsData.settings.whatsapp_number);
+                }
+              }
+
+              setLoading(false);
+              return;
+            }
+          }
         }
 
-        const { orders } = await orderRes.json();
-        if (!orders || orders.length === 0) {
-          throw new Error("Commande introuvable");
-        }
-
-        setOrder(orders[0]);
-
-        if (settingsRes && settingsRes.ok) {
-          const settingsData = await settingsRes.json();
-          if (settingsData.settings) {
-            if (settingsData.settings.wave_link) setWaveLink(settingsData.settings.wave_link);
-            if (settingsData.settings.whatsapp_number) setWhatsappNumber(settingsData.settings.whatsapp_number);
+        // If order not found yet and we haven't reached maxAttempts, retry after 1.8 seconds
+        if (currentAttempt < maxAttempts) {
+          if (isMounted) {
+            setAttemptCount(currentAttempt + 1);
+            timeoutId = setTimeout(() => {
+              fetchOrderWithRetry(currentAttempt + 1);
+            }, 1800);
+          }
+        } else {
+          if (isMounted) {
+            setError("La commande met plus de temps que prévu à s'afficher. Veuillez vérifier votre réseau ou réessayer.");
+            setLoading(false);
           }
         }
       } catch (err) {
-        console.error("Error fetching data:", err);
-        setError(err instanceof Error ? err.message : "Une erreur est survenue");
-      } finally {
-        setLoading(false);
+        if (currentAttempt < maxAttempts) {
+          if (isMounted) {
+            setAttemptCount(currentAttempt + 1);
+            timeoutId = setTimeout(() => {
+              fetchOrderWithRetry(currentAttempt + 1);
+            }, 1800);
+          }
+        } else {
+          if (isMounted) {
+            setError("Impossible d'accéder au serveur. Veuillez réessayer.");
+            setLoading(false);
+          }
+        }
       }
     }
 
-    if (orderNumber) {
-      fetchData();
-    }
+    setLoading(true);
+    setError(null);
+    setAttemptCount(1);
+    setSecondsElapsed(0);
+    fetchOrderWithRetry(1);
+
+    return () => {
+      isMounted = false;
+      if (timeoutId) clearTimeout(timeoutId);
+    };
   }, [orderNumber]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex flex-col">
-        <Navbar />
-        <main className="flex-1 container max-w-3xl mx-auto px-4 py-10 md:py-16">
-          <div className="rounded-3xl border border-neutral-100 bg-white p-6 md:p-10 shadow-xs space-y-6 text-center">
-            <div className="h-16 w-16 bg-neutral-100 rounded-full mx-auto animate-pulse" />
-            <div className="h-7 w-64 bg-neutral-200 rounded-lg mx-auto animate-pulse" />
-            <div className="h-4 w-48 bg-neutral-100 rounded-md mx-auto animate-pulse" />
+  // Re-trigger manual retry
+  const handleManualRetry = () => {
+    setLoading(true);
+    setError(null);
+    setAttemptCount(1);
+    setSecondsElapsed(0);
+  };
 
-            <div className="border-t border-neutral-100 pt-6 space-y-4 text-left">
-              <div className="h-5 w-40 bg-neutral-200 rounded-md animate-pulse" />
-              <div className="h-12 bg-neutral-100 rounded-2xl animate-pulse" />
-              <div className="h-24 bg-neutral-100 rounded-2xl animate-pulse" />
+  if (loading) {
+    const progressPercent = Math.min(100, Math.round((attemptCount / maxAttempts) * 100));
+
+    return (
+      <div className="min-h-screen bg-[var(--porcelaine,#F1ECE3)]/40 flex flex-col font-sans">
+        <Navbar />
+        <main className="flex-1 flex items-center justify-center px-4 py-16">
+          <div className="w-full max-w-lg rounded-[2.5rem] border border-[var(--laiton,#B9793E)]/30 bg-[var(--obsidienne,#0E0B09)] p-8 sm:p-10 shadow-[0_25px_70px_rgba(0,0,0,0.4)] text-white text-center space-y-6">
+            {/* Spinning Golden Crest Loader */}
+            <div className="relative mx-auto h-20 w-20 flex items-center justify-center">
+              <div className="absolute inset-0 rounded-full border-3 border-[var(--laiton,#B9793E)]/20 border-t-[var(--laiton-clair,#D9AE78)] animate-spin" />
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--laiton,#B9793E)]/15 border border-[var(--laiton)]/40 text-[var(--laiton-clair,#D9AE78)]">
+                <span className="text-xl animate-pulse">✦</span>
+              </div>
             </div>
+
+            {/* Title & Eyebrow */}
+            <div>
+              <span className="inline-block text-[10px] font-extrabold uppercase tracking-[0.25em] text-[var(--laiton-clair,#D9AE78)] mb-1">
+                ✦ CONFIRMATION EN COURS
+              </span>
+              <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#F1ECE3]">
+                Finalisation de votre commande...
+              </h1>
+              <p className="text-xs text-white/60 font-medium mt-2 leading-relaxed max-w-sm mx-auto">
+                Le serveur valide et enregistre votre commande. Veuillez patienter quelques instants sans fermer la page.
+              </p>
+            </div>
+
+            {/* Timer & Attempt Progress Bar */}
+            <div className="space-y-3 pt-2">
+              <div className="flex items-center justify-between text-xs font-mono font-bold">
+                <span className="text-[var(--laiton-clair,#D9AE78)] flex items-center gap-1.5">
+                  <span className="h-2 w-2 rounded-full bg-emerald-500 animate-ping" />
+                  Vérification (Tentative {attemptCount}/{maxAttempts})
+                </span>
+                <span className="text-white/70">
+                  {secondsElapsed}s écoulées
+                </span>
+              </div>
+
+              <div className="h-3 w-full overflow-hidden rounded-full bg-white/10 p-0.5 border border-white/10">
+                <div
+                  className="h-full bg-gradient-to-r from-[var(--laiton,#B9793E)] via-[#E5C195] to-[var(--laiton,#B9793E)] transition-all duration-300 rounded-full shadow-[0_0_12px_rgba(185,121,62,0.6)]"
+                  style={{ width: `${progressPercent}%` }}
+                />
+              </div>
+            </div>
+
+            <p className="text-[11px] text-white/40 italic">
+              Numéro de suivi transmis : <span className="font-mono font-semibold text-white/70">{orderNumber}</span>
+            </p>
           </div>
         </main>
         <Footer />
@@ -104,23 +203,37 @@ export default function ConfirmationPage() {
 
   if (error || !order) {
     return (
-      <div className="min-h-screen bg-background flex flex-col">
+      <div className="min-h-screen bg-[var(--porcelaine,#F1ECE3)]/40 flex flex-col font-sans">
         <Navbar />
-        <main className="flex-1 flex items-center justify-center px-4">
-          <div className="text-center max-w-md">
-            <div className="text-6xl mb-4">❌</div>
-            <h1 className="text-2xl font-bold text-[var(--text-dark)] mb-2">
-              Commande introuvable
-            </h1>
-            <p className="text-[var(--text-dark)]/60 mb-6">
-              {error || "Cette commande n'existe pas."}
-            </p>
-            <Link
-              href="/boutique"
-              className="inline-flex rounded-full bg-[var(--gold)] px-6 py-3 text-sm font-bold text-[#241B14] shadow-lg"
-            >
-              Retour à la boutique
-            </Link>
+        <main className="flex-1 flex items-center justify-center px-4 py-16">
+          <div className="w-full max-w-md rounded-[2.5rem] border border-neutral-200 bg-white p-8 text-center shadow-xl space-y-5">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-amber-50 text-amber-600 border border-amber-200 text-2xl font-bold">
+              ⏳
+            </div>
+            <div>
+              <h1 className="font-serif text-2xl font-bold text-[var(--obsidienne,#0E0B09)]">
+                Vérification prolongée
+              </h1>
+              <p className="text-xs text-neutral-600 mt-2 leading-relaxed">
+                Le serveur enregistre toujours votre commande <span className="font-mono font-bold text-neutral-900">#{orderNumber}</span>.
+              </p>
+            </div>
+
+            <div className="pt-2 space-y-2.5">
+              <button
+                onClick={handleManualRetry}
+                className="flex w-full h-12 items-center justify-center gap-2 rounded-full bg-[var(--obsidienne,#0E0B09)] text-[var(--porcelaine,#F1ECE3)] text-xs font-extrabold uppercase tracking-wider shadow-lg hover:bg-[var(--laiton,#B9793E)] hover:text-[var(--obsidienne,#0E0B09)] transition-all cursor-pointer"
+              >
+                <span>Réessayer la vérification</span>
+              </button>
+
+              <Link
+                href="/boutique"
+                className="block text-xs font-bold text-neutral-500 hover:text-neutral-900 py-2 transition-colors"
+              >
+                Retour à la boutique
+              </Link>
+            </div>
           </div>
         </main>
         <Footer />
