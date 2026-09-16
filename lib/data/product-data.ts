@@ -115,3 +115,29 @@ export async function getRelatedProducts(currentProductId: string, limit = 4) {
 
   return productsWithImages;
 }
+
+/**
+ * Récupère tous les slugs et dates de mise à jour des produits actifs pour le sitemap XML
+ */
+export async function getAllProductSlugs(): Promise<Array<{ slug: string; updatedAt?: string }>> {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from('products')
+      .select('slug, updated_at')
+      .eq('is_active', true);
+
+    if (error || !data) {
+      console.error('Error fetching product slugs for sitemap:', error);
+      return [];
+    }
+
+    return data.map((p) => ({
+      slug: p.slug,
+      updatedAt: p.updated_at,
+    }));
+  } catch (err) {
+    console.error('Failed to get product slugs for sitemap:', err);
+    return [];
+  }
+}
