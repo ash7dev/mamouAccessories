@@ -60,6 +60,8 @@ export const viewport: Viewport = {
   themeColor: "#B8935E",
 };
 
+import { SplashScreen } from "@/components/ui/splash-screen";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -68,6 +70,7 @@ export default function RootLayout({
   return (
     <html lang="fr" className={`h-full antialiased ${plusJakartaSans.variable} ${outfit.variable} ${playfair.variable}`}>
       <body className="min-h-full flex flex-col font-sans" suppressHydrationWarning>
+        <SplashScreen />
         <CartProvider>
           <PageTransition>
             {children}
