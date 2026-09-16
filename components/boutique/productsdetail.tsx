@@ -25,6 +25,7 @@ import {
   ShoppingBag
 } from "lucide-react";
 import { ProductCard, type PublicProductCard } from "@/components/home/ProductCard";
+import { ProductShareModal } from "@/components/boutique/ProductShareModal";
 
 /* ============================================================
    Fiche produit publique ultra-premium — /produit/[slug]
@@ -63,6 +64,7 @@ export function ProductDetailPublic({ product, relatedProducts = [] }: ProductDe
   const [justAdded, setJustAdded] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
   const [activeAccordion, setActiveAccordion] = useState<string | null>("description");
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
 
@@ -92,21 +94,8 @@ export function ProductDetailPublic({ product, relatedProducts = [] }: ProductDe
     router.push("/commande");
   };
 
-  const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: product.name,
-          text: `Découvrez « ${product.name} » sur Mamou Jewelry`,
-          url: window.location.href,
-        });
-      } catch (err) {
-        console.log("Share cancelled", err);
-      }
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-      alert("Lien du produit copié !");
-    }
+  const handleShare = () => {
+    setShareModalOpen(true);
   };
 
   const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
@@ -135,6 +124,13 @@ export function ProductDetailPublic({ product, relatedProducts = [] }: ProductDe
           </Link>
 
           <div className="flex items-center gap-2">
+            <button
+              onClick={handleShare}
+              className="flex items-center gap-1.5 rounded-full border border-[var(--laiton)]/40 bg-gradient-to-r from-[var(--obsidienne)] to-stone-900 px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-wider text-[#F5D77F] shadow-md backdrop-blur-md transition-all hover:scale-105 active:scale-95"
+            >
+              <Sparkles className="h-3.5 w-3.5 text-[#D4AF37]" />
+              <span>Partager en Story</span>
+            </button>
             <button
               onClick={() => setIsFavorite(!isFavorite)}
               aria-label="Ajouter aux favoris"
@@ -606,6 +602,20 @@ export function ProductDetailPublic({ product, relatedProducts = [] }: ProductDe
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Modal de Partage Story & Réseaux Sociaux */}
+      <ProductShareModal
+        isOpen={shareModalOpen}
+        onClose={() => setShareModalOpen(false)}
+        product={{
+          name: product.name,
+          slug: product.slug,
+          price: product.price,
+          compareAtPrice: product.compareAtPrice,
+          categoryName: product.categoryName,
+          imageUrl: activeImgObj?.url || product.images[0]?.url || '/placeholder-product.svg',
+        }}
+      />
     </div>
   );
 }
