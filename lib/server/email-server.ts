@@ -221,15 +221,21 @@ export async function sendAdminOrderEmail(order: OrderEmailData): Promise<{ succ
     </html>
     `;
 
-    const data = await resend.emails.send({
+    const response = await resend.emails.send({
       from: fromEmail,
       to: adminRecipient,
       subject: `🛍️ Nouvelle Commande #${order.order_number} (${formatCurrency(order.total)}) - ${order.customer_name}`,
       html: htmlContent,
     });
 
-    console.log(`✅ [Resend] Email de commande #${order.order_number} envoyé avec succès à ${adminRecipient} (ID: ${data.id})`);
-    return { success: true, id: data.id };
+    if (response.error) {
+      console.error(`❌ [Resend] Erreur lors de l'envoi de l'email pour #${order.order_number}:`, response.error);
+      return { success: false, error: response.error.message };
+    }
+
+    const emailId = response.data?.id;
+    console.log(`✅ [Resend] Email de commande #${order.order_number} envoyé avec succès à ${adminRecipient} (ID: ${emailId})`);
+    return { success: true, id: emailId };
   } catch (error: any) {
     console.error(`❌ [Resend] Erreur lors de l'envoi de l'email pour #${order.order_number}:`, error);
     return { success: false, error: error?.message || 'Erreur lors de l\'envoi de l\'email.' };
