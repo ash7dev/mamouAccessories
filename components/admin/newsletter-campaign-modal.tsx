@@ -146,7 +146,10 @@ export function NewsletterCampaignModal({
     }
   };
 
-  const handleSendBroadcast = async () => {
+  // Confirmation Modal State
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+
+  const handleOpenConfirmModal = () => {
     if (!subject || !headline || !message) {
       toast.error("Veuillez remplir au moins le sujet, le titre et le message.");
       return;
@@ -157,12 +160,11 @@ export function NewsletterCampaignModal({
       return;
     }
 
-    const confirmSend = window.confirm(
-      `Êtes-vous sûre de vouloir envoyer cette campagne email à TOUS vos ${subscribersCount} abonnés ?`
-    );
+    setShowConfirmModal(true);
+  };
 
-    if (!confirmSend) return;
-
+  const executeSendBroadcast = async () => {
+    setShowConfirmModal(false);
     setIsSendingBroadcast(true);
     try {
       const res = await fetch("/api/admin/newsletter/send", {
@@ -640,9 +642,9 @@ export function NewsletterCampaignModal({
 
               <button
                 type="button"
-                onClick={handleSendBroadcast}
+                onClick={handleOpenConfirmModal}
                 disabled={isSendingTest || isSendingBroadcast || subscribersCount === 0}
-                className="flex-1 sm:flex-none px-6 py-2.5 rounded-xl bg-gradient-to-r from-[var(--laiton,#B9793E)] to-[#9A622E] text-[var(--obsidienne,#0E0B09)] text-xs font-bold hover:brightness-110 transition-all disabled:opacity-50 shadow-lg flex items-center justify-center gap-2"
+                className="flex-1 sm:flex-none px-6 py-2.5 rounded-xl bg-gradient-to-r from-[var(--laiton,#B9793E)] to-[#9A622E] text-[var(--obsidienne,#0E0B09)] text-xs font-bold hover:brightness-110 transition-all disabled:opacity-50 shadow-lg flex items-center justify-center gap-2 cursor-pointer"
               >
                 {isSendingBroadcast ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -655,6 +657,81 @@ export function NewsletterCampaignModal({
           </div>
         </motion.div>
       </div>
+
+      {/* Modale de Confirmation d'Envoi Haute Joaillerie */}
+      {showConfirmModal && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 15 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="w-full max-w-md bg-[var(--obsidienne,#0E0B09)] border border-[var(--laiton,#B9793E)]/40 rounded-3xl p-6 sm:p-8 shadow-[0_30px_90px_rgba(0,0,0,0.95)] text-[var(--porcelaine,#F1ECE3)] space-y-6 relative overflow-hidden"
+          >
+            {/* Ornement lumineux */}
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[var(--laiton,#B9793E)] to-transparent" />
+
+            <div className="text-center space-y-2">
+              <div className="w-14 h-14 rounded-2xl bg-[var(--laiton,#B9793E)]/15 border border-[var(--laiton,#B9793E)]/40 flex items-center justify-center text-[var(--laiton-clair,#D9AE78)] mx-auto mb-3 shadow-inner">
+                <Crown className="w-7 h-7" />
+              </div>
+              <h3 className="font-serif text-xl font-bold text-[var(--porcelaine,#F1ECE3)]">
+                Confirmation d&apos;Envoi de Campagne
+              </h3>
+              <p className="text-xs text-[var(--porcelaine,#F1ECE3)]/60">
+                Vous êtes sur le point de diffuser cette newsletter à votre Cercle Privé.
+              </p>
+            </div>
+
+            {/* Récapitulatif de la Campagne */}
+            <div className="p-4 rounded-2xl bg-[var(--obsidienne-soft,#17120D)] border border-[var(--laiton,#B9793E)]/20 space-y-2.5 text-xs">
+              <div className="flex justify-between border-b border-[var(--laiton,#B9793E)]/10 pb-2">
+                <span className="text-[var(--porcelaine,#F1ECE3)]/60">Objet :</span>
+                <span className="font-bold text-[var(--laiton-clair,#D9AE78)] text-right truncate max-w-[200px]">
+                  {subject}
+                </span>
+              </div>
+              <div className="flex justify-between border-b border-[var(--laiton,#B9793E)]/10 pb-2">
+                <span className="text-[var(--porcelaine,#F1ECE3)]/60">Style de Campagne :</span>
+                <span className="font-semibold text-[var(--porcelaine,#F1ECE3)] capitalize">
+                  {templateType}
+                </span>
+              </div>
+              <div className="flex justify-between border-b border-[var(--laiton,#B9793E)]/10 pb-2">
+                <span className="text-[var(--porcelaine,#F1ECE3)]/60">Destinataires ciblés :</span>
+                <span className="font-bold text-emerald-400">
+                  {subscribersCount} abonnée(s) active(s)
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-[var(--porcelaine,#F1ECE3)]/60">Service d&apos;envoi :</span>
+                <span className="font-medium text-[var(--porcelaine,#F1ECE3)]">
+                  Resend API (Sécurisé)
+                </span>
+              </div>
+            </div>
+
+            {/* Boutons d'Action */}
+            <div className="flex items-center gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowConfirmModal(false)}
+                className="flex-1 py-3 px-4 rounded-xl border border-[var(--laiton,#B9793E)]/30 bg-[var(--obsidienne-soft,#17120D)] text-xs font-semibold text-[var(--porcelaine,#F1ECE3)]/70 hover:text-white hover:border-[var(--laiton)] transition-all"
+              >
+                Annuler
+              </button>
+
+              <button
+                type="button"
+                onClick={executeSendBroadcast}
+                className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-[var(--laiton,#B9793E)] to-[#9A622E] text-[var(--obsidienne,#0E0B09)] text-xs font-bold hover:brightness-110 shadow-lg transition-all flex items-center justify-center gap-2"
+              >
+                <Send className="w-4 h-4" />
+                <span>Confirmer & Lancer</span>
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </AnimatePresence>
   );
 }

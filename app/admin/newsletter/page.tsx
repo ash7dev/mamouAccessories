@@ -132,29 +132,48 @@ export default function AdminNewsletterPage() {
 
   return (
     <div className="space-y-8 p-6 lg:p-8 max-w-7xl mx-auto">
-      {/* En-tête Luxe */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-[var(--laiton,#B9793E)]/20 pb-6">
-        <div>
-          <div className="flex items-center gap-2 text-[var(--laiton,#B9793E)] text-xs font-bold uppercase tracking-widest mb-1">
-            <Mail className="w-4 h-4" /> Marketing & Fidélisation
-          </div>
-          <h1 className="font-serif text-3xl font-bold text-[var(--porcelaine,#F1ECE3)]">
-            Studio Marketing & Newsletter
-          </h1>
-          <p className="text-sm text-[var(--porcelaine,#F1ECE3)]/60 mt-1">
-            Envoyez des emails de luxe à vos clientes et gérez votre liste d&apos;abonnés.
-          </p>
+      {/* En-tête Luxe Obsidienne & Laiton */}
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[var(--obsidienne,#0E0B09)] via-[var(--obsidienne-soft,#17120D)] to-[var(--obsidienne,#0E0B09)] border border-[var(--laiton,#B9793E)]/30 p-6 sm:p-8 lg:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.6)]">
+        {/* Ligne filet laiton supérieure */}
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[var(--laiton-clair,#D9AE78)] to-transparent opacity-80" />
+
+        {/* Ornements dorés concentriques d'arrière-plan */}
+        <div aria-hidden className="pointer-events-none absolute -right-20 -top-20 opacity-25">
+          <div className="h-80 w-80 rounded-full border border-[var(--laiton,#B9793E)]/30 animate-spin-slow" />
+          <div className="absolute inset-10 rounded-full border border-[var(--laiton,#B9793E)]/40" />
         </div>
 
-        {/* Bouton d'action principal */}
-        <div className="flex flex-wrap items-center gap-3">
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-[var(--laiton,#B9793E)] to-[#9A622E] text-[var(--obsidienne,#0E0B09)] text-xs font-bold hover:brightness-110 transition-all shadow-lg shadow-[var(--laiton,#B9793E)]/20"
-          >
-            <PlusCircle className="w-4 h-4" />
-            <span>Créer une Campagne Email</span>
-          </button>
+        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <div className="max-w-2xl">
+            {/* Tag Badge */}
+            <div className="inline-flex items-center gap-2 rounded-full bg-[var(--laiton,#B9793E)]/15 border border-[var(--laiton,#B9793E)]/35 px-3.5 py-1 text-[11px] font-bold uppercase tracking-[0.25em] text-[var(--laiton-clair,#D9AE78)] mb-3">
+              <Sparkles className="w-3.5 h-3.5 text-[var(--laiton-clair)] animate-pulse" />
+              <span>CERCLE PRIVÉ &amp; STUDIO MARKETING</span>
+            </div>
+
+            {/* Titre Luxe */}
+            <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white leading-tight">
+              Studio Marketing &amp; Newsletter
+            </h1>
+
+            {/* Sous-titre */}
+            <p className="text-sm sm:text-base text-[var(--porcelaine,#F1ECE3)]/75 leading-relaxed mt-2 font-sans">
+              Concevez, prévisualisez en direct et diffusez des emails d&apos;exception à vos abonnées privilégiées.
+            </p>
+          </div>
+
+          {/* Bouton d'action principal avec effet Glow */}
+          <div className="shrink-0 w-full md:w-auto">
+            <button
+              type="button"
+              onClick={() => setIsModalOpen(true)}
+              className="group relative flex items-center justify-center gap-3 w-full md:w-auto px-7 py-4 rounded-2xl bg-gradient-to-r from-[var(--laiton,#B9793E)] via-[#D9AE78] to-[var(--laiton,#B9793E)] text-[var(--obsidienne,#0E0B09)] text-xs sm:text-sm font-extrabold uppercase tracking-wider shadow-[0_10px_35px_rgba(185,121,62,0.4)] hover:shadow-[0_15px_45px_rgba(185,121,62,0.6)] hover:scale-[1.03] active:scale-[0.98] transition-all duration-300 cursor-pointer"
+            >
+              <PlusCircle className="w-5 h-5 transition-transform group-hover:rotate-90" />
+              <span>Créer une Campagne Email</span>
+              <Sparkles className="w-4 h-4 text-[var(--obsidienne)] animate-bounce" />
+            </button>
+          </div>
         </div>
       </div>
 

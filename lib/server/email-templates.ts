@@ -22,7 +22,8 @@ function formatCurrency(amount: string | number): string {
 }
 
 export function generateCampaignEmailHtml(data: EmailTemplateData): string {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.mamouaccessories.com';
+  const envUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  const siteUrl = envUrl && !envUrl.includes('localhost') ? envUrl : 'https://www.mamouaccessories.com';
   const ctaText = data.ctaText || 'DÉCOUVRIR SUR LA BOUTIQUE →';
   const ctaUrl = data.ctaUrl || `${siteUrl}/boutique`;
 
