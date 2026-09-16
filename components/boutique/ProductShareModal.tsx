@@ -284,30 +284,38 @@ async function renderStoryCard(data: StoryCardData): Promise<Blob | null> {
   ctx.font = 'bold 44px system-ui, sans-serif';
   ctx.fillText(data.formattedPrice, CANVAS_W / 2, cursorY + 15);
 
+  cursorY += badgeH / 2 + 20;
+
   if (data.formattedComparePrice) {
     ctx.fillStyle = MUTED;
     ctx.font = '26px system-ui, sans-serif';
-    const strikeY = cursorY + badgeH / 2 + 38;
-    ctx.fillText(data.formattedComparePrice, CANVAS_W / 2, strikeY);
+    cursorY += 38;
+    ctx.fillText(data.formattedComparePrice, CANVAS_W / 2, cursorY);
     const w = ctx.measureText(data.formattedComparePrice).width;
     ctx.strokeStyle = MUTED;
     ctx.lineWidth = 1.5;
     ctx.beginPath();
-    ctx.moveTo(CANVAS_W / 2 - w / 2, strikeY - 9);
-    ctx.lineTo(CANVAS_W / 2 + w / 2, strikeY - 9);
+    ctx.moveTo(CANVAS_W / 2 - w / 2, cursorY - 9);
+    ctx.lineTo(CANVAS_W / 2 + w / 2, cursorY - 9);
     ctx.stroke();
   }
 
-  // 8. Pied de page — ornement + appel à l'action
-  drawGoldOrnament(ctx, CANVAS_W / 2, CANVAS_H - 210);
+  // 8. Pied de page — suit le contenu réel avec un espacement fixe
+  // (donc pas de vide quand le nom du produit est court), tout en
+  // restant plafonné pour ne jamais coller à la bordure basse si le
+  // nom du produit est très long.
+  const footerMaxY = CANVAS_H - 220;
+  const footerY = Math.min(cursorY + 130, footerMaxY);
+
+  drawGoldOrnament(ctx, CANVAS_W / 2, footerY);
 
   ctx.fillStyle = '#FFFFFF';
   ctx.font = '500 28px system-ui, sans-serif';
-  ctx.fillText('CLIQUEZ SUR LE LIEN EN STORY POUR COMMANDER', CANVAS_W / 2, CANVAS_H - 150);
+  ctx.fillText('CLIQUEZ SUR LE LIEN EN STORY POUR COMMANDER', CANVAS_W / 2, footerY + 60);
 
   ctx.fillStyle = GOLD;
   ctx.font = 'bold 26px system-ui, sans-serif';
-  ctx.fillText('www.mamouaccessories.com', CANVAS_W / 2, CANVAS_H - 105);
+  ctx.fillText('www.mamouaccessories.com', CANVAS_W / 2, footerY + 105);
 
   return new Promise((resolve) => canvas.toBlob((b) => resolve(b), 'image/png', 1));
 }
