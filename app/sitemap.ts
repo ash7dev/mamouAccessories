@@ -3,8 +3,16 @@ import { getAllProductSlugs } from '@/lib/data/product-data';
 
 export const revalidate = 3600; // Régénération du sitemap toutes les heures
 
+function getBaseUrl(): string {
+  const envUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  if (!envUrl || envUrl.includes('localhost') || envUrl.includes('127.0.0.1')) {
+    return 'https://www.mamouaccessories.com';
+  }
+  return envUrl.replace(/\/$/, '');
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.mamouaccessories.com';
+  const baseUrl = getBaseUrl();
 
   // 1. Pages statiques principales
   const staticRoutes: MetadataRoute.Sitemap = [
