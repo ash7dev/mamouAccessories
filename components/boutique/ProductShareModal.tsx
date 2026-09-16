@@ -33,7 +33,13 @@ export function ProductShareModal({ isOpen, onClose, product }: ProductShareModa
 
   if (!isOpen) return null;
 
-  const siteUrl = typeof window !== 'undefined' ? window.location.origin : 'https://www.mamouaccessories.com';
+  const getShareSiteUrl = () => {
+    if (typeof window !== 'undefined' && (window.location.origin.includes('localhost') || window.location.origin.includes('127.0.0.1'))) {
+      return window.location.origin;
+    }
+    return 'https://www.mamouaccessories.com';
+  };
+  const siteUrl = getShareSiteUrl();
   const productUrl = `${siteUrl}/produit/${product.slug}`;
   const formattedPrice = new Intl.NumberFormat('fr-FR').format(product.price) + ' FCFA';
   const formattedComparePrice = product.compareAtPrice 
