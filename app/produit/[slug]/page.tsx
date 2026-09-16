@@ -69,9 +69,41 @@ export default async function ProductPage({ params }: ProductPageProps) {
   }
 
   const relatedProducts = await getRelatedProducts(product.id, 4);
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.mamouaccessories.com';
+
+  // Microdonnées JSON-LD Schema.org pour l'affichage enrichi sur Google (Rich Snippets: Prix, Image, Disponibilité)
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product.name,
+    image: product.images.length > 0 ? product.images.map((img) => img.url) : [`${siteUrl}/ensemble.jpg`],
+    description: product.description || `Découvrez ${product.name} (${product.categoryName}) sur Mamou's Accessories à Dakar, Sénégal.`,
+    sku: product.id,
+    brand: {
+      '@type': 'Brand',
+      name: "Mamou's Accessories",
+    },
+    offers: {
+      '@type': 'Offer',
+      url: `${siteUrl}/produit/${product.slug}`,
+      priceCurrency: 'XOF',
+      price: product.price,
+      priceValidUntil: '2030-12-31',
+      itemCondition: 'https://schema.org/NewCondition',
+      availability: product.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+      seller: {
+        '@type': 'Organization',
+        name: "Mamou's Accessories",
+      },
+    },
+  };
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Navbar />
       <ProductDetailPublic product={product} relatedProducts={relatedProducts} />
       <Footer />

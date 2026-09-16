@@ -27,9 +27,29 @@ const playfair = Playfair_Display({
 });
 
 
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.mamouaccessories.com';
+
 export const metadata: Metadata = {
-  title: "Mamou's Accessories - Accessoires Premium",
-  description: "Découvrez nos accessoires élégants et bijoux pour sublimer votre style.",
+  metadataBase: new URL(baseUrl),
+  title: {
+    default: "Mamou's Accessories — Haute Joaillerie & Accessoires à Dakar",
+    template: "%s | Mamou's Accessories",
+  },
+  description: "Découvrez la collection exclusive de bijoux et accessoires raffinés par Mamou's Accessories à Dakar, Sénégal. Écrin de luxe offert, livraison en 24h & paiement sécurisé (Wave, Orange Money).",
+  keywords: [
+    "bijoux dakar",
+    "accessoires dakar",
+    "haute joaillerie senegal",
+    "mamou accessories",
+    "bague dakar",
+    "collier dakar",
+    "boucles d'oreilles dakar",
+    "cadeau femme senegal",
+    "bijouterie dakar",
+    "boutique en ligne dakar"
+  ],
+  authors: [{ name: "Mamou's Accessories" }],
+  creator: "Mamou's Accessories",
   applicationName: "Mamou's Accessories",
   appleWebApp: {
     capable: true,
@@ -49,6 +69,28 @@ export const metadata: Metadata = {
     apple: [
       { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
     ],
+  },
+  openGraph: {
+    title: "Mamou's Accessories — Haute Joaillerie & Accessoires à Dakar",
+    description: "Boutique en ligne de bijoux d'exception à Dakar, Sénégal. Écrin offert & livraison 24h.",
+    url: baseUrl,
+    siteName: "Mamou's Accessories",
+    locale: "fr_SN",
+    type: "website",
+    images: [
+      {
+        url: `${baseUrl}/ensemble.jpg`,
+        width: 1200,
+        height: 630,
+        alt: "Mamou's Accessories - Haute Joaillerie",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Mamou's Accessories — Haute Joaillerie & Accessoires à Dakar",
+    description: "Boutique en ligne de bijoux d'exception à Dakar, Sénégal.",
+    images: [`${baseUrl}/ensemble.jpg`],
   },
   verification: {
     google: "google045039b5e8be6150",
