@@ -50,6 +50,9 @@ export const metadata: Metadata = {
       { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
     ],
   },
+  verification: {
+    google: "google045039b5e8be6150",
+  },
 };
 
 export const viewport: Viewport = {
