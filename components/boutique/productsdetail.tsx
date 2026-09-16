@@ -126,28 +126,21 @@ export function ProductDetailPublic({ product, relatedProducts = [] }: ProductDe
           <div className="flex items-center gap-2">
             <button
               onClick={handleShare}
-              className="flex items-center gap-1.5 rounded-full border border-[var(--laiton)]/40 bg-gradient-to-r from-[var(--obsidienne)] to-stone-900 px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-wider text-[#F5D77F] shadow-md backdrop-blur-md transition-all hover:scale-105 active:scale-95"
+              className="flex items-center gap-1.5 rounded-full border border-[var(--laiton)]/40 bg-gradient-to-r from-[var(--obsidienne)] to-stone-900 px-3.5 py-2 text-[11px] font-bold uppercase tracking-wider text-[#F5D77F] shadow-md backdrop-blur-md transition-all hover:scale-105 active:scale-95 shrink-0 whitespace-nowrap"
             >
-              <Sparkles className="h-3.5 w-3.5 text-[#D4AF37]" />
-              <span>Partager en Story</span>
+              <Sparkles className="h-3.5 w-3.5 text-[#D4AF37] shrink-0" />
+              <span>Partager <span className="hidden sm:inline">en Story</span></span>
             </button>
             <button
               onClick={() => setIsFavorite(!isFavorite)}
               aria-label="Ajouter aux favoris"
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-white/80 border border-[var(--laiton)]/20 text-[var(--obsidienne)] shadow-sm backdrop-blur-md transition-all hover:scale-110"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/80 border border-[var(--laiton)]/20 text-[var(--obsidienne)] shadow-sm backdrop-blur-md transition-all hover:scale-110 active:scale-95"
             >
               <Heart
                 className={`h-4 w-4 ${
                   isFavorite ? "fill-[var(--laiton)] text-[var(--laiton)]" : "text-[var(--obsidienne)]/60"
                 }`}
               />
-            </button>
-            <button
-              onClick={handleShare}
-              aria-label="Partager ce produit"
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-white/80 border border-[var(--laiton)]/20 text-[var(--obsidienne)] shadow-sm backdrop-blur-md transition-all hover:scale-110"
-            >
-              <Share2 className="h-4 w-4 text-[var(--obsidienne)]/70" />
             </button>
           </div>
         </nav>
