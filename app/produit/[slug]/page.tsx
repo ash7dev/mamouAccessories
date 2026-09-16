@@ -27,7 +27,12 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
   const formatFCFA = (n: number) => new Intl.NumberFormat("fr-FR").format(n) + " FCFA";
   const title = `✨ ${product.name} (${formatFCFA(product.price)}) — Mamou's Accessories`;
   const description = product.description || `Découvrez « ${product.name} » (${product.categoryName}) sur Mamou's Accessories. Pièce d'exception sélectionnée avec soin à Dakar, Sénégal.`;
-  const mainImage = product.images[0]?.url || 'https://www.mamouaccessories.com/ensemble.jpg';
+  const rawImage = product.images[0]?.url || 'https://www.mamouaccessories.com/ensemble.jpg';
+  // Forcer le format JPG pour Cloudinary car WhatsApp / iMessage ne prennent pas en charge WebP pour les aperçus OpenGraph
+  const mainImage = rawImage.includes('res.cloudinary.com')
+    ? rawImage.replace('/f_auto', '/f_jpg')
+    : rawImage;
+
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.mamouaccessories.com';
   const pageUrl = `${siteUrl}/produit/${product.slug}`;
 
@@ -44,6 +49,8 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
       images: [
         {
           url: mainImage,
+          secureUrl: mainImage,
+          type: 'image/jpeg',
           width: 800,
           height: 800,
           alt: product.name,

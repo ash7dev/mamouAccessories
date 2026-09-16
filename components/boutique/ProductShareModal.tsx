@@ -49,13 +49,128 @@ export function ProductShareModal({ isOpen, onClose, product }: ProductShareModa
   // Pre-filled message for sharing
   const shareMessage = `✨ Regarde ce bijou d'exception sur Mamou's Accessories :\n« ${product.name} » (${formattedPrice})\n\n👉 Découvrez la collection ici : ${productUrl}`;
 
-  // Native Web Share API
+  // Native Web Share API avec support du fichier image pour Instagram Story / WhatsApp
   const handleNativeShare = async () => {
     if (navigator.share) {
       try {
+        // Tenter de générer et d'attacher le fichier image PNG pour le partage direct en story / médias
+        const canvas = document.createElement('canvas');
+        canvas.width = 1080;
+        canvas.height = 1920;
+        const ctx = canvas.getContext('2d');
+
+        if (ctx) {
+          const grad = ctx.createLinearGradient(0, 0, 0, 1920);
+          grad.addColorStop(0, '#0F0E0C');
+          grad.addColorStop(0.5, '#191612');
+          grad.addColorStop(1, '#080706');
+          ctx.fillStyle = grad;
+          ctx.fillRect(0, 0, 1080, 1920);
+
+          ctx.strokeStyle = '#D4AF37';
+          ctx.lineWidth = 6;
+          ctx.strokeRect(40, 40, 1000, 1840);
+          ctx.lineWidth = 2;
+          ctx.strokeRect(52, 52, 976, 1816);
+
+          ctx.fillStyle = '#D4AF37';
+          ctx.font = 'bold 36px serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('✨ MAMOU\'S ACCESSORIES ✨', 540, 140);
+
+          ctx.fillStyle = '#A39B8B';
+          ctx.font = '24px sans-serif';
+          ctx.fillText('HAUTE JOAILLERIE & ACCESSOIRES • DAKAR', 540, 190);
+
+          const img = new window.Image();
+          img.crossOrigin = 'anonymous';
+          img.src = product.imageUrl;
+
+          await new Promise((resolve) => {
+            img.onload = resolve;
+            img.onerror = resolve;
+          });
+
+          const imgX = 140;
+          const imgY = 260;
+          const imgSize = 800;
+
+          ctx.fillStyle = '#1A1815';
+          ctx.fillRect(imgX - 10, imgY - 10, imgSize + 20, imgSize + 20);
+          ctx.strokeStyle = '#D4AF37';
+          ctx.lineWidth = 3;
+          ctx.strokeRect(imgX - 10, imgY - 10, imgSize + 20, imgSize + 20);
+
+          try {
+            ctx.drawImage(img, imgX, imgY, imgSize, imgSize);
+          } catch {
+            ctx.fillStyle = '#2A251E';
+            ctx.fillRect(imgX, imgY, imgSize, imgSize);
+          }
+
+          if (product.categoryName) {
+            ctx.fillStyle = '#D4AF37';
+            ctx.font = 'bold 28px sans-serif';
+            ctx.fillText(product.categoryName.toUpperCase(), 540, 1140);
+          }
+
+          ctx.fillStyle = '#FFFFFF';
+          ctx.font = 'bold 52px serif';
+          const words = product.name.split(' ');
+          let line = '';
+          let currentY = 1220;
+          for (let n = 0; n < words.length; n++) {
+            const testLine = line + words[n] + ' ';
+            const metrics = ctx.measureText(testLine);
+            if (metrics.width > 900 && n > 0) {
+              ctx.fillText(line.trim(), 540, currentY);
+              line = words[n] + ' ';
+              currentY += 65;
+            } else {
+              line = testLine;
+            }
+          }
+          ctx.fillText(line.trim(), 540, currentY);
+
+          const priceY = currentY + 90;
+          ctx.fillStyle = 'rgba(212, 175, 55, 0.15)';
+          ctx.strokeStyle = '#D4AF37';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.roundRect(540 - 240, priceY - 50, 480, 80, 40);
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.fillStyle = '#E5C158';
+          ctx.font = 'bold 44px sans-serif';
+          ctx.fillText(formattedPrice, 540, priceY + 6);
+
+          ctx.fillStyle = '#FFFFFF';
+          ctx.font = '500 28px sans-serif';
+          ctx.fillText('CLIQUEZ SUR LE LIEN EN STORY POUR COMMANDER', 540, 1720);
+
+          ctx.fillStyle = '#D4AF37';
+          ctx.font = 'bold 24px sans-serif';
+          ctx.fillText('www.mamouaccessories.com', 540, 1770);
+
+          const blob: Blob | null = await new Promise((res) => canvas.toBlob((b) => res(b), 'image/png'));
+          if (blob) {
+            const file = new File([blob], `story-mamou-${product.slug}.png`, { type: 'image/png' });
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+              await navigator.share({
+                files: [file],
+                title: `${product.name} — Mamou's Accessories`,
+                text: `Découvrez « ${product.name} » (${formattedPrice}) sur Mamou's Accessories :\n${productUrl}`,
+              });
+              return;
+            }
+          }
+        }
+
+        // Fallback sans fichier (lien seul)
         await navigator.share({
           title: `${product.name} — Mamou's Accessories`,
-          text: `Découvrez « ${product.name} » (${formattedPrice}) sur Mamou's Accessories.`,
+          text: `Découvrez « ${product.name} » (${formattedPrice}) sur Mamou's Accessories :\n${productUrl}`,
           url: productUrl,
         });
       } catch (err) {
