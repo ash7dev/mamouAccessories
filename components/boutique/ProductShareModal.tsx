@@ -192,11 +192,11 @@ export function ProductShareModal({ isOpen, onClose, product }: ProductShareModa
 
       // Footer Call to Action
       ctx.fillStyle = '#FFFFFF';
-      ctx.font = '28px sans-serif';
-      ctx.fillText('📲 Scannez ou cliquez sur le lien en story pour commander', 540, 1720);
+      ctx.font = '500 28px sans-serif';
+      ctx.fillText('CLIQUEZ SUR LE LIEN EN STORY POUR COMMANDER', 540, 1720);
 
-      ctx.fillStyle = '#A39B8B';
-      ctx.font = '22px sans-serif';
+      ctx.fillStyle = '#D4AF37';
+      ctx.font = 'bold 24px sans-serif';
       ctx.fillText('www.mamouaccessories.com', 540, 1770);
 
       // Convert to blob and download
