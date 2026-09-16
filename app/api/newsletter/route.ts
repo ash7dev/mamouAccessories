@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient, createServiceRoleClient } from '@/lib/supabase/server';
+import { createServiceRoleClient } from '@/lib/supabase/service-role';
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,10 +14,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Format email invalide' }, { status: 400 });
     }
 
-    const supabase = await createClient();
     const serviceRole = createServiceRoleClient();
 
-    const { data: existing } = await supabase
+    const { data: existing } = await serviceRole
       .from('newsletter_subscribers')
       .select('id, is_active')
       .eq('email', email.toLowerCase())
@@ -27,7 +26,7 @@ export async function POST(request: NextRequest) {
       if (existing.is_active) {
         return NextResponse.json({ error: 'Email deja inscrit' }, { status: 409 });
       } else {
-        const { error: updateError } = await supabase
+        const { error: updateError } = await serviceRole
           .from('newsletter_subscribers')
           .update({ is_active: true, subscribed_at: new Date().toISOString() })
           .eq('id', existing.id);
@@ -61,9 +60,9 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient();
+    const serviceRole = createServiceRoleClient();
 
-    const { data: subscribers, error } = await supabase
+    const { data: subscribers, error } = await serviceRole
       .from('newsletter_subscribers')
       .select('*')
       .eq('is_active', true)
