@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServiceRoleClient } from '@/lib/supabase/service-role';
 import type { CreateOrderInput, OrderFilters } from '@/lib/types/order';
 import { broadcastOrderPushNotification } from '@/lib/server/push-server';
+import { sendAdminOrderEmail } from '@/lib/server/email-server';
 
 // GET /api/orders - Récupérer toutes les commandes ou filtrer par order_number
 export async function GET(request: NextRequest) {
@@ -246,6 +247,24 @@ export async function POST(request: NextRequest) {
       total,
       orderId: order.id,
     }).catch(err => console.error('Error broadcasting push notification:', err));
+
+    // Envoi de l'email d'alerte à l'administrateur via Resend
+    sendAdminOrderEmail({
+      id: order.id,
+      order_number: order.order_number,
+      customer_name: body.customer_name,
+      customer_phone: body.customer_phone,
+      customer_email: body.customer_email,
+      delivery_address: body.delivery_address,
+      delivery_note: body.delivery_note,
+      payment_method: body.payment_method,
+      payment_status: paymentStatus,
+      subtotal,
+      delivery_fee: body.delivery_fee,
+      total,
+      items: orderItems,
+      created_at: order.created_at,
+    }).catch(err => console.error('Error sending admin order email:', err));
 
     return NextResponse.json(
       { order: orderWithItems },
