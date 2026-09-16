@@ -92,24 +92,28 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-// Gestion des notifications push VAPID
+// Gestion des notifications push VAPID (Style Notification WhatsApp / Message Urgent)
 self.addEventListener('push', (event) => {
   let data = {};
   try {
     data = event.data ? event.data.json() : {};
   } catch (e) {
-    data = { title: "Mamou's Accessories", body: event.data ? event.data.text() : 'Nouvelle notification' };
+    data = { title: "📲 NOUVELLE COMMANDE", body: event.data ? event.data.text() : 'Vous avez reçu une nouvelle commande' };
   }
 
-  const title = data.title || "Mamou's Accessories";
+  const title = data.title || "📲 NOUVELLE COMMANDE — Mamou's";
   const options = {
-    body: data.body || 'Nouvelle notification de commande',
+    body: data.body || 'Nouveau message de commande reçu',
     icon: data.icon || '/logo.jpg',
     badge: data.badge || '/icon-192.png',
-    vibrate: [300, 100, 300, 100, 400],
-    tag: 'order-push-notification',
+    vibrate: [200, 100, 200, 100, 200, 100, 400], // Vibration type message WhatsApp
+    tag: 'order-push-whatsapp',
     renotify: true,
+    requireInteraction: true, // Reste affiché en haut de l'écran comme un vrai SMS/WhatsApp jusqu'au clic
     data: data.url || '/admin/orders',
+    actions: [
+      { action: 'open', title: '💬 Ouvrir la Commande' }
+    ]
   };
 
   event.waitUntil(self.registration.showNotification(title, options));

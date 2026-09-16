@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { addPushSubscription } from '@/lib/server/push-server';
+import { saveSubscriptionToSupabase } from '@/lib/server/push-server';
 
 export async function POST(request: Request) {
   try {
@@ -10,7 +10,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Subscription invalide' }, { status: 400 });
     }
 
-    addPushSubscription(subscription);
+    await saveSubscriptionToSupabase(subscription);
 
     return NextResponse.json({ success: true, message: 'Push notification activée avec succès !' });
   } catch (error: any) {
