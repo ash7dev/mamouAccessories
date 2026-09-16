@@ -48,7 +48,7 @@ export function MaisonMamouExperience() {
 
             <div className="flex flex-col sm:flex-row gap-4 shrink-0 w-full md:w-auto">
               <a
-                href="https://wa.me/221779878666?text=Bonjour%20Mamou%20Jewelry,%20je%20souhaite%20un%20conseil%20sur%20vos%20bijoux"
+                href="https://wa.me/221774907955?text=Bonjour%20Mamou%20Jewelry,%20je%20souhaite%20un%20conseil%20sur%20vos%20bijoux"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group flex items-center justify-center gap-3 rounded-full bg-gradient-to-r from-[var(--laiton)] to-[#9A622E] px-7 py-4 text-xs sm:text-sm font-bold uppercase tracking-wider text-white shadow-[0_8px_25px_rgba(185,121,62,0.35)] transition-all hover:scale-105 hover:shadow-[0_12px_35px_rgba(185,121,62,0.5)] active:scale-95"

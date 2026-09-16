@@ -22,8 +22,8 @@ export async function GET() {
       delivery_fee_zone3: '3500',
       delivery_fee_zone4: '3500',
       delivery_fee_zone5: '3500',
-      whatsapp_number: '+221770000000',
-      store_name: 'Mamou Jewelry',
+      whatsapp_number: '+221774907955',
+      store_name: "Mamou's Accessories",
     };
     settings?.forEach(({ key, value }) => {
       if (value) settingsObj[key] = value;
