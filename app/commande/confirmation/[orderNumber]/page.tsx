@@ -55,13 +55,33 @@ export default function ConfirmationPage() {
     return () => clearInterval(interval);
   }, [loading]);
 
-  // Order Fetch with Auto-Retry / Polling loop
+  // Order Fetch with Auto-Retry / Polling loop & Instant Session Cache
   useEffect(() => {
     if (!orderNumber) return;
 
     let isMounted = true;
     let timeoutId: NodeJS.Timeout;
 
+    // 1. Tenter d'hydrater la commande immédiatement depuis le sessionStorage (création locale)
+    let cachedOrder: Order | null = null;
+    if (typeof window !== "undefined") {
+      try {
+        const raw = sessionStorage.getItem(`order_${orderNumber}`);
+        if (raw) {
+          cachedOrder = JSON.parse(raw);
+        }
+      } catch (e) {
+        console.error("Error reading order from sessionStorage", e);
+      }
+    }
+
+    if (cachedOrder) {
+      setOrder(cachedOrder);
+      setLoading(false);
+      return;
+    }
+
+    // 2. Si non présent en cache (ex: ré-ouverture ou lien direct), fetch serveur avec retry
     async function fetchOrderWithRetry(currentAttempt: number) {
       if (!isMounted) return;
 
@@ -86,12 +106,25 @@ export default function ConfirmationPage() {
               }
 
               setLoading(false);
+
+              // Ouvrir Wave si autoWave=1
+              if (typeof window !== "undefined") {
+                const searchParams = new URLSearchParams(window.location.search);
+                if (searchParams.get("autoWave") === "1" && data.orders[0].payment_method === "wave") {
+                  const waveUrl = `https://pay.wave.com/m/M_sn_wi1Bfmu7HgWY/c/sn/?amount=${data.orders[0].total}`;
+                  setTimeout(() => {
+                    if (isMounted) {
+                      window.location.href = waveUrl;
+                    }
+                  }, 600);
+                }
+              }
               return;
             }
           }
         }
 
-        // If order not found yet and we haven't reached maxAttempts, retry after 1.8 seconds
+        // Si la commande n'est pas encore trouvée, réessayer
         if (currentAttempt < maxAttempts) {
           if (isMounted) {
             setAttemptCount(currentAttempt + 1);

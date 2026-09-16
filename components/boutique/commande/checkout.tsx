@@ -249,14 +249,23 @@ export function Checkout({
 
       clear();
 
+      // Sauvegarder la commande dans le sessionStorage pour un affichage instantané sans attente réseau
+      if (typeof window !== "undefined" && order) {
+        try {
+          sessionStorage.setItem(`order_${order.order_number}`, JSON.stringify(order));
+        } catch (e) {
+          console.error("Failed to save order to sessionStorage:", e);
+        }
+      }
+
       if (payment === "wave") {
         const waveUrl = `https://pay.wave.com/m/M_sn_wi1Bfmu7HgWY/c/sn/?amount=${total}`;
-        // 1. Rediriger vers la page de confirmation en arrière-plan
+        // 1. Préparer la page de confirmation en arrière-plan
         router.push(`/commande/confirmation/${order.order_number}`);
-        // 2. Déclencher immédiatement l'ouverture de l'application Wave
+        // 2. Ouvrir directement l'application Wave pour le paiement
         setTimeout(() => {
           window.location.href = waveUrl;
-        }, 300);
+        }, 150);
       } else {
         router.push(`/commande/confirmation/${order.order_number}`);
       }

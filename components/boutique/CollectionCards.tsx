@@ -195,7 +195,7 @@ export function CollectionCards({ collections }: CollectionCardsProps) {
                 `}
               >
                 <Link
-                  href={collection.slug ? `/boutique?category=${collection.slug}` : "/boutique"}
+                  href={collection.slug ? `/boutique?categorie=${collection.slug}` : "/boutique"}
                   className="group relative block h-full rounded-[1.75rem] lg:rounded-[2rem] overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--laiton)] focus-visible:ring-offset-2"
                 >
                   <motion.div

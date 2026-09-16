@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
             quantity
           )
         `)
-        .eq('order_number', orderNumber);
+        .ilike('order_number', orderNumber.trim());
 
       if (error) {
         console.error('Error fetching order by order_number:', error);

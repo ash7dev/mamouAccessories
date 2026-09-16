@@ -159,7 +159,8 @@ export async function getFeaturedProducts(): Promise<PublicProductCard[]> {
       compare_at_price,
       stock,
       image_orientation,
-      categories!inner(name)
+      categories!inner(name),
+      product_images(cloudinary_public_id, position)
     `)
     .eq('is_active', true)
     .eq('is_featured', true)
@@ -171,46 +172,25 @@ export async function getFeaturedProducts(): Promise<PublicProductCard[]> {
     return [];
   }
 
-  // Récupérer les images séparément pour chaque produit
-  const productsWithImages = await Promise.all(
-    (data || []).map(async (product) => {
-      const { data: images, error: imageError } = await supabase
-        .from('product_images')
-        .select('cloudinary_public_id')
-        .eq('product_id', product.id)
-        .order('position', { ascending: true })
-        .limit(1);
+  return (data || []).map((product: any) => {
+    // Trier les images par position et prendre la première
+    const sortedImages = (product.product_images || []).sort(
+      (a: any, b: any) => (a.position ?? 0) - (b.position ?? 0)
+    );
+    const firstImage = sortedImages[0]?.cloudinary_public_id || null;
 
-      if (imageError) {
-        console.error('Error fetching images for product', product.id, imageError);
-      }
-
-      if (!images || images.length === 0) {
-        console.log('Product', product.name, 'has no images');
-      } else {
-        console.log('Product:', product.name, 'Image ID:', images[0].cloudinary_public_id);
-      }
-
-      return {
-        ...product,
-        firstImage: images?.[0]?.cloudinary_public_id || null,
-      };
-    })
-  );
-
-  return productsWithImages.map((product) => ({
-    id: product.id,
-    name: product.name,
-    slug: product.slug,
-    categoryName: Array.isArray(product.categories) && product.categories.length > 0 ? product.categories[0].name : 'Bijoux',
-    price: product.price,
-    compareAtPrice: product.compare_at_price,
-    stock: product.stock,
-    imageUrl: product.firstImage
-      ? buildCloudinaryImageUrl(product.firstImage)
-      : null,
-    imageOrientation: product.image_orientation || 'portrait',
-  }));
+    return {
+      id: product.id,
+      name: product.name,
+      slug: product.slug,
+      categoryName: Array.isArray(product.categories) && product.categories.length > 0 ? product.categories[0].name : 'Bijoux',
+      price: product.price,
+      compareAtPrice: product.compare_at_price,
+      stock: product.stock,
+      imageUrl: firstImage ? buildCloudinaryImageUrl(firstImage) : null,
+      imageOrientation: product.image_orientation || 'portrait',
+    };
+  });
 }
 
 /**
@@ -229,7 +209,8 @@ export async function getNewArrivals(): Promise<PublicProductCard[]> {
       compare_at_price,
       stock,
       image_orientation,
-      categories!inner(name)
+      categories!inner(name),
+      product_images(cloudinary_public_id, position)
     `)
     .eq('is_active', true)
     .order('created_at', { ascending: false })
@@ -240,46 +221,24 @@ export async function getNewArrivals(): Promise<PublicProductCard[]> {
     return [];
   }
 
-  // Récupérer les images séparément pour chaque produit
-  const productsWithImages = await Promise.all(
-    (data || []).map(async (product) => {
-      const { data: images, error: imageError } = await supabase
-        .from('product_images')
-        .select('cloudinary_public_id')
-        .eq('product_id', product.id)
-        .order('position', { ascending: true })
-        .limit(1);
+  return (data || []).map((product: any) => {
+    const sortedImages = (product.product_images || []).sort(
+      (a: any, b: any) => (a.position ?? 0) - (b.position ?? 0)
+    );
+    const firstImage = sortedImages[0]?.cloudinary_public_id || null;
 
-      if (imageError) {
-        console.error('Error fetching images for product', product.id, imageError);
-      }
-
-      if (!images || images.length === 0) {
-        console.log('Product', product.name, 'has no images');
-      } else {
-        console.log('Product:', product.name, 'Image ID:', images[0].cloudinary_public_id);
-      }
-
-      return {
-        ...product,
-        firstImage: images?.[0]?.cloudinary_public_id || null,
-      };
-    })
-  );
-
-  return productsWithImages.map((product) => ({
-    id: product.id,
-    name: product.name,
-    slug: product.slug,
-    categoryName: Array.isArray(product.categories) && product.categories.length > 0 ? product.categories[0].name : 'Bijoux',
-    price: product.price,
-    compareAtPrice: product.compare_at_price,
-    stock: product.stock,
-    imageUrl: product.firstImage
-      ? buildCloudinaryImageUrl(product.firstImage)
-      : null,
-    imageOrientation: product.image_orientation || 'portrait',
-  }));
+    return {
+      id: product.id,
+      name: product.name,
+      slug: product.slug,
+      categoryName: Array.isArray(product.categories) && product.categories.length > 0 ? product.categories[0].name : 'Bijoux',
+      price: product.price,
+      compareAtPrice: product.compare_at_price,
+      stock: product.stock,
+      imageUrl: firstImage ? buildCloudinaryImageUrl(firstImage) : null,
+      imageOrientation: product.image_orientation || 'portrait',
+    };
+  });
 }
 
 /**
@@ -398,7 +357,7 @@ export async function getActivePromo(): Promise<ActivePromoData | null> {
 export async function getRecommendedProducts(): Promise<PublicProductCard[]> {
   const supabase = await createClient();
 
-  // Récupérer tous les produits actifs
+  // Récupérer tous les produits actifs avec images en une seule requête
   const { data, error } = await supabase
     .from('products')
     .select(`
@@ -409,7 +368,8 @@ export async function getRecommendedProducts(): Promise<PublicProductCard[]> {
       compare_at_price,
       stock,
       image_orientation,
-      categories!inner(name)
+      categories!inner(name),
+      product_images(cloudinary_public_id, position)
     `)
     .eq('is_active', true);
 
@@ -422,38 +382,23 @@ export async function getRecommendedProducts(): Promise<PublicProductCard[]> {
   const shuffled = (data || []).sort(() => Math.random() - 0.5);
   const randomProducts = shuffled.slice(0, 8);
 
-  // Récupérer les images séparément pour chaque produit
-  const productsWithImages = await Promise.all(
-    randomProducts.map(async (product) => {
-      const { data: images, error: imageError } = await supabase
-        .from('product_images')
-        .select('cloudinary_public_id')
-        .eq('product_id', product.id)
-        .order('position', { ascending: true })
-        .limit(1);
+  return randomProducts.map((product: any) => {
+    const sortedImages = (product.product_images || []).sort(
+      (a: any, b: any) => (a.position ?? 0) - (b.position ?? 0)
+    );
+    const firstImage = sortedImages[0]?.cloudinary_public_id || null;
 
-      if (imageError) {
-        console.error('Error fetching images for product', product.id, imageError);
-      }
-
-      return {
-        ...product,
-        firstImage: images?.[0]?.cloudinary_public_id || null,
-      };
-    })
-  );
-
-  return productsWithImages.map((product) => ({
-    id: product.id,
-    name: product.name,
-    slug: product.slug,
-    categoryName: Array.isArray(product.categories) && product.categories.length > 0 ? product.categories[0].name : 'Bijoux',
-    price: product.price,
-    compareAtPrice: product.compare_at_price,
-    stock: product.stock,
-    imageUrl: product.firstImage
-      ? buildCloudinaryImageUrl(product.firstImage)
-      : null,
-    imageOrientation: product.image_orientation || 'portrait',
-  }));
+    return {
+      id: product.id,
+      name: product.name,
+      slug: product.slug,
+      categoryName: Array.isArray(product.categories) && product.categories.length > 0 ? product.categories[0].name : 'Bijoux',
+      price: product.price,
+      compareAtPrice: product.compare_at_price,
+      stock: product.stock,
+      imageUrl: firstImage ? buildCloudinaryImageUrl(firstImage) : null,
+      imageOrientation: product.image_orientation || 'portrait',
+    };
+  });
 }
+

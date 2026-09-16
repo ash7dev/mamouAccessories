@@ -11,7 +11,9 @@ export interface PublicProductCard {
   id: string;
   name: string;
   slug: string;
+  categoryId?: string;
   categoryName: string;
+  categorySlug?: string;
   price: number;
   compareAtPrice: number | null;
   stock: number;

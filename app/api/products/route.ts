@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
       .from('products')
       .select(`
         *,
-        categories(id, name),
+        categories(id, name, slug),
         images:product_images(*)
       `)
       .order('created_at', { ascending: false });
@@ -67,6 +67,7 @@ export async function GET(request: NextRequest) {
       slug: product.slug,
       categoryId: product.category_id,
       categoryName: product.categories?.name ?? "Sans catégorie",
+      categorySlug: product.categories?.slug ?? "",
       price: Number(product.price ?? 0),
       compareAtPrice: product.compare_at_price ?? null,
       stock: Number(product.stock ?? 0),

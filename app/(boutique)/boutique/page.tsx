@@ -15,6 +15,15 @@ import { Search, SlidersHorizontal, ArrowUpDown, X, Sparkles, ChevronDown, Check
 
 type SortOption = "recent" | "price-asc" | "price-desc";
 
+function normalizeCategoryStr(str: string): string {
+  if (!str) return "";
+  return str
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]/g, "");
+}
+
 function BoutiquePageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -28,7 +37,13 @@ function BoutiquePageContent() {
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [sortBy, setSortBy] = useState<SortOption>("recent");
   const [searchQuery, setSearchQuery] = useState(searchParams?.get("search") || "");
-  const [activeCategorySlug, setActiveCategorySlug] = useState<string | null>(searchParams?.get("categorie") || null);
+  const [activeCategorySlug, setActiveCategorySlug] = useState<string | null>(
+    searchParams?.get("categorie") || searchParams?.get("category") || null
+  );
+  const [priceRange, setPriceRange] = useState<[number, number] | null>(null);
+  const [inStockOnly, setInStockOnly] = useState(false);
+  const [featuredOnly, setFeaturedOnly] = useState(false);
+
   const [isCategoryMenuOpen, setIsCategoryMenuOpen] = useState(false);
   const [isSortMenuOpen, setIsSortMenuOpen] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
@@ -61,7 +76,9 @@ function BoutiquePageContent() {
             id: product.id,
             name: product.name,
             slug: product.slug,
+            categoryId: product.categoryId,
             categoryName: product.categoryName,
+            categorySlug: product.categorySlug,
             price: product.price,
             compareAtPrice: product.compareAtPrice,
             stock: product.stock,
@@ -89,21 +106,90 @@ function BoutiquePageContent() {
       // 1. Recherche texte
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase().trim();
-        result = result.filter(
-          (p) =>
+        const normQ = normalizeCategoryStr(q);
+        result = result.filter((p) => {
+          const normName = normalizeCategoryStr(p.name);
+          const normCat = normalizeCategoryStr(p.categoryName || "");
+          const isEarringSearch = normQ.includes("boucle") || normQ.includes("oreille");
+          const isEarringProduct = normCat.includes("boucle") || normCat.includes("oreille") || normName.includes("boucle");
+
+          return (
             p.name.toLowerCase().includes(q) ||
-            p.categoryName?.toLowerCase().includes(q)
-        );
+            p.categoryName?.toLowerCase().includes(q) ||
+            (normQ.length >= 2 && (normName.includes(normQ) || normCat.includes(normQ))) ||
+            (isEarringSearch && isEarringProduct)
+          );
+        });
       }
 
       // 2. Filtre par Catégorie
       if (activeCategorySlug) {
+        const normActive = normalizeCategoryStr(activeCategorySlug);
+
+        // Trouver la catégorie correspondante dans la liste des catégories
+        const catObj = categories.find(
+          (c) =>
+            c.slug === activeCategorySlug ||
+            c.id === activeCategorySlug ||
+            normalizeCategoryStr(c.slug) === normActive ||
+            normalizeCategoryStr(c.name) === normActive
+        );
+
+        result = result.filter((p) => {
+          // A. Par UUID de catégorie (si catObj est trouvé)
+          if (catObj && p.categoryId && p.categoryId === catObj.id) {
+            return true;
+          }
+          // B. Par slug de catégorie
+          if (
+            p.categorySlug &&
+            (p.categorySlug.toLowerCase() === activeCategorySlug.toLowerCase() ||
+              normalizeCategoryStr(p.categorySlug) === normActive)
+          ) {
+            return true;
+          }
+          // C. Par nom de catégorie
+          if (
+            catObj &&
+            p.categoryName &&
+            normalizeCategoryStr(p.categoryName) === normalizeCategoryStr(catObj.name)
+          ) {
+            return true;
+          }
+          // D. Par chaîne de caractères normalisée (ex: bouclesdoreilles vs boucles-d-oreilles)
+          if (p.categoryName) {
+            const normP = normalizeCategoryStr(p.categoryName);
+            if (normP === normActive) return true;
+            if (
+              (normActive.includes("boucle") || normActive.includes("oreille")) &&
+              (normP.includes("boucle") || normP.includes("oreille"))
+            ) {
+              return true;
+            }
+          }
+          return false;
+        });
+      }
+
+      // 3. Filtre par tranche de prix
+      if (priceRange) {
+        const [min, max] = priceRange;
+        result = result.filter((p) => p.price >= min && p.price <= max);
+      }
+
+      // 4. En stock uniquement
+      if (inStockOnly) {
+        result = result.filter((p) => p.stock > 0);
+      }
+
+      // 5. En promotion / vedette
+      if (featuredOnly) {
         result = result.filter(
-          (p) => p.categoryName?.toLowerCase() === activeCategorySlug.toLowerCase()
+          (p) => p.compareAtPrice && p.compareAtPrice > p.price
         );
       }
 
-      // 3. Tri
+      // 6. Tri
       if (sortBy === "price-asc") {
         result.sort((a, b) => a.price - b.price);
       } else if (sortBy === "price-desc") {
@@ -115,7 +201,7 @@ function BoutiquePageContent() {
 
       setFilteredProducts(result);
     },
-    [searchQuery, activeCategorySlug, sortBy]
+    [searchQuery, activeCategorySlug, categories, priceRange, inStockOnly, featuredOnly, sortBy]
   );
 
   useEffect(() => {
@@ -124,9 +210,9 @@ function BoutiquePageContent() {
 
   // Synchronisation des paramètres d'URL
   useEffect(() => {
-    const urlCat = searchParams?.get("categorie");
+    const urlCat = searchParams?.get("categorie") || searchParams?.get("category") || null;
     if (urlCat !== activeCategorySlug) {
-      setActiveCategorySlug(urlCat || null);
+      setActiveCategorySlug(urlCat);
     }
     const urlSearch = searchParams?.get("search");
     if (urlSearch !== undefined && urlSearch !== searchQuery) {
@@ -140,52 +226,50 @@ function BoutiquePageContent() {
     const params = new URLSearchParams(searchParams?.toString() || "");
     if (slug) {
       params.set("categorie", slug);
+      params.delete("category");
     } else {
       params.delete("categorie");
+      params.delete("category");
     }
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
   const handleFilterChange = (filters: FilterOptions) => {
-    let result = [...allProducts];
-
     if (filters.category) {
       const catObj = categories.find((c) => c.id === filters.category);
       if (catObj) {
-        result = result.filter(
-          (p) => p.categoryName?.toLowerCase() === catObj.name.toLowerCase()
-        );
+        handleSelectCategory(catObj.slug);
       }
+    } else {
+      handleSelectCategory(null);
     }
 
-    if (filters.priceRange) {
-      const [min, max] = filters.priceRange;
-      result = result.filter((p) => p.price >= min && p.price <= max);
-    }
-
-    if (filters.inStock) {
-      result = result.filter((p) => p.stock > 0);
-    }
-
-    if (filters.featured) {
-      result = result.filter(
-        (p) => p.compareAtPrice && p.compareAtPrice > p.price
-      );
-    }
-
-    setFilteredProducts(result);
+    setPriceRange(filters.priceRange);
+    setInStockOnly(filters.inStock);
+    setFeaturedOnly(filters.featured);
   };
 
   const clearFilters = () => {
     setActiveCategorySlug(null);
     setSearchQuery("");
     setSortBy("recent");
+    setPriceRange(null);
+    setInStockOnly(false);
+    setFeaturedOnly(false);
     router.push(pathname, { scroll: false });
-    setFilteredProducts(allProducts);
   };
 
   const selectedCategoryName = activeCategorySlug
-    ? categories.find((c) => c.slug === activeCategorySlug)?.name
+    ? categories.find(
+        (c) =>
+          c.slug === activeCategorySlug ||
+          c.id === activeCategorySlug ||
+          normalizeCategoryStr(c.slug) === normalizeCategoryStr(activeCategorySlug) ||
+          normalizeCategoryStr(c.name) === normalizeCategoryStr(activeCategorySlug)
+      )?.name ||
+      (normalizeCategoryStr(activeCategorySlug).includes("boucle")
+        ? "Boucles d'oreilles"
+        : activeCategorySlug)
     : null;
 
   return (

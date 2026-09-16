@@ -1,7 +1,7 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useRef } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { fadeUp, stagger } from "@/lib/motion";
@@ -227,10 +227,13 @@ export function Hero({ products }: HeroProps) {
                 className="group block relative overflow-hidden rounded-[2.5rem] bg-white p-3.5 shadow-[0_20px_50px_-10px_rgba(14,11,9,0.18)] transition-all duration-500 hover:shadow-[0_25px_60px_-10px_rgba(185,121,62,0.3)] hover:-translate-y-1"
               >
                 <div className="relative w-[210px] h-[270px] xl:w-[230px] xl:h-[290px] rounded-[2rem] overflow-hidden bg-[var(--porcelaine,#F1ECE3)]">
-                  <img
+                  <Image
                     src={p1.imageUrl || "/placeholder-product.svg"}
                     alt={p1.name}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    fill
+                    sizes="230px"
+                    priority
+                    className="object-cover transition-transform duration-700 group-hover:scale-105"
                   />
                   <span className="absolute top-3 left-3 rounded-full bg-[var(--obsidienne,#0E0B09)]/90 px-3 py-1 text-[9px] font-bold uppercase tracking-wider text-amber-200 backdrop-blur-xs">
                     #1 Nouveauté
@@ -268,10 +271,12 @@ export function Hero({ products }: HeroProps) {
                 className="group block relative overflow-hidden rounded-[2.2rem] bg-white p-3 shadow-[0_20px_50px_-10px_rgba(14,11,9,0.18)] transition-all duration-500 hover:shadow-[0_25px_60px_-10px_rgba(185,121,62,0.3)] hover:-translate-y-1"
               >
                 <div className="relative w-[185px] h-[230px] xl:w-[200px] xl:h-[250px] rounded-[1.8rem] overflow-hidden bg-[var(--porcelaine,#F1ECE3)]">
-                  <img
+                  <Image
                     src={p2.imageUrl || "/placeholder-product.svg"}
                     alt={p2.name}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    fill
+                    sizes="200px"
+                    className="object-cover transition-transform duration-700 group-hover:scale-105"
                   />
                   <span className="absolute top-2.5 left-2.5 rounded-full bg-[var(--laiton,#B9793E)] px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white shadow-xs">
                     #2 Coup de cœur
@@ -309,10 +314,12 @@ export function Hero({ products }: HeroProps) {
                 className="group block relative overflow-hidden rounded-[2.2rem] bg-white p-3 shadow-[0_20px_50px_-10px_rgba(14,11,9,0.15)] transition-all duration-500 hover:shadow-[0_25px_60px_-10px_rgba(185,121,62,0.3)] hover:-translate-y-1"
               >
                 <div className="relative w-[180px] h-[220px] xl:w-[195px] xl:h-[240px] rounded-[1.8rem] overflow-hidden bg-[var(--porcelaine,#F1ECE3)]">
-                  <img
+                  <Image
                     src={p3.imageUrl || "/placeholder-product.svg"}
                     alt={p3.name}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    fill
+                    sizes="195px"
+                    className="object-cover transition-transform duration-700 group-hover:scale-105"
                   />
                   <span className="absolute top-2.5 left-2.5 rounded-full bg-[var(--obsidienne,#0E0B09)] px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-amber-200">
                     #3 Incontournable
