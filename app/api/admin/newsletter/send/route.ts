@@ -135,6 +135,16 @@ export async function POST(request: NextRequest) {
       sent_at: new Date().toISOString(),
     });
 
+    if (successCount === 0 && failCount > 0) {
+      return NextResponse.json(
+        {
+          error:
+            "En mode gratuit Resend (onboarding@resend.dev), vous pouvez envoyer des emails de test uniquement vers mariamkoita095@gmail.com. Pour envoyer à toutes vos clientes, vous devez vérifier votre domaine mamouaccessories.com sur Resend (Domains > Add Domain).",
+        },
+        { status: 403 }
+      );
+    }
+
     return NextResponse.json({
       message: `Campagne envoyée avec succès à ${successCount} abonné(s) ! (${failCount} échec(s))`,
       successCount,
