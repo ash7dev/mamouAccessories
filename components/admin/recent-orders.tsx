@@ -163,23 +163,23 @@ export function RecentOrders({ orders, isEmpty = false }: RecentOrdersProps) {
                 <Link
                   key={order.id}
                   href={`/admin/orders/${order.id}`}
-                  className="group relative flex items-center justify-between p-3.5 rounded-2xl border border-[var(--laiton,#B9793E)]/15 bg-gradient-to-r from-[var(--porcelaine,#F1ECE3)]/30 to-white hover:from-white hover:to-white hover:border-[var(--laiton,#B9793E)]/50 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5"
+                  className="group relative flex items-center justify-between p-3 sm:p-3.5 rounded-2xl border border-[var(--laiton,#B9793E)]/15 bg-gradient-to-r from-[var(--porcelaine,#F1ECE3)]/30 to-white hover:from-white hover:to-white hover:border-[var(--laiton,#B9793E)]/50 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 gap-2"
                 >
                   {/* Left Accent Glow */}
                   <div className="absolute left-0 top-2 bottom-2 w-1 rounded-r-full bg-[var(--laiton,#B9793E)] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-                  <div className="flex items-center gap-3.5 min-w-0">
+                  <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0 flex-1">
                     {/* Customer Avatar Circle */}
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--obsidienne,#0E0B09)] text-[var(--porcelaine,#F1ECE3)] font-serif font-bold text-xs shadow-xs border border-[var(--laiton,#B9793E)]/30 group-hover:border-[var(--laiton)] group-hover:scale-105 transition-all">
+                    <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--obsidienne,#0E0B09)] text-[var(--porcelaine,#F1ECE3)] font-serif font-bold text-xs shadow-xs border border-[var(--laiton,#B9793E)]/30 group-hover:border-[var(--laiton)] group-hover:scale-105 transition-all">
                       {initials}
                     </div>
 
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5 flex-wrap">
                         <span className="font-mono text-xs font-bold text-[var(--laiton,#B9793E)] tracking-wider">
                           {order.order_number}
                         </span>
-                        <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-sans font-bold border ${statusInfo.bg}`}>
+                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-sans font-bold border shrink-0 ${statusInfo.bg}`}>
                           <span className={`h-1.5 w-1.5 rounded-full ${statusInfo.dot}`} />
                           {statusInfo.label}
                         </span>
@@ -191,19 +191,19 @@ export function RecentOrders({ orders, isEmpty = false }: RecentOrdersProps) {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3 shrink-0 text-right">
+                  <div className="flex items-center gap-2 sm:gap-3 shrink-0 text-right pl-1">
                     <div>
-                      <span className="block font-mono text-sm font-bold text-[var(--obsidienne,#0E0B09)] tabular-nums tracking-tight">
+                      <span className="block font-mono text-xs sm:text-sm font-bold text-[var(--obsidienne,#0E0B09)] tabular-nums tracking-tight whitespace-nowrap">
                         {formatAmount(order.total)}{" "}
-                        <span className="text-[10px] font-sans text-[var(--laiton,#B9793E)] font-bold">FCFA</span>
+                        <span className="text-[9px] sm:text-[10px] font-sans text-[var(--laiton,#B9793E)] font-bold">FCFA</span>
                       </span>
-                      <span className="block text-[10px] font-sans font-semibold text-[var(--obsidienne,#0E0B09)]/40">
+                      <span className="block text-[9px] sm:text-[10px] font-sans font-semibold text-[var(--obsidienne,#0E0B09)]/40 whitespace-nowrap">
                         {formatDate(order.created_at)}
                       </span>
                     </div>
 
-                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--porcelaine,#F1ECE3)]/60 text-[var(--obsidienne,#0E0B09)]/40 transition-all duration-300 group-hover:bg-[var(--laiton,#B9793E)] group-hover:text-white group-hover:translate-x-0.5">
-                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="flex h-6 w-6 sm:h-7 sm:w-7 items-center justify-center rounded-full bg-[var(--porcelaine,#F1ECE3)]/60 text-[var(--obsidienne,#0E0B09)]/40 transition-all duration-300 group-hover:bg-[var(--laiton,#B9793E)] group-hover:text-white group-hover:translate-x-0.5 shrink-0">
+                      <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
                       </svg>
                     </div>

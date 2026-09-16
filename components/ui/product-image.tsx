@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { resolveProductImageUrl, PLACEHOLDER_IMAGE } from "@/lib/utils/image-helpers";
 
@@ -18,7 +18,7 @@ interface ProductImageProps {
 }
 
 /**
- * Composant Image réutilisable avec fallback automatique & résolution d'URL robuste
+ * Composant Image réutilisable avec fallback automatique, résolution d'URL & chargement instantané sans blocage
  */
 export function ProductImage({
   src,
@@ -32,6 +32,8 @@ export function ProductImage({
   unoptimized = false,
   quality = 85,
 }: ProductImageProps) {
+  const imgRef = useRef<HTMLImageElement | null>(null);
+
   const resolvedSrc = resolveProductImageUrl(src, {
     width: width || (fill ? 800 : width),
     height: height || (fill ? 800 : height),
@@ -41,7 +43,7 @@ export function ProductImage({
   const [hasError, setHasError] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  // Synchronisation si la prop src change
+  // Synchronisation si la prop src change + détection du cache DOM
   useEffect(() => {
     const updated = resolveProductImageUrl(src, {
       width: width || (fill ? 800 : width),
@@ -49,8 +51,21 @@ export function ProductImage({
     });
     setCurrentSrc(updated);
     setHasError(false);
-    setIsLoading(true);
+
+    // Vérifier si l'image est déjà en cache dans le DOM
+    if (imgRef.current && imgRef.current.complete && imgRef.current.naturalWidth > 0) {
+      setIsLoading(false);
+    } else {
+      setIsLoading(true);
+    }
   }, [src, width, height, fill]);
+
+  // Sécurité : Si l'événement onLoad stagne ou est contourné par le navigateur
+  useEffect(() => {
+    if (imgRef.current && imgRef.current.complete) {
+      setIsLoading(false);
+    }
+  }, [currentSrc]);
 
   const handleError = () => {
     if (!hasError) {
@@ -66,11 +81,16 @@ export function ProductImage({
 
   const finalSrc = hasError || !currentSrc ? PLACEHOLDER_IMAGE : currentSrc;
   const isSvgOrData = finalSrc.endsWith('.svg') || finalSrc.startsWith('data:');
+  const isCloudinaryOrRemote = finalSrc.includes('res.cloudinary.com') || finalSrc.includes('supabase.co');
+  
+  // Désactiver l'optimisation serveur proxy Next.js si l'URL est déjà une URL Cloudinary/Supabase optimisée ou SVG
+  const shouldUseDirectCdn = unoptimized || isSvgOrData || isCloudinaryOrRemote;
 
   if (fill) {
     return (
-      <div className={`relative h-full w-full overflow-hidden ${isLoading ? 'animate-pulse bg-gradient-to-tr from-[var(--porcelaine,#F1ECE3)] via-neutral-100 to-[var(--porcelaine,#F1ECE3)]' : ''}`}>
+      <div className={`relative h-full w-full overflow-hidden ${isLoading ? 'bg-[var(--porcelaine,#F1ECE3)] animate-pulse' : ''}`}>
         <Image
+          ref={imgRef}
           src={finalSrc}
           alt={alt || "Image produit"}
           fill
@@ -79,7 +99,7 @@ export function ProductImage({
           onLoad={handleLoad}
           priority={priority}
           sizes={sizes}
-          unoptimized={unoptimized || isSvgOrData}
+          unoptimized={shouldUseDirectCdn}
           quality={quality}
         />
       </div>
@@ -87,8 +107,9 @@ export function ProductImage({
   }
 
   return (
-    <div className={`inline-block overflow-hidden ${isLoading ? 'animate-pulse bg-gradient-to-tr from-[var(--porcelaine,#F1ECE3)] via-neutral-100 to-[var(--porcelaine,#F1ECE3)]' : ''}`}>
+    <div className={`inline-block overflow-hidden ${isLoading ? 'bg-[var(--porcelaine,#F1ECE3)] animate-pulse' : ''}`}>
       <Image
+        ref={imgRef}
         src={finalSrc}
         alt={alt || "Image produit"}
         width={width || 500}
@@ -98,9 +119,10 @@ export function ProductImage({
         onLoad={handleLoad}
         priority={priority}
         sizes={sizes}
-        unoptimized={unoptimized || isSvgOrData}
+        unoptimized={shouldUseDirectCdn}
         quality={quality}
       />
     </div>
   );
 }
+

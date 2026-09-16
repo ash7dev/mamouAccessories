@@ -57,7 +57,7 @@ export async function sendAdminOrderEmail(order: OrderEmailData): Promise<{ succ
 
   try {
     const resend = new Resend(apiKey);
-    const fromEmail = process.env.RESEND_FROM_EMAIL || 'Mamou Accessoires <onboarding@resend.dev>';
+    const fromEmail = process.env.RESEND_FROM_EMAIL || 'Mamou Accessoires <contact@mamouaccessories.com>';
     const adminRecipient = process.env.ADMIN_NOTIFICATION_EMAIL || ADMIN_EMAIL;
     const envUrl = process.env.NEXT_PUBLIC_SITE_URL;
     const siteUrl = envUrl && !envUrl.includes('localhost') ? envUrl : 'https://www.mamouaccessories.com';

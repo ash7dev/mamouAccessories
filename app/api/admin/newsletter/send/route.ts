@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
     }
 
     const resend = new Resend(apiKey);
-    const fromEmail = process.env.RESEND_FROM_EMAIL || 'Mamou Accessoires <onboarding@resend.dev>';
+    const fromEmail = process.env.RESEND_FROM_EMAIL || 'Mamou Accessoires <contact@mamouaccessories.com>';
     const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL || 'mariamkoita095@gmail.com';
 
     // Générer le code HTML élégant
@@ -125,21 +125,29 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Enregistrer la campagne dans l'historique
-    await supabase.from('newsletter_campaigns').insert({
-      subject: body.subject,
-      template_type: body.templateType,
-      recipients_count: successCount,
-      body_content: body.message,
-      status: failCount === 0 ? 'sent' : 'partial',
-      sent_at: new Date().toISOString(),
-    });
+    // Enregistrer la campagne dans l'historique (si la table existe)
+    try {
+      const { error: insertError } = await supabase.from('newsletter_campaigns').insert({
+        subject: body.subject,
+        template_type: body.templateType,
+        recipients_count: successCount,
+        body_content: body.message,
+        status: failCount === 0 ? 'sent' : 'partial',
+        sent_at: new Date().toISOString(),
+      });
+
+      if (insertError) {
+        console.warn('⚠️ [Newsletter Campaigns Table Warning]:', insertError.message);
+      }
+    } catch (e: any) {
+      console.warn('⚠️ [Newsletter Campaigns Table Exception]:', e?.message || e);
+    }
 
     if (successCount === 0 && failCount > 0) {
       return NextResponse.json(
         {
           error:
-            "En mode gratuit Resend (onboarding@resend.dev), vous pouvez envoyer des emails de test uniquement vers mariamkoita095@gmail.com. Pour envoyer à toutes vos clientes, vous devez vérifier votre domaine mamouaccessories.com sur Resend (Domains > Add Domain).",
+            "Échec de l'envoi via Resend. Si votre domaine n'est pas encore vérifié sur Resend, utilisez 'onboarding@resend.dev' comme expéditeur et vérifiez votre dossier Spams/Courriers indésirables.",
         },
         { status: 403 }
       );
@@ -158,3 +166,4 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+

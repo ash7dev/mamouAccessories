@@ -118,7 +118,7 @@ export default function ProductsPage() {
 
   if (isLoading) {
     return (
-      <div className="p-6 lg:p-8">
+      <div className="p-3.5 sm:p-6 lg:p-8">
         <div className="mx-auto max-w-7xl space-y-6">
           <div className="h-44 w-full animate-pulse rounded-3xl bg-neutral-900/10 border border-[var(--laiton)]/20" />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -132,7 +132,7 @@ export default function ProductsPage() {
   }
 
   return (
-    <div className="p-6 lg:p-8">
+    <div className="p-3.5 sm:p-6 lg:p-8">
       <ProductsHeader
         totalCount={stats.totalCount}
         activeCount={stats.activeCount}

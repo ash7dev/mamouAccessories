@@ -50,9 +50,9 @@ export function AdminPageHeader({
   };
 
   return (
-    <div className="-mx-6 -mt-6 mb-6 lg:-mx-8 lg:-mt-8">
+    <div className="-mx-3.5 -mt-3.5 sm:-mx-6 sm:-mt-6 mb-6 lg:-mx-8 lg:-mt-8">
       {/* ===== Bandeau sombre ===== */}
-      <div className="relative overflow-hidden rounded-b-3xl bg-[#241B14] px-6 pb-6 pt-6 lg:px-8">
+      <div className="relative overflow-hidden rounded-b-3xl bg-[#241B14] px-4 pb-5 pt-5 sm:px-6 sm:pb-6 sm:pt-6 lg:px-8">
         {/* Ornement signature : cercles concentriques dorés */}
         <div aria-hidden className="pointer-events-none absolute -right-12 -top-12 opacity-60">
           <div className="h-44 w-44 rounded-full border border-[var(--gold)]/15" />
@@ -61,20 +61,20 @@ export function AdminPageHeader({
         </div>
 
         <div className="relative mx-auto max-w-5xl">
-          <div className={`flex items-center justify-between gap-4 ${searchPlaceholder ? "mb-5" : ""}`}>
+          <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 ${searchPlaceholder ? "mb-4 sm:mb-5" : ""}`}>
             <div>
-              <div className="flex items-center gap-2.5">
-                <h1 className="font-serif text-2xl lg:text-3xl font-semibold tracking-tight text-[#F4EFE6]">{title}</h1>
+              <div className="flex items-center gap-2.5 flex-wrap">
+                <h1 className="font-serif text-xl sm:text-2xl lg:text-3xl font-semibold tracking-tight text-[#F4EFE6]">{title}</h1>
                 {typeof count === "number" && (
                   <span className="font-mono rounded-full bg-white/10 px-3 py-0.5 text-xs font-bold text-[var(--laiton-clair,#D9AE78)] border border-[var(--laiton,#B9793E)]/25 tabular-nums">
                     {count}
                   </span>
                 )}
               </div>
-              {subtitle && <p className="mt-1 text-xs lg:text-sm font-sans tracking-wide text-[#F4EFE6]/60">{subtitle}</p>}
+              {subtitle && <p className="mt-1 text-xs lg:text-sm font-sans tracking-wide text-[#F4EFE6]/60 leading-relaxed">{subtitle}</p>}
             </div>
 
-            {action}
+            {action && <div className="self-start sm:self-auto shrink-0">{action}</div>}
           </div>
 
           {searchPlaceholder && (
@@ -85,7 +85,7 @@ export function AdminPageHeader({
                 placeholder={searchPlaceholder}
                 value={searchQuery}
                 onChange={(e) => handleSearch(e.target.value)}
-                className="w-full rounded-full border border-white/10 bg-white/5 py-3 pl-12 pr-4 text-xs font-sans tracking-wide text-[#F4EFE6] placeholder:text-[#F4EFE6]/35 transition-colors focus:border-[var(--laiton)]/50 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-[var(--laiton)]/25"
+                className="w-full rounded-full border border-white/10 bg-white/5 py-2.5 sm:py-3 pl-12 pr-4 text-xs font-sans tracking-wide text-[#F4EFE6] placeholder:text-[#F4EFE6]/35 transition-colors focus:border-[var(--laiton)]/50 focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-[var(--laiton)]/25"
               />
             </div>
           )}
@@ -94,7 +94,7 @@ export function AdminPageHeader({
 
       {/* ===== Contenu sous le bandeau (filtres, onglets…) ===== */}
       {below && (
-        <div className="mx-auto mt-5 max-w-5xl px-6 lg:px-8">{below}</div>
+        <div className="mx-auto mt-4 sm:mt-5 max-w-5xl px-3.5 sm:px-6 lg:px-8">{below}</div>
       )}
     </div>
   );

@@ -114,3 +114,28 @@ export async function broadcastOrderPushNotification(payload: {
   const sendPromises = subs.map(sub => sendPushNotification(sub, { title, body, url }));
   await Promise.allSettled(sendPromises);
 }
+
+export async function broadcastLowStockPushNotification(payload: {
+  productName: string;
+  remainingStock: number;
+  productId?: string;
+}) {
+  initVapidKeys();
+
+  const title = payload.remainingStock === 0 
+    ? `🚨 RUPTURE DE STOCK • ${payload.productName}`
+    : `⚠️ STOCK FAIBLE • ${payload.productName}`;
+    
+  const body = payload.remainingStock === 0
+    ? `Il ne reste plus aucune pièce disponible pour "${payload.productName}".`
+    : `Plus que ${payload.remainingStock} pièce(s) disponible(s) pour "${payload.productName}".`;
+
+  const url = payload.productId ? `/admin/products/${payload.productId}/edit` : '/admin/products';
+
+  const subs = await getStoredSubscriptions();
+  if (subs.length === 0) return;
+
+  const sendPromises = subs.map(sub => sendPushNotification(sub, { title, body, url }));
+  await Promise.allSettled(sendPromises);
+}
+

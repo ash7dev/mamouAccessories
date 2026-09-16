@@ -57,6 +57,16 @@ export default function SettingsPage() {
         registration = await navigator.serviceWorker.register("/sw.js");
       }
 
+      // Désabonner l'ancienne souscription si la clé a changé pour éviter InvalidStateError
+      const existingSub = await registration.pushManager.getSubscription();
+      if (existingSub) {
+        try {
+          await existingSub.unsubscribe();
+        } catch (e) {
+          console.warn("Erreur désinscription push précédente:", e);
+        }
+      }
+
       const permission = await Notification.requestPermission();
       setPushStatus(permission as any);
 
@@ -100,6 +110,27 @@ export default function SettingsPage() {
       toast.error(err.message || "Erreur lors de l'activation des notifications Push.");
     } finally {
       setIsSubscribingPush(false);
+    }
+  };
+
+  const [isSendingTestPush, setIsSendingTestPush] = useState(false);
+
+  const handleTestPush = async () => {
+    setIsSendingTestPush(true);
+    try {
+      const res = await fetch("/api/admin/push/test", { method: "POST" });
+      const data = await res.json();
+      if (res.ok) {
+        toast.success("🔔 Notification Push de test envoyée avec succès !", {
+          description: "Vérifiez votre écran ou centre de notifications.",
+        });
+      } else {
+        toast.error(data.error || "Erreur lors de l'envoi de la notification de test.");
+      }
+    } catch (err: any) {
+      toast.error("Impossible d'envoyer la notification Push de test.");
+    } finally {
+      setIsSendingTestPush(false);
     }
   };
   const [formData, setFormData] = useState<SettingsData>({
@@ -174,12 +205,12 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="p-6 lg:p-8">
+    <div className="p-3.5 sm:p-6 lg:p-8">
       {/* Settings Header */}
       <ParametreHeader saveState={saveState} />
 
       {/* Settings Content */}
-      <div className="mt-6 space-y-6">
+      <div className="mt-4 sm:mt-6 space-y-4 sm:space-y-6">
         {/* Wave Link Section */}
         <SettingsSection
           icon={<CreditCard className="h-6 w-6 text-[var(--laiton,#B9793E)]" />}
@@ -202,7 +233,7 @@ export default function SettingsPage() {
             <button
               onClick={() => saveSettings(["wave_link"])}
               disabled={saveState === "saving"}
-              className="rounded-full bg-[var(--obsidienne,#0E0B09)] px-6 py-2.5 text-sm font-medium text-[var(--porcelaine,#F1ECE3)] transition-all hover:bg-[var(--laiton,#B9793E)] active:scale-95 disabled:opacity-50"
+              className="w-full sm:w-auto rounded-full bg-[var(--obsidienne,#0E0B09)] px-6 py-2.5 text-sm font-medium text-[var(--porcelaine,#F1ECE3)] transition-all hover:bg-[var(--laiton,#B9793E)] active:scale-95 disabled:opacity-50"
             >
               {saveState === "saving" ? "Enregistrement..." : "Enregistrer"}
             </button>
@@ -305,7 +336,7 @@ export default function SettingsPage() {
             <button
               onClick={() => saveSettings(["delivery_fee_zone1", "delivery_fee_zone2", "delivery_fee_zone3", "delivery_fee_zone4", "delivery_fee_zone5", "delivery_days"])}
               disabled={saveState === "saving"}
-              className="rounded-full bg-[var(--obsidienne,#0E0B09)] px-6 py-2.5 text-sm font-medium text-[var(--porcelaine,#F1ECE3)] transition-all hover:bg-[var(--laiton,#B9793E)] active:scale-95 disabled:opacity-50"
+              className="w-full sm:w-auto rounded-full bg-[var(--obsidienne,#0E0B09)] px-6 py-2.5 text-sm font-medium text-[var(--porcelaine,#F1ECE3)] transition-all hover:bg-[var(--laiton,#B9793E)] active:scale-95 disabled:opacity-50"
             >
               {saveState === "saving" ? "Enregistrement..." : "Enregistrer les tarifs de livraison"}
             </button>
@@ -334,7 +365,7 @@ export default function SettingsPage() {
             <button
               onClick={() => saveSettings(["whatsapp_number"])}
               disabled={saveState === "saving"}
-              className="rounded-full bg-[var(--obsidienne,#0E0B09)] px-6 py-2.5 text-sm font-medium text-[var(--porcelaine,#F1ECE3)] transition-all hover:bg-[var(--laiton,#B9793E)] active:scale-95 disabled:opacity-50"
+              className="w-full sm:w-auto rounded-full bg-[var(--obsidienne,#0E0B09)] px-6 py-2.5 text-sm font-medium text-[var(--porcelaine,#F1ECE3)] transition-all hover:bg-[var(--laiton,#B9793E)] active:scale-95 disabled:opacity-50"
             >
               {saveState === "saving" ? "Enregistrement..." : "Enregistrer"}
             </button>
@@ -375,7 +406,7 @@ export default function SettingsPage() {
             <button
               onClick={() => saveSettings(["store_name", "store_description"])}
               disabled={saveState === "saving"}
-              className="rounded-full bg-[var(--obsidienne,#0E0B09)] px-6 py-2.5 text-sm font-medium text-[var(--porcelaine,#F1ECE3)] transition-all hover:bg-[var(--laiton,#B9793E)] active:scale-95 disabled:opacity-50"
+              className="w-full sm:w-auto rounded-full bg-[var(--obsidienne,#0E0B09)] px-6 py-2.5 text-sm font-medium text-[var(--porcelaine,#F1ECE3)] transition-all hover:bg-[var(--laiton,#B9793E)] active:scale-95 disabled:opacity-50"
             >
               {saveState === "saving" ? "Enregistrement..." : "Enregistrer"}
             </button>
@@ -390,17 +421,17 @@ export default function SettingsPage() {
         >
           <div className="space-y-4">
             {/* Son notification Ping (Shopify Style) */}
-            <div className="rounded-2xl bg-[var(--porcelaine,#F1ECE3)]/60 border border-[var(--laiton,#B9793E)]/20 p-4 space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white text-[var(--laiton,#B9793E)] shadow-xs">
+            <div className="rounded-2xl bg-[var(--porcelaine,#F1ECE3)]/60 border border-[var(--laiton,#B9793E)]/20 p-3.5 sm:p-4 space-y-3">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-[var(--laiton,#B9793E)] shadow-xs">
                     {soundEnabled ? <Volume2 className="h-5 w-5" /> : <VolumeX className="h-5 w-5 text-gray-400" />}
                   </div>
-                  <div>
-                    <p className="text-sm font-semibold text-[var(--obsidienne,#0E0B09)]">
+                  <div className="min-w-0">
+                    <p className="text-xs sm:text-sm font-semibold text-[var(--obsidienne,#0E0B09)]">
                       Son Ping de nouvelle commande
                     </p>
-                    <p className="text-xs text-[var(--obsidienne,#0E0B09)]/60">
+                    <p className="text-[11px] sm:text-xs text-[var(--obsidienne,#0E0B09)]/60">
                       Alerte sonore instantanée à chaque commande reçue
                     </p>
                   </div>
@@ -418,7 +449,7 @@ export default function SettingsPage() {
                       toast.info("Son des notifications désactivé");
                     }
                   }}
-                  className={`relative h-6 w-11 rounded-full transition-colors ${soundEnabled ? "bg-[var(--laiton,#B9793E)]" : "bg-gray-300"}`}
+                  className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${soundEnabled ? "bg-[var(--laiton,#B9793E)]" : "bg-gray-300"}`}
                 >
                   <span className={`absolute top-1 h-4 w-4 rounded-full bg-white transition-transform ${soundEnabled ? "right-1" : "left-1"}`} />
                 </button>
@@ -461,32 +492,32 @@ export default function SettingsPage() {
             </div>
 
             {/* Carte Push Web Notification (Style WhatsApp / Arrière-plan) */}
-            <div className="rounded-2xl bg-gradient-to-br from-[#19130F] to-[#0E0B09] border border-[var(--laiton,#B9793E)]/40 p-4 sm:p-5 text-white shadow-md space-y-3">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <div className="inline-flex items-center gap-1.5 rounded-full bg-[var(--laiton,#B9793E)]/20 border border-[var(--laiton,#B9793E)]/40 px-2.5 py-0.5 text-[10px] font-bold text-[var(--laiton-clair,#D9AE78)] uppercase tracking-wider mb-1">
+            <div className="rounded-2xl bg-gradient-to-br from-[#19130F] to-[#0E0B09] border border-[var(--laiton,#B9793E)]/40 p-3.5 sm:p-5 text-white shadow-md space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                <div className="space-y-1 min-w-0">
+                  <div className="inline-flex items-center gap-1.5 rounded-full bg-[var(--laiton,#B9793E)]/20 border border-[var(--laiton,#B9793E)]/40 px-2.5 py-0.5 text-[10px] font-bold text-[var(--laiton-clair,#D9AE78)] uppercase tracking-wider">
                     📲 Alertes Web Push Mobile & PC
                   </div>
-                  <h4 className="font-serif text-base font-bold text-[#F1ECE3]">
+                  <h4 className="font-serif text-base sm:text-lg font-bold text-[#F1ECE3]">
                     Notifications Push (Style WhatsApp)
                   </h4>
-                  <p className="text-xs text-white/60 mt-1 leading-relaxed">
+                  <p className="text-xs text-white/70 leading-relaxed">
                     Recevez une alerte sonore et visuelle instantanée directement sur l&apos;écran de votre téléphone (même si l&apos;application est fermée).
                   </p>
                 </div>
 
-                <div className="shrink-0 pt-1">
+                <div className="shrink-0 self-start sm:self-auto pt-1 sm:pt-0">
                   {pushStatus === "granted" ? (
-                    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-400 bg-emerald-950/80 border border-emerald-700/60 px-2.5 py-1 rounded-full">
+                    <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-400 bg-emerald-950/80 border border-emerald-700/60 px-3 py-1 rounded-full">
                       <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
                       Actif sur cet appareil
                     </span>
                   ) : pushStatus === "denied" ? (
-                    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-red-400 bg-red-950/80 border border-red-700/60 px-2.5 py-1 rounded-full">
+                    <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-red-400 bg-red-950/80 border border-red-700/60 px-3 py-1 rounded-full">
                       Bloqué par le navigateur
                     </span>
                   ) : (
-                    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-300 bg-amber-950/80 border border-amber-700/60 px-2.5 py-1 rounded-full">
+                    <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-amber-300 bg-amber-950/80 border border-amber-700/60 px-3 py-1 rounded-full">
                       Non activé
                     </span>
                   )}
@@ -508,33 +539,42 @@ export default function SettingsPage() {
                     "Activer les Notifications Push"
                   )}
                 </button>
+
+                <button
+                  type="button"
+                  onClick={handleTestPush}
+                  disabled={isSendingTestPush}
+                  className="flex-1 flex items-center justify-center gap-2 rounded-xl border border-[var(--laiton,#B9793E)]/50 bg-white/10 hover:bg-white/20 text-white py-3 px-4 text-xs font-bold uppercase tracking-wider shadow-sm active:scale-95 transition-all disabled:opacity-50 cursor-pointer"
+                >
+                  {isSendingTestPush ? "Envoi du test..." : "🔔 Tester la Notification Push"}
+                </button>
               </div>
 
-              <p className="text-[10px] text-white/40 italic pt-1">
+              <p className="text-[10px] text-white/50 italic pt-1">
                 💡 Sur iPhone (Safari) : Ajoutez d&apos;abord le site à l&apos;écran d&apos;accueil via Partager ➔ &quot;Sur l&apos;écran d&apos;accueil&quot; pour autoriser les Push Web.
               </p>
             </div>
 
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-[var(--obsidienne,#0E0B09)]">Nouvelles commandes</p>
-                <p className="text-xs text-[var(--obsidienne,#0E0B09)]/60">Recevoir une notification pour chaque nouvelle commande</p>
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0 flex-1">
+                <p className="text-xs sm:text-sm font-medium text-[var(--obsidienne,#0E0B09)]">Nouvelles commandes</p>
+                <p className="text-[11px] sm:text-xs text-[var(--obsidienne,#0E0B09)]/60">Recevoir une notification pour chaque nouvelle commande</p>
               </div>
               <button
                 onClick={() => handleChange("notifications_orders", !formData.notifications_orders)}
-                className={`relative h-6 w-11 rounded-full transition-colors ${formData.notifications_orders ? "bg-[var(--laiton,#B9793E)]" : "bg-gray-300"}`}
+                className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${formData.notifications_orders ? "bg-[var(--laiton,#B9793E)]" : "bg-gray-300"}`}
               >
                 <span className={`absolute top-1 h-4 w-4 rounded-full bg-white transition-transform ${formData.notifications_orders ? "right-1" : "left-1"}`} />
               </button>
             </div>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-[var(--obsidienne,#0E0B09)]">Stock faible</p>
-                <p className="text-xs text-[var(--obsidienne,#0E0B09)]/60">Alerte quand un produit est en stock faible</p>
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0 flex-1">
+                <p className="text-xs sm:text-sm font-medium text-[var(--obsidienne,#0E0B09)]">Stock faible</p>
+                <p className="text-[11px] sm:text-xs text-[var(--obsidienne,#0E0B09)]/60">Alerte quand un produit est en stock faible</p>
               </div>
               <button
                 onClick={() => handleChange("notifications_low_stock", !formData.notifications_low_stock)}
-                className={`relative h-6 w-11 rounded-full transition-colors ${formData.notifications_low_stock ? "bg-[var(--laiton,#B9793E)]" : "bg-gray-300"}`}
+                className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${formData.notifications_low_stock ? "bg-[var(--laiton,#B9793E)]" : "bg-gray-300"}`}
               >
                 <span className={`absolute top-1 h-4 w-4 rounded-full bg-white transition-transform ${formData.notifications_low_stock ? "right-1" : "left-1"}`} />
               </button>

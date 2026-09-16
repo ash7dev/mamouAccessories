@@ -131,170 +131,191 @@ export default function AdminNewsletterPage() {
   };
 
   return (
-    <div className="space-y-8 p-6 lg:p-8 max-w-7xl mx-auto">
-      {/* En-tête Luxe Obsidienne & Laiton */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[var(--obsidienne,#0E0B09)] via-[var(--obsidienne-soft,#17120D)] to-[var(--obsidienne,#0E0B09)] border border-[var(--laiton,#B9793E)]/30 p-6 sm:p-8 lg:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.6)]">
-        {/* Ligne filet laiton supérieure */}
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[var(--laiton-clair,#D9AE78)] to-transparent opacity-80" />
+    <div className="-mx-6 -mt-6 mb-8 lg:-mx-8 lg:-mt-8 space-y-6 font-sans">
+      {/* ===== Hero Banner Haute Joaillerie (Executive Header) ===== */}
+      <div className="relative overflow-hidden rounded-b-[3rem] bg-gradient-to-r from-[var(--obsidienne,#0E0B09)] via-[var(--obsidienne-soft,#17120D)] to-[var(--obsidienne,#0E0B09)] px-6 pb-10 pt-10 lg:px-10 shadow-2xl border-b border-[var(--laiton,#B9793E)]/25 text-[var(--porcelaine,#F1ECE3)]">
+        {/* Cercles ornementaux dorés d'ambiance */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-[var(--laiton,#B9793E)]/15 via-[#D9AE78]/5 to-transparent rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-10 w-72 h-72 bg-[var(--laiton,#B9793E)]/10 rounded-full blur-2xl pointer-events-none" />
 
-        {/* Ornements dorés concentriques d'arrière-plan */}
-        <div aria-hidden className="pointer-events-none absolute -right-20 -top-20 opacity-25">
-          <div className="h-80 w-80 rounded-full border border-[var(--laiton,#B9793E)]/30 animate-spin-slow" />
-          <div className="absolute inset-10 rounded-full border border-[var(--laiton,#B9793E)]/40" />
-        </div>
-
-        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-          <div className="max-w-2xl">
-            {/* Tag Badge */}
-            <div className="inline-flex items-center gap-2 rounded-full bg-[var(--laiton,#B9793E)]/15 border border-[var(--laiton,#B9793E)]/35 px-3.5 py-1 text-[11px] font-bold uppercase tracking-[0.25em] text-[var(--laiton-clair,#D9AE78)] mb-3">
-              <Sparkles className="w-3.5 h-3.5 text-[var(--laiton-clair)] animate-pulse" />
-              <span>CERCLE PRIVÉ &amp; STUDIO MARKETING</span>
+        <div className="relative z-10 mx-auto max-w-7xl">
+          {/* Ligne 1 : Titre + Bouton d'action principal */}
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 pb-8 border-b border-[var(--laiton,#B9793E)]/20">
+            <div>
+              <div className="inline-flex items-center gap-2 rounded-full border border-[var(--laiton,#B9793E)]/40 bg-[var(--laiton,#B9793E)]/10 px-4 py-1 text-[10px] font-extrabold tracking-[0.25em] text-[var(--laiton-clair,#D9AE78)] uppercase mb-3 backdrop-blur-md shadow-inner">
+                <Sparkles className="h-3 w-3 stroke-[2]" />
+                Marketing &amp; Fidélisation Client
+              </div>
+              <h1 className="font-serif text-2xl lg:text-4xl font-semibold tracking-tight text-[var(--porcelaine,#F1ECE3)]">
+                Studio Marketing &amp; Newsletter
+              </h1>
+              <p className="mt-1.5 text-xs lg:text-sm tracking-wide text-[var(--porcelaine,#F1ECE3)]/65 max-w-xl">
+                Concevez, prévisualisez en direct et diffusez des emails d&apos;exception à vos abonnées.
+              </p>
             </div>
 
-            {/* Titre Luxe */}
-            <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white leading-tight">
-              Studio Marketing &amp; Newsletter
-            </h1>
-
-            {/* Sous-titre */}
-            <p className="text-sm sm:text-base text-[var(--porcelaine,#F1ECE3)]/75 leading-relaxed mt-2 font-sans">
-              Concevez, prévisualisez en direct et diffusez des emails d&apos;exception à vos abonnées privilégiées.
-            </p>
+            <div className="flex items-center gap-3 shrink-0">
+              <button
+                type="button"
+                onClick={() => setIsModalOpen(true)}
+                className="group inline-flex items-center justify-center gap-2.5 rounded-full bg-gradient-to-r from-[var(--laiton,#B9793E)] via-[#D9AE78] to-[var(--laiton,#B9793E)] px-7 py-3.5 text-xs font-sans font-bold tracking-wider text-[var(--obsidienne,#0E0B09)] shadow-[0_8px_25px_rgba(185,121,62,0.3)] transition-all hover:brightness-110 active:scale-95 uppercase cursor-pointer"
+              >
+                <PlusCircle className="h-4 w-4 stroke-[2.5]" />
+                <span>Créer une Campagne Email</span>
+              </button>
+            </div>
           </div>
 
-          {/* Bouton d'action principal avec effet Glow */}
-          <div className="shrink-0 w-full md:w-auto">
+          {/* Ligne 2 : Executive KPI Bar */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-6">
+            {/* Abonnées */}
+            <div className="rounded-2xl border border-[var(--laiton,#B9793E)]/20 bg-[var(--obsidienne-soft,#17120D)]/80 p-3.5 flex items-center gap-3.5 backdrop-blur-md">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--laiton,#B9793E)]/15 text-[var(--laiton-clair,#D9AE78)] border border-[var(--laiton)]/25">
+                <Users className="h-5 w-5" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-[var(--laiton-clair,#D9AE78)]">
+                  Cercle Privé
+                </p>
+                <p className="font-mono text-lg font-bold text-[var(--porcelaine,#F1ECE3)] tabular-nums leading-none mt-0.5">
+                  {subscribers.length} Abonnée(s)
+                </p>
+              </div>
+            </div>
+
+            {/* Campagnes */}
+            <div className="rounded-2xl border border-purple-500/20 bg-purple-950/20 p-3.5 flex items-center gap-3.5 backdrop-blur-md">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-purple-500/15 text-purple-400 border border-purple-500/25">
+                <Send className="h-5 w-5" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-purple-300">
+                  Campagnes Diffusées
+                </p>
+                <p className="font-mono text-lg font-bold text-white tabular-nums leading-none mt-0.5">
+                  {campaigns.length} Créée(s)
+                </p>
+              </div>
+            </div>
+
+            {/* Service Resend */}
+            <div className="rounded-2xl border border-emerald-500/20 bg-emerald-950/20 p-3.5 flex items-center gap-3.5 backdrop-blur-md">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/25">
+                <Sparkles className="h-5 w-5" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-emerald-300">
+                  Service Email API
+                </p>
+                <p className="font-sans text-xs font-bold text-emerald-300 leading-none mt-0.5 flex items-center gap-1.5">
+                  <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                  Resend Connecté
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Ligne 3 : Barre de Recherche Haute Joaillerie */}
+          {activeTab === "subscribers" && (
+            <div className="pt-6">
+              <div className="relative w-full">
+                <Search className="absolute left-4.5 top-1/2 h-4.5 w-4.5 -translate-y-1/2 text-[var(--laiton,#B9793E)]" />
+                <input
+                  type="text"
+                  placeholder="Rechercher une abonnée par adresse email..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full rounded-2xl border border-[var(--laiton,#B9793E)]/35 bg-[var(--obsidienne,#0E0B09)]/90 py-4 pl-12 pr-10 text-xs sm:text-sm text-[var(--porcelaine,#F1ECE3)] placeholder:text-[var(--porcelaine,#F1ECE3)]/35 transition-all focus:border-[var(--laiton,#B9793E)] focus:bg-[var(--obsidienne,#0E0B09)] focus:outline-none focus:ring-2 focus:ring-[var(--laiton,#B9793E)]/30 shadow-inner font-sans"
+                />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery("")}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-[var(--laiton-clair,#D9AE78)] hover:underline font-medium"
+                  >
+                    Effacer
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ===== Barre d'Onglets & Actions d'Export (Filtres Rapides) ===== */}
+      <div className="mx-auto max-w-7xl px-6 lg:px-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="scrollbar-none -mx-1 flex gap-2 overflow-x-auto px-1 py-1">
             <button
+              key="subscribers"
               type="button"
-              onClick={() => setIsModalOpen(true)}
-              className="group relative flex items-center justify-center gap-3 w-full md:w-auto px-7 py-4 rounded-2xl bg-gradient-to-r from-[var(--laiton,#B9793E)] via-[#D9AE78] to-[var(--laiton,#B9793E)] text-[var(--obsidienne,#0E0B09)] text-xs sm:text-sm font-extrabold uppercase tracking-wider shadow-[0_10px_35px_rgba(185,121,62,0.4)] hover:shadow-[0_15px_45px_rgba(185,121,62,0.6)] hover:scale-[1.03] active:scale-[0.98] transition-all duration-300 cursor-pointer"
+              onClick={() => setActiveTab("subscribers")}
+              className={`shrink-0 rounded-full px-5 py-2.5 text-xs font-semibold uppercase tracking-wider transition-all flex items-center gap-2 ${
+                activeTab === "subscribers"
+                  ? "bg-[var(--obsidienne,#0E0B09)] text-[var(--porcelaine,#F1ECE3)] shadow-md ring-2 ring-[var(--laiton,#B9793E)]/40"
+                  : "border border-[var(--laiton,#B9793E)]/25 bg-white text-[var(--obsidienne,#0E0B09)]/75 hover:border-[var(--laiton,#B9793E)]/60 hover:text-[var(--obsidienne,#0E0B09)]"
+              }`}
             >
-              <PlusCircle className="w-5 h-5 transition-transform group-hover:rotate-90" />
-              <span>Créer une Campagne Email</span>
-              <Sparkles className="w-4 h-4 text-[var(--obsidienne)] animate-bounce" />
+              <Users className="w-3.5 h-3.5" />
+              Abonnées ({subscribers.length})
+            </button>
+
+            <button
+              key="history"
+              type="button"
+              onClick={() => setActiveTab("history")}
+              className={`shrink-0 rounded-full px-5 py-2.5 text-xs font-semibold uppercase tracking-wider transition-all flex items-center gap-2 ${
+                activeTab === "history"
+                  ? "bg-[var(--obsidienne,#0E0B09)] text-[var(--porcelaine,#F1ECE3)] shadow-md ring-2 ring-[var(--laiton,#B9793E)]/40"
+                  : "border border-[var(--laiton,#B9793E)]/25 bg-white text-[var(--obsidienne,#0E0B09)]/75 hover:border-[var(--laiton,#B9793E)]/60 hover:text-[var(--obsidienne,#0E0B09)]"
+              }`}
+            >
+              <History className="w-3.5 h-3.5" />
+              Historique Campagnes ({campaigns.length})
             </button>
           </div>
+
+          {activeTab === "subscribers" && (
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={copyAllEmails}
+                disabled={subscribers.length === 0}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-[var(--obsidienne,#0E0B09)] border border-[var(--laiton,#B9793E)]/30 text-xs font-semibold text-[var(--laiton-clair,#D9AE78)] hover:bg-[var(--laiton,#B9793E)]/20 transition-all disabled:opacity-50 cursor-pointer shadow-sm"
+              >
+                {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                <span>{copied ? "Copié !" : "Copier emails"}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={exportCSV}
+                disabled={subscribers.length === 0}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-white border border-[var(--laiton,#B9793E)]/25 text-xs font-semibold text-[var(--obsidienne,#0E0B09)] hover:border-[var(--laiton,#B9793E)] transition-all disabled:opacity-50 cursor-pointer shadow-sm"
+              >
+                <Download className="w-3.5 h-3.5 text-[var(--laiton,#B9793E)]" />
+                <span>CSV</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={fetchSubscribers}
+                disabled={isLoading}
+                className="p-2.5 rounded-full border border-[var(--laiton,#B9793E)]/25 bg-white text-[var(--obsidienne,#0E0B09)] hover:border-[var(--laiton,#B9793E)] transition-all cursor-pointer shadow-sm"
+                title="Actualiser la liste"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? "animate-spin" : ""}`} />
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Cartes de Statistiques */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <div className="p-5 rounded-2xl border border-[var(--laiton,#B9793E)]/20 bg-[var(--obsidienne-soft,#17120D)] flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-[var(--laiton,#B9793E)]/15 border border-[var(--laiton,#B9793E)]/30 flex items-center justify-center text-[var(--laiton-clair,#D9AE78)]">
-            <Users className="w-6 h-6" />
-          </div>
-          <div>
-            <span className="text-2xl font-bold text-[var(--porcelaine,#F1ECE3)]">
-              {subscribers.length}
-            </span>
-            <p className="text-xs text-[var(--porcelaine,#F1ECE3)]/60 font-medium">
-              Abonnées au Cercle Privé
-            </p>
-          </div>
-        </div>
-
-        <div className="p-5 rounded-2xl border border-[var(--laiton,#B9793E)]/20 bg-[var(--obsidienne-soft,#17120D)] flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-purple-400">
-            <Send className="w-6 h-6" />
-          </div>
-          <div>
-            <span className="text-2xl font-bold text-[var(--porcelaine,#F1ECE3)]">
-              {campaigns.length}
-            </span>
-            <p className="text-xs text-[var(--porcelaine,#F1ECE3)]/60 font-medium">
-              Campagnes créées
-            </p>
-          </div>
-        </div>
-
-        <div className="p-5 rounded-2xl border border-[var(--laiton,#B9793E)]/20 bg-[var(--obsidienne-soft,#17120D)] flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
-            <Sparkles className="w-6 h-6" />
-          </div>
-          <div>
-            <span className="text-2xl font-bold text-[var(--porcelaine,#F1ECE3)]">
-              Resend API
-            </span>
-            <p className="text-xs text-[var(--porcelaine,#F1ECE3)]/60 font-medium">
-              Statut Délivrabilité Connecté
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Navigation par Onglets */}
-      <div className="flex items-center justify-between border-b border-[var(--laiton,#B9793E)]/20 pb-4">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => setActiveTab("subscribers")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-              activeTab === "subscribers"
-                ? "bg-[var(--laiton,#B9793E)] text-[var(--obsidienne,#0E0B09)] shadow-md"
-                : "text-[var(--porcelaine,#F1ECE3)]/60 hover:text-[var(--porcelaine,#F1ECE3)] hover:bg-[var(--obsidienne-soft,#17120D)]"
-            }`}
-          >
-            <Users className="w-4 h-4" />
-            Abonnées ({subscribers.length})
-          </button>
-
-          <button
-            onClick={() => setActiveTab("history")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-              activeTab === "history"
-                ? "bg-[var(--laiton,#B9793E)] text-[var(--obsidienne,#0E0B09)] shadow-md"
-                : "text-[var(--porcelaine,#F1ECE3)]/60 hover:text-[var(--porcelaine,#F1ECE3)] hover:bg-[var(--obsidienne-soft,#17120D)]"
-            }`}
-          >
-            <History className="w-4 h-4" />
-            Historique Campagnes ({campaigns.length})
-          </button>
-        </div>
-
+      {/* Contenu Onglets */}
+      <div className="mx-auto max-w-7xl px-6 lg:px-8">
+        {/* Contenu Onglet 1 : Abonnées */}
         {activeTab === "subscribers" && (
-          <div className="flex items-center gap-2">
-            <button
-              onClick={copyAllEmails}
-              disabled={subscribers.length === 0}
-              className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[var(--obsidienne-soft,#17120D)] border border-[var(--laiton,#B9793E)]/30 text-xs font-semibold text-[var(--laiton-clair,#D9AE78)] hover:bg-[var(--laiton,#B9793E)]/20 transition-all disabled:opacity-50"
-            >
-              {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
-              {copied ? "Copié !" : "Copier emails"}
-            </button>
-
-            <button
-              onClick={exportCSV}
-              disabled={subscribers.length === 0}
-              className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[var(--obsidienne-soft,#17120D)] border border-[var(--laiton,#B9793E)]/30 text-xs font-semibold text-[var(--porcelaine,#F1ECE3)] hover:border-[var(--laiton,#B9793E)] transition-all disabled:opacity-50"
-            >
-              <Download className="w-4 h-4" />
-              CSV
-            </button>
-
-            <button
-              onClick={fetchSubscribers}
-              disabled={isLoading}
-              className="p-2 rounded-xl border border-[var(--laiton,#B9793E)]/30 bg-[var(--obsidienne-soft,#17120D)] text-[var(--porcelaine,#F1ECE3)] hover:border-[var(--laiton,#B9793E)] transition-all"
-              title="Actualiser la liste"
-            >
-              <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />
-            </button>
-          </div>
-        )}
-      </div>
-
-      {/* Contenu Onglet 1 : Abonnées */}
-      {activeTab === "subscribers" && (
-        <div className="space-y-4">
-          <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--porcelaine,#F1ECE3)]/40" />
-            <input
-              type="text"
-              placeholder="Rechercher une adresse email..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-11 pr-4 py-3 rounded-xl bg-[var(--obsidienne-soft,#17120D)] border border-[var(--laiton,#B9793E)]/20 text-sm text-[var(--porcelaine,#F1ECE3)] placeholder:text-[var(--porcelaine,#F1ECE3)]/40 focus:outline-none focus:border-[var(--laiton,#B9793E)] transition-all"
-            />
-          </div>
+          <div className="space-y-4">
 
           <div className="rounded-2xl border border-[var(--laiton,#B9793E)]/20 bg-[var(--obsidienne-soft,#17120D)] overflow-hidden shadow-xl">
             {isLoading ? (
@@ -405,6 +426,7 @@ export default function AdminNewsletterPage() {
           )}
         </div>
       )}
+      </div>
 
       {/* Modale Studio de création de campagne */}
       <NewsletterCampaignModal

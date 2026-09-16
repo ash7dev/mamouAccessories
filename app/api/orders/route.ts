@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceRoleClient } from '@/lib/supabase/service-role';
 import type { CreateOrderInput, OrderFilters } from '@/lib/types/order';
-import { broadcastOrderPushNotification } from '@/lib/server/push-server';
+import { broadcastOrderPushNotification, broadcastLowStockPushNotification } from '@/lib/server/push-server';
 import { sendAdminOrderEmail } from '@/lib/server/email-server';
 
 // GET /api/orders - Récupérer toutes les commandes ou filtrer par order_number
@@ -219,14 +219,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Décrémenter le stock des produits
+    // Décrémenter le stock des produits et vérifier l'alerte stock faible
     for (const item of body.items) {
       const product = products.find(p => p.id === item.product_id);
       if (product) {
+        const newStock = Math.max(0, product.stock - item.quantity);
         await supabase
           .from('products')
-          .update({ stock: product.stock - item.quantity })
+          .update({ stock: newStock })
           .eq('id', product.id);
+
+        if (newStock <= 3) {
+          broadcastLowStockPushNotification({
+            productName: product.name,
+            remainingStock: newStock,
+            productId: product.id,
+          }).catch(err => console.error('Error broadcasting low stock push notification:', err));
+        }
       }
     }
 
