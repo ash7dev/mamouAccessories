@@ -143,12 +143,12 @@ export function Sidebar() {
 
           {/* Header Branding */}
           <div className="flex items-center gap-3 px-2 pb-6 border-b border-[var(--laiton,#B9793E)]/15">
-            <Link href="/" className="group flex flex-col leading-none">
+            <Link href="/?client=1" className="group flex flex-col leading-none" title="Voir la boutique client (Mode aperçu)">
               <span className="font-serif text-2xl font-bold tracking-tight text-[var(--porcelaine,#F1ECE3)] group-hover:text-[var(--laiton-clair,#D9AE78)] transition-colors">
                 Mamou&apos;s
               </span>
               <span className="text-[9px] font-sans font-bold tracking-[0.35em] text-[var(--laiton,#B9793E)] uppercase mt-1">
-                ACCESSORIES
+                ACCESSORIES ↗
               </span>
             </Link>
           </div>
