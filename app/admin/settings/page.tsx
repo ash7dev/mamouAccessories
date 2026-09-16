@@ -31,11 +31,77 @@ export default function SettingsPage() {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [soundEnabled, setSoundEnabledState] = useState(true);
   const [selectedSoundType, setSelectedSoundTypeState] = useState<SoundType>("luxe_crystal");
+  const [pushStatus, setPushStatus] = useState<"granted" | "default" | "denied" | "unsupported">("default");
+  const [isSubscribingPush, setIsSubscribingPush] = useState(false);
 
   useEffect(() => {
     setSoundEnabledState(isSoundEnabled());
     setSelectedSoundTypeState(getSoundType());
+    if (typeof window !== "undefined" && "Notification" in window) {
+      setPushStatus(Notification.permission as any);
+    } else {
+      setPushStatus("unsupported");
+    }
   }, []);
+
+  const handleActivatePush = async () => {
+    if (typeof window === "undefined" || !("serviceWorker" in navigator) || !("PushManager" in window)) {
+      toast.error("Votre navigateur ne supporte pas les notifications Push Web.");
+      return;
+    }
+
+    setIsSubscribingPush(true);
+    try {
+      let registration = await navigator.serviceWorker.getRegistration();
+      if (!registration) {
+        registration = await navigator.serviceWorker.register("/sw.js");
+      }
+
+      const permission = await Notification.requestPermission();
+      setPushStatus(permission as any);
+
+      if (permission !== "granted") {
+        toast.error("Permission refusée pour les notifications Push.");
+        setIsSubscribingPush(false);
+        return;
+      }
+
+      const keyRes = await fetch("/api/admin/push/vapid-key");
+      const keyData = await keyRes.json();
+      const publicKey = keyData?.publicKey;
+
+      if (!publicKey) {
+        toast.error("Impossible de récupérer la clé VAPID Push.");
+        setIsSubscribingPush(false);
+        return;
+      }
+
+      const { urlBase64ToUint8Array } = await import("@/lib/push-notifications");
+      const convertedKey = urlBase64ToUint8Array(publicKey) as unknown as BufferSource;
+
+      const subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: convertedKey,
+      });
+
+      const subRes = await fetch("/api/admin/push/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ subscription }),
+      });
+
+      if (subRes.ok) {
+        toast.success("📲 Notifications Push Web (Style WhatsApp) activées avec succès sur cet appareil !");
+      } else {
+        toast.error("Erreur lors de l'enregistrement de l'abonnement Push.");
+      }
+    } catch (err: any) {
+      console.error("Error activating Web Push:", err);
+      toast.error(err.message || "Erreur lors de l'activation des notifications Push.");
+    } finally {
+      setIsSubscribingPush(false);
+    }
+  };
   const [formData, setFormData] = useState<SettingsData>({
     wave_link: "https://pay.wave.com/m/M_sn_wi1Bfmu7HgWY/c/sn/",
     delivery_fee_zone1: "2000",
@@ -392,6 +458,61 @@ export default function SettingsPage() {
                   </div>
                 </div>
               )}
+            </div>
+
+            {/* Carte Push Web Notification (Style WhatsApp / Arrière-plan) */}
+            <div className="rounded-2xl bg-gradient-to-br from-[#19130F] to-[#0E0B09] border border-[var(--laiton,#B9793E)]/40 p-4 sm:p-5 text-white shadow-md space-y-3">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <div className="inline-flex items-center gap-1.5 rounded-full bg-[var(--laiton,#B9793E)]/20 border border-[var(--laiton,#B9793E)]/40 px-2.5 py-0.5 text-[10px] font-bold text-[var(--laiton-clair,#D9AE78)] uppercase tracking-wider mb-1">
+                    📲 Alertes Web Push Mobile & PC
+                  </div>
+                  <h4 className="font-serif text-base font-bold text-[#F1ECE3]">
+                    Notifications Push (Style WhatsApp)
+                  </h4>
+                  <p className="text-xs text-white/60 mt-1 leading-relaxed">
+                    Recevez une alerte sonore et visuelle instantanée directement sur l&apos;écran de votre téléphone (même si l&apos;application est fermée).
+                  </p>
+                </div>
+
+                <div className="shrink-0 pt-1">
+                  {pushStatus === "granted" ? (
+                    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-400 bg-emerald-950/80 border border-emerald-700/60 px-2.5 py-1 rounded-full">
+                      <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                      Actif sur cet appareil
+                    </span>
+                  ) : pushStatus === "denied" ? (
+                    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-red-400 bg-red-950/80 border border-red-700/60 px-2.5 py-1 rounded-full">
+                      Bloqué par le navigateur
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-300 bg-amber-950/80 border border-amber-700/60 px-2.5 py-1 rounded-full">
+                      Non activé
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div className="pt-2 flex flex-col sm:flex-row gap-2.5">
+                <button
+                  type="button"
+                  onClick={handleActivatePush}
+                  disabled={isSubscribingPush}
+                  className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[var(--laiton,#B9793E)] via-[#D9AE78] to-[var(--laiton,#B9793E)] text-[var(--obsidienne,#0E0B09)] py-3 px-4 text-xs font-extrabold uppercase tracking-wider shadow-md hover:brightness-110 active:scale-95 transition-all disabled:opacity-50 cursor-pointer"
+                >
+                  {isSubscribingPush ? (
+                    "Activation en cours..."
+                  ) : pushStatus === "granted" ? (
+                    "Re-synchroniser Push cet appareil"
+                  ) : (
+                    "Activer les Notifications Push"
+                  )}
+                </button>
+              </div>
+
+              <p className="text-[10px] text-white/40 italic pt-1">
+                💡 Sur iPhone (Safari) : Ajoutez d&apos;abord le site à l&apos;écran d&apos;accueil via Partager ➔ &quot;Sur l&apos;écran d&apos;accueil&quot; pour autoriser les Push Web.
+              </p>
             </div>
 
             <div className="flex items-center justify-between">
