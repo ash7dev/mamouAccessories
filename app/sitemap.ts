@@ -1,7 +1,8 @@
 import { MetadataRoute } from 'next';
 import { getAllProductSlugs } from '@/lib/data/product-data';
 
-export const revalidate = 3600; // Régénération du sitemap toutes les heures
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 function getBaseUrl(): string {
   const envUrl = process.env.NEXT_PUBLIC_SITE_URL;
