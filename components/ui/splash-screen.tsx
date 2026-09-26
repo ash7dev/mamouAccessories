@@ -15,6 +15,14 @@ export function SplashScreen() {
   const [fadingOut, setFadingOut] = useState(false);
 
   useEffect(() => {
+    // 0. Réinitialiser la position de défilement tout en haut au rechargement
+    if (typeof window !== "undefined") {
+      if ('scrollRestoration' in window.history) {
+        window.history.scrollRestoration = 'manual';
+      }
+      window.scrollTo(0, 0);
+    }
+
     // 1. Laisser le splash visible pendant 1.1s
     const timer = setTimeout(() => {
       setFadingOut(true);
@@ -23,6 +31,7 @@ export function SplashScreen() {
     // 2. Retirer complètement le composant après l'animation de fondu (700ms)
     const removeTimer = setTimeout(() => {
       setVisible(false);
+      window.scrollTo(0, 0);
     }, 1800);
 
     return () => {
