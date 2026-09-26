@@ -137,7 +137,7 @@ export default function SettingsPage() {
     wave_link: "https://pay.wave.com/m/M_sn_wi1Bfmu7HgWY/c/sn/",
     delivery_fee_zone1: "2000",
     delivery_fee_zone2: "2500",
-    delivery_fee_zone3: "3500",
+    delivery_fee_zone3: "1500",
     delivery_fee_zone4: "3500",
     delivery_fee_zone5: "3500",
     delivery_days: "1",
@@ -161,7 +161,7 @@ export default function SettingsPage() {
           wave_link: data.settings.wave_link || "https://pay.wave.com/m/M_sn_wi1Bfmu7HgWY/c/sn/",
           delivery_fee_zone1: data.settings.delivery_fee_zone1 || "2000",
           delivery_fee_zone2: data.settings.delivery_fee_zone2 || "2500",
-          delivery_fee_zone3: data.settings.delivery_fee_zone3 || "3500",
+          delivery_fee_zone3: data.settings.delivery_fee_zone3 || "1500",
           delivery_fee_zone4: data.settings.delivery_fee_zone4 || "3500",
           delivery_fee_zone5: data.settings.delivery_fee_zone5 || "3500",
           delivery_days: data.settings.delivery_days || "1",
@@ -250,9 +250,9 @@ export default function SettingsPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-bold text-[var(--obsidienne,#0E0B09)] mb-1">
-                  Zone 1 - Dakar (FCFA)
+                  Zone 1 (2 000 FCFA)
                 </label>
-                <p className="text-[11px] text-gray-500 mb-2">Plateau, Fann, Point E, Mermoz, Sacré-Cœur, Liberté, Ouakam, Ngor, Almadies, Yoff, Mamelles</p>
+                <p className="text-[11px] text-gray-500 mb-2">Cité Alioune Sow, Golf, VDN, Castors, Derklé, Yoff, Grand Yoff, Sacré Cœur, Grand Dakar, HLM, Fadia, Cambérène, Point E, Fann, Mermoz, Ouest Foire</p>
                 <input
                   type="number"
                   value={formData.delivery_fee_zone1}
@@ -264,9 +264,9 @@ export default function SettingsPage() {
 
               <div>
                 <label className="block text-xs font-bold text-[var(--obsidienne,#0E0B09)] mb-1">
-                  Zone 2 - Pikine / Guédiawaye (FCFA)
+                  Zone 2 (2 500 FCFA)
                 </label>
-                <p className="text-[11px] text-gray-500 mb-2">Pikine, Guédiawaye, Parcelles Assainies, Grand Yoff, Cambérène</p>
+                <p className="text-[11px] text-gray-500 mb-2">Guédiawaye, Pikine, Almadies, Mamelles, Ouakam, Ngor, Médina, Fass, Plateau, Virage</p>
                 <input
                   type="number"
                   value={formData.delivery_fee_zone2}
@@ -278,41 +278,27 @@ export default function SettingsPage() {
 
               <div>
                 <label className="block text-xs font-bold text-[var(--obsidienne,#0E0B09)] mb-1">
-                  Zone 3 - Thiaroye / Keur Massar (FCFA)
+                  Zone 3 (1 500 FCFA)
                 </label>
-                <p className="text-[11px] text-gray-500 mb-2">Thiaroye, Yeumbeul, Mbao, Keur Massar, Keur Mbaye Fall, Fas Mbao</p>
+                <p className="text-[11px] text-gray-500 mb-2">Nord Foire, Patte d’Oie, Soprime, Parcelles</p>
                 <input
                   type="number"
                   value={formData.delivery_fee_zone3}
                   onChange={(e) => handleChange("delivery_fee_zone3", e.target.value)}
-                  placeholder="3500"
+                  placeholder="1500"
                   className="w-full rounded-2xl border border-[var(--laiton,#B9793E)]/25 bg-white px-4 py-3 text-sm text-[var(--obsidienne,#0E0B09)] focus:border-[var(--laiton,#B9793E)] focus:outline-none focus:ring-2 focus:ring-[var(--laiton,#B9793E)]/20"
                 />
               </div>
 
               <div>
                 <label className="block text-xs font-bold text-[var(--obsidienne,#0E0B09)] mb-1">
-                  Zone 4 - Rufisque / Malika (FCFA)
+                  Zone 4 - Régions du Sénégal
                 </label>
-                <p className="text-[11px] text-gray-500 mb-2">Rufisque, Malika, Tivaouane Peulh, Bargny, Diamniadio, Sangalkam</p>
+                <p className="text-[11px] text-gray-500 mb-2">Partout au Sénégal (Tarif communiqué à la validation de la commande)</p>
                 <input
                   type="number"
                   value={formData.delivery_fee_zone4}
                   onChange={(e) => handleChange("delivery_fee_zone4", e.target.value)}
-                  placeholder="3500"
-                  className="w-full rounded-2xl border border-[var(--laiton,#B9793E)]/25 bg-white px-4 py-3 text-sm text-[var(--obsidienne,#0E0B09)] focus:border-[var(--laiton,#B9793E)] focus:outline-none focus:ring-2 focus:ring-[var(--laiton,#B9793E)]/20"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-[var(--obsidienne,#0E0B09)] mb-1">
-                  Zone 5 - Régions du Sénégal (FCFA)
-                </label>
-                <p className="text-[11px] text-gray-500 mb-2">Thiès, Mbour, Saly, Saint-Louis, Kaolack, Touba, Ziguinchor, Diourbel...</p>
-                <input
-                  type="number"
-                  value={formData.delivery_fee_zone5}
-                  onChange={(e) => handleChange("delivery_fee_zone5", e.target.value)}
                   placeholder="3500"
                   className="w-full rounded-2xl border border-[var(--laiton,#B9793E)]/25 bg-white px-4 py-3 text-sm text-[var(--obsidienne,#0E0B09)] focus:border-[var(--laiton,#B9793E)] focus:outline-none focus:ring-2 focus:ring-[var(--laiton,#B9793E)]/20"
                 />
@@ -334,7 +320,7 @@ export default function SettingsPage() {
             </div>
 
             <button
-              onClick={() => saveSettings(["delivery_fee_zone1", "delivery_fee_zone2", "delivery_fee_zone3", "delivery_fee_zone4", "delivery_fee_zone5", "delivery_days"])}
+              onClick={() => saveSettings(["delivery_fee_zone1", "delivery_fee_zone2", "delivery_fee_zone3", "delivery_fee_zone4", "delivery_days"])}
               disabled={saveState === "saving"}
               className="w-full sm:w-auto rounded-full bg-[var(--obsidienne,#0E0B09)] px-6 py-2.5 text-sm font-medium text-[var(--porcelaine,#F1ECE3)] transition-all hover:bg-[var(--laiton,#B9793E)] active:scale-95 disabled:opacity-50"
             >

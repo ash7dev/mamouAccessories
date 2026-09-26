@@ -4,11 +4,10 @@ import { createServiceRoleClient } from '@/lib/supabase/service-role';
 export const DEFAULT_DELIVERY_FEES = {
   delivery_fee_zone1: 2000,
   delivery_fee_zone2: 2500,
-  delivery_fee_zone3: 3500,
-  delivery_fee_zone4: 3500,
-  delivery_fee_zone5: 3500,
+  delivery_fee_zone3: 1500,
+  delivery_fee_zone4: 0,
   delivery_fee_dakar: 2000,
-  delivery_fee_regions: 3500,
+  delivery_fee_regions: 0,
 };
 
 // GET /api/settings/delivery-fees - Récupérer les frais de livraison (public)

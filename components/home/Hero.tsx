@@ -371,30 +371,43 @@ export function Hero({ products }: HeroProps) {
               </div>
             </motion.div>
 
-            {/* HEADLINE */}
-            <motion.h1
-              variants={fadeUp}
-              className="font-heading text-3xl sm:text-4xl font-bold tracking-tight text-[var(--obsidienne,#0E0B09)] leading-[1.12]"
-            >
-              <span className="font-serif italic font-normal text-[var(--laiton,#B9793E)]">L&apos;élégance</span>
-              <br />
-              commence ici<span className="text-[var(--laiton,#B9793E)] font-serif">.</span>
-            </motion.h1>
+            {/* HEADLINE / WELCOME */}
+            <motion.div variants={fadeUp} className="space-y-1">
+              <h1 className="font-serif text-2xl sm:text-3xl font-medium italic tracking-tight text-[var(--obsidienne,#0E0B09)] leading-tight">
+                Bienvenue chez <span className="text-[var(--laiton,#B9793E)] not-italic font-extrabold block sm:inline">Mamou’s Accessories</span>
+              </h1>
+            </motion.div>
 
             {/* GOLD DIVIDER LINE */}
-            <motion.div variants={fadeUp} className="flex items-center justify-center gap-2 my-2">
-              <span className="h-[1px] w-8 bg-gradient-to-r from-transparent to-[var(--laiton,#B9793E)]/40" />
+            <motion.div variants={fadeUp} className="flex items-center justify-center gap-2 my-2.5">
+              <span className="h-[1px] w-10 bg-gradient-to-r from-transparent to-[var(--laiton,#B9793E)]/40" />
               <span className="text-[10px] text-[var(--laiton,#B9793E)]">❖</span>
-              <span className="h-[1px] w-8 bg-gradient-to-l from-transparent to-[var(--laiton,#B9793E)]/40" />
+              <span className="h-[1px] w-10 bg-gradient-to-l from-transparent to-[var(--laiton,#B9793E)]/40" />
             </motion.div>
 
             {/* SUBTITLE */}
-            <motion.p
+            <motion.div
               variants={fadeUp}
-              className="text-xs sm:text-sm text-[var(--obsidienne)]/75 max-w-xs mx-auto leading-relaxed font-sans"
+              className="max-w-sm mx-auto space-y-3 font-sans"
             >
-              Des pièces d'exception choisies avec soin pour une allure raffinée et affirmée au quotidien.
-            </motion.p>
+              <p className="text-xs sm:text-sm text-[var(--obsidienne,#0E0B09)]/75 leading-relaxed font-sans">
+                Des bijoux en acier inoxydable et plaqué or, pensés pour celles qui aiment être élégantes sans en faire trop.
+              </p>
+
+              <div className="pt-1 flex items-center justify-center gap-2 text-[10px] sm:text-[11px] font-bold tracking-[0.2em] text-[var(--laiton,#B9793E)] uppercase">
+                <span>Chic</span>
+                <span className="opacity-40">•</span>
+                <span>Féminin</span>
+                <span className="opacity-40">•</span>
+                <span>Intemporel</span>
+              </div>
+
+              <div className="pt-1">
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--laiton,#B9793E)]/30 bg-gradient-to-r from-amber-50/80 via-white to-amber-50/80 px-4 py-1 text-xs font-serif font-bold text-[var(--obsidienne,#0E0B09)] shadow-xs">
+                  ✨ Brillez plus.
+                </span>
+              </div>
+            </motion.div>
 
             {/* HIGH-END CTA BUTTON */}
             <motion.div variants={fadeUp} className="pt-2">

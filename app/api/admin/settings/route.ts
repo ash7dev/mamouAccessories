@@ -19,9 +19,8 @@ export async function GET() {
       wave_link: 'https://pay.wave.com/m/M_sn_wi1Bfmu7HgWY/c/sn/',
       delivery_fee_zone1: '2000',
       delivery_fee_zone2: '2500',
-      delivery_fee_zone3: '3500',
-      delivery_fee_zone4: '3500',
-      delivery_fee_zone5: '3500',
+      delivery_fee_zone3: '1500',
+      delivery_fee_zone4: '0',
       whatsapp_number: '+221774907955',
       store_name: "Mamou's Accessories",
     };
